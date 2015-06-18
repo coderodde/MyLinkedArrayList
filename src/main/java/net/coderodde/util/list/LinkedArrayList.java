@@ -5,6 +5,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.NoSuchElementException;
 
 /**
  * This class implements a list data structure consisting of a list of arrays. 
@@ -325,12 +326,16 @@ public class LinkedArrayList<E> implements List<E> {
         if (node.prev != null && node.next != null) {
             node.prev.next = node.next;
             node.next.prev = node.prev;
+        } else if (node.prev == null && node.next == null) {
+            // 'node' is the only node in this list. Do not remove.
         } else if (node.prev == null) {
-            // 'node' is the head node.
+            // 'node' is the head node and is not the only node.
             head = node.next;
-        } else if (node.next == null) {
-            // 'node' is the tail node.
+            head.prev = null;
+        } else {
+            // 'node' is the tail node and is not the only node.
             tail = node.prev;
+            tail.next = null;
         }
         
         // If no match, 'node' is the only node in this list; do not remove.
@@ -384,9 +389,10 @@ public class LinkedArrayList<E> implements List<E> {
         private LinkedArrayListNode<E> node = head;
         
         /**
-         * The index within the current node.
+         * The next index of the element to iterate within the current node.
+         * The semantics of this field is "increment first, then use".
          */
-        private int localIndex = 0;
+        private int localIndex = -1;
         
         /**
          * The amount of elements iterated.
@@ -394,28 +400,50 @@ public class LinkedArrayList<E> implements List<E> {
         private int iterated = 0;
         
         /**
-         * Is set to <code>true</code> if the last element was removed.
+         * Is set to <code>true</code> if the last element was removed. 
          */
         private boolean lastRemoved = false;
         
+        /**
+         * The amount of elements in the list being iterated at the moment of
+         * creation of this iterator.
+         */
+        private final int maxElements = size;
+        
         @Override
         public boolean hasNext() {
-            return iterated < size;
+            return iterated < maxElements;
         }
 
         @Override
         public E next() {
-            lastRemoved = false;
+            checkCoModification();
+            
+            if (iterated == maxElements) {
+                throw new NoSuchElementException("The iterator exceeded.");
+            }
+            
+            if (lastRemoved) {
+                lastRemoved = false;
+                ++iterated;
+                
+                if (localIndex == node.size()) {
+                    localIndex = 0;
+                    node = node.next;
+                }
+                
+                // No need for incrementing 'localIndex'.
+                return node.get(localIndex);
+            }
+            
             ++iterated;
             
-            if (localIndex == node.size()) {
+            if (++localIndex == node.size()) {
                 localIndex = 0;
                 node = node.next;
             }
             
-            E ret = node.get(localIndex);
-            ++localIndex;
-            return ret;
+            return node.get(localIndex);
         }
         
         @Override
@@ -425,16 +453,21 @@ public class LinkedArrayList<E> implements List<E> {
                         "Removing the same element twice.");
             }
             
+            if (iterated == 0) {
+                throw new IllegalStateException("No current element.");
+            }
+            
+            checkCoModification();
             lastRemoved = true;
-            node.remove(localIndex);
+            --size;
+            
+            node.removeAt(localIndex);
             
             if (node.isEmpty()) {
-                // Unlink
-                localIndex = 0;
-                LinkedArrayListNode<E> nextNode = node.next;
+                LinkedArrayListNode<E> next = node.next;
                 unlinkNode(node);
-                node = nextNode;
-                expectedModCount = modCount;
+                node = next;
+                localIndex = 0;
             }
         }
      
