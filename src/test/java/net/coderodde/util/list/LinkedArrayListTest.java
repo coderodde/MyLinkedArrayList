@@ -2,6 +2,7 @@ package net.coderodde.util.list;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -88,19 +89,19 @@ public class LinkedArrayListTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void testThrowsOnRemovalFromEmptyList() {
+    public void testIteratorThrowsOnRemovalFromEmptyList() {
         list.iterator().remove();
     }
     
     @Test(expected = IllegalStateException.class)
-    public void testThrowsOnRemovalWithoutValidIteratorPointer() {
+    public void testIteratorThrowsOnRemovalWithoutValidIteratorPointer() {
         list.add(0);
         list.add(1);
         list.iterator().remove();
     }
     
     @Test(expected = IllegalStateException.class)
-    public void testThrowsOnRemovingTheSameElementTwice() {
+    public void testIteratorThrowsOnRemovingTheSameElementTwice() {
         list.add(0);
         list.add(1);
         list.add(2);
@@ -115,6 +116,42 @@ public class LinkedArrayListTest {
         System.out.println("Removed the element for the first time! If you " +
                            "see this message, everything up till now is o.k.");
         iterator.remove(); // This must throw.
+    }
+    
+    @Test(expected = ConcurrentModificationException.class)
+    public void testIteratorThrowsOnConcurrentModification_next() {
+        list.add(0);
+        list.add(1);
+        list.add(2);
+        list.add(3);
+        
+        Iterator<Integer> iter = list.iterator();
+        
+        iter.next();
+        
+        list.add(4);
+        
+        iter.next();
+        
+        fail("Iterator should have detected the modification!");
+    }
+    
+    @Test(expected = ConcurrentModificationException.class)
+    public void testIteratorThrowsOnConcurrentModification_remove() {
+        list.add(0);
+        list.add(1);
+        list.add(2);
+        list.add(3);
+        
+        Iterator<Integer> iter = list.iterator();
+        
+        iter.next();
+        
+        list.add(4);
+        
+        iter.remove();
+        
+        fail("Iterator should have detected the modification!");
     }
     
     @Test

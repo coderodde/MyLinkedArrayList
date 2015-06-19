@@ -120,69 +120,6 @@ public class LinkedArrayList<E> implements List<E> {
     public LinkedArrayList() {
         this(DEFAULT_DEGREE);
     }
-    
-    @Override
-    public int size() {
-        return size;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return size() == 0;
-    }
-
-    @Override
-    public boolean contains(Object o) {
-        for (LinkedArrayListNode<E> node = head;
-                node != null;
-                node = node.next) {
-            if (node.contains(o)) {
-                return true;
-            }
-        }
-        
-        return false;
-    }
-
-    @Override
-    public Iterator<E> iterator() {
-        return new LinkedArrayListIterator();
-    }
-
-    @Override
-    public Object[] toArray() {
-        Object[] ret = new Object[size];
-        int index = 0;
-        
-        for (LinkedArrayListNode<E> node = head; 
-                node != null; 
-                node = node.next) {
-            final int nodeSize = node.size();
-            
-            for (int i = 0; i < nodeSize; ++i, ++index) {
-                ret[index] = node.get(i);
-            }
-        }
-        
-        return ret;
-    }
-
-    @Override
-    public <T> T[] toArray(T[] a) {
-        Object[] arr = toArray();
-        
-        if (a.length < size) {
-            return (T[]) Arrays.copyOf(arr, size, a.getClass());
-        }
-        
-        System.arraycopy(arr, 0, a, 0, size);
-        
-        if (a.length > size) {
-            a[size] = null;
-        }
-        
-        return a;
-    }
 
     @Override
     public boolean add(E e) {
@@ -202,35 +139,8 @@ public class LinkedArrayList<E> implements List<E> {
     }
 
     @Override
-    public boolean remove(Object o) {
-        for (LinkedArrayListNode<E> node = head; 
-                node != null; 
-                node = node.next) {
-            
-            if (node.remove(o)) {
-                --size;
-                ++modCount;
-                
-                if (node.isEmpty()) {
-                    unlinkNode(node);
-                }
-                
-                return true;
-            }
-        }
-        
-        return false;
-    }
-
-    @Override
-    public boolean containsAll(Collection<?> c) {
-        for (Object o : c) {
-            if (!contains(o)) {
-                return false;
-            }
-        }
-        
-        return true;
+    public void add(int index, E element) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -268,76 +178,35 @@ public class LinkedArrayList<E> implements List<E> {
     }
 
     @Override
-    public boolean removeAll(Collection<?> c) {
-        Set<E> set = null;
-        
-        if (c instanceof HashSet) {
-            set = (HashSet<E>) c;
-        } else {
-            set = new HashSet<>((Collection<E>) c);
-        }
-        
-        boolean modified = false;
-        
-        for (LinkedArrayListNode<E> node = tail; 
-                node != null;
-                node = node.prev) {
-            for (int i = node.size() - 1; i >= 0; --i) {
-                if (set.contains(node.get(i))) {
-                    modified = true;
-                    node.removeAt(i);
-                    --size;
-                    ++modCount;
-                    
-                    if (node.isEmpty()) {
-                        unlinkNode(node);
-                    }
-                }
-            }
-        }
-        
-        return modified;
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> c) {
-        Set<E> set = null;
-        
-        if (c instanceof HashSet) {
-            set = (HashSet<E>) c;
-        } else {
-            set = new HashSet<>((Collection<E>) c);
-        }
-        
-        boolean modified = false;
-        
-        for (LinkedArrayListNode<E> node = tail; 
-                node != null;
-                node = node.prev) {
-            for (int i = node.size() - 1; i >= 0; --i) {
-                if (!set.contains(node.get(i))) {
-                    modified = true;
-                    node.removeAt(i);
-                    --size;
-                    ++modCount;
-                    
-                    if (node.isEmpty()) {
-                        unlinkNode(node);
-                    }
-                }
-            }
-        }
-        
-        return modified;
-    }
-
-    @Override
     public void clear() {
         head = head.spawn();
         tail = head;
-        
         size = 0;
         ++modCount;
+    }
+    
+    @Override
+    public boolean contains(Object o) {
+        for (LinkedArrayListNode<E> node = head;
+                node != null;
+                node = node.next) {
+            if (node.contains(o)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        for (Object o : c) {
+            if (!contains(o)) {
+                return false;
+            }
+        }
+        
+        return true;
     }
 
     @Override
@@ -346,37 +215,7 @@ public class LinkedArrayList<E> implements List<E> {
         searchElement(index);
         return searchNode.get(searchLocalIndex);
     }
-
-    @Override
-    public E set(int index, E element) {
-        checkIndexForAccess(index);
-        searchElement(index);
-        E ret = searchNode.get(searchLocalIndex);
-        searchNode.set(searchLocalIndex, element);
-        return ret;
-    }
-
-    @Override
-    public void add(int index, E element) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public E remove(int index) {
-        checkIndexForAccess(index);
-        searchElement(index);
-        E ret = searchNode.get(searchLocalIndex);
-        searchNode.removeAt(searchLocalIndex);
-        
-        if (searchNode.isEmpty()) {
-            unlinkNode(searchNode);
-        }
-        
-        ++modCount;
-        --size;
-        return ret;
-    }
-
+    
     @Override
     public int indexOf(Object o) {
         int index = 0;
@@ -394,6 +233,16 @@ public class LinkedArrayList<E> implements List<E> {
         }
         
         return -1;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return size() == 0;
+    }
+
+    @Override
+    public Iterator<E> iterator() {
+        return new BasicLinkedArrayListIterator();
     }
 
     @Override
@@ -426,8 +275,104 @@ public class LinkedArrayList<E> implements List<E> {
     }
 
     @Override
+    public E remove(int index) {
+        checkIndexForAccess(index);
+        searchElement(index);
+        E ret = searchNode.get(searchLocalIndex);
+        searchNode.removeAt(searchLocalIndex);
+        
+        if (searchNode.isEmpty()) {
+            unlinkNode(searchNode);
+        }
+        
+        ++modCount;
+        --size;
+        return ret;
+    }
+    
+    @Override
+    public boolean remove(Object o) {
+        for (LinkedArrayListNode<E> node = head; 
+                node != null; 
+                node = node.next) {
+            
+            if (node.remove(o)) {
+                --size;
+                ++modCount;
+                
+                if (node.isEmpty()) {
+                    unlinkNode(node);
+                }
+                
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        return bulkContainOperation(c, true);
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        return bulkContainOperation(c, false);
+    }
+
+    @Override
+    public E set(int index, E element) {
+        checkIndexForAccess(index);
+        searchElement(index);
+        E ret = searchNode.get(searchLocalIndex);
+        searchNode.set(searchLocalIndex, element);
+        return ret;
+    }
+    
+    @Override
+    public int size() {
+        return size;
+    }
+    
+    @Override
     public List<E> subList(int fromIndex, int toIndex) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Object[] toArray() {
+        Object[] ret = new Object[size];
+        int index = 0;
+        
+        for (LinkedArrayListNode<E> node = head; 
+                node != null; 
+                node = node.next) {
+            final int nodeSize = node.size();
+            
+            for (int i = 0; i < nodeSize; ++i, ++index) {
+                ret[index] = node.get(i);
+            }
+        }
+        
+        return ret;
+    }
+
+    @Override
+    public <T> T[] toArray(T[] a) {
+        Object[] arr = toArray();
+        
+        if (a.length < size) {
+            return (T[]) Arrays.copyOf(arr, size, a.getClass());
+        }
+        
+        System.arraycopy(arr, 0, a, 0, size);
+        
+        if (a.length > size) {
+            a[size] = null;
+        }
+        
+        return a;
     }
     
     @Override
@@ -446,6 +391,81 @@ public class LinkedArrayList<E> implements List<E> {
         }
         
         return sb.append("]").toString();
+    }
+    
+    /**
+     * Validates the access index.
+     * 
+     * @param index the index to validate.
+     * 
+     * @throws IllegalArgumentException if the index is too small or too large.
+     */
+    private void checkIndexForAccess(int index) {
+        if (index < 0) {
+            throw new IllegalArgumentException(
+                    "The index is negative: " + index);
+        }
+        
+        if (index >= size()) {
+            throw new IllegalArgumentException(
+                    "The index is too large: " + index + ". " +
+                    "The size of this list is " + size() + ".");
+        }
+    }
+    
+    /**
+     * Validates the degree.
+     * 
+     * @param degree the degree value to validate.
+     * 
+     * @throws IllegalArgumentException if degree is too small.
+     */
+    private static void checkDegree(int degree) {
+        if (degree < MINIMUM_DEGREE) {
+            throw new IllegalArgumentException(
+            "The input degree (" + degree + ") is too small. Should be at " +
+            "least " + MINIMUM_DEGREE + ".");
+        }
+    }
+    
+    /**
+     * Removes from this list all elements <code>e</code> for which 
+     * <code>col.contains(e)</code> is <code>mode</code>.
+     * 
+     * @param col  the collection of elements to consider.
+     * @param mode the mode.
+     * @return <code>true</code> only if this list has changed during this
+     *         operation.
+     */
+    private boolean bulkContainOperation(Collection<?> col, boolean mode) {
+        Set<E> set = null;
+        
+        if (col instanceof HashSet) {
+            set = (HashSet<E>) col;
+        } else {
+            set = new HashSet<>((Collection<E>) col);
+        }
+        
+        boolean modified = false;
+        
+        for (LinkedArrayListNode<E> node = tail; 
+                node != null;
+                node = node.prev) {
+            for (int i = node.size() - 1; i >= 0; --i) {
+                if (set.contains(node.get(i)) == mode) {
+                    modified = true;
+                    node.removeAt(i);
+                    --size;
+                    ++modCount;
+                    
+                    if (node.isEmpty()) {
+                        unlinkNode(node);
+                    }
+                }
+            }
+        }
+        
+        return modified;
     }
     
     /**
@@ -507,42 +527,9 @@ public class LinkedArrayList<E> implements List<E> {
     }
     
     /**
-     * Validates the degree.
-     * 
-     * @param degree the degree value to validate.
-     * 
-     * @throws IllegalArgumentException if degree is too small.
+     * Implements a basic iterator of type <code>Iterator</code>.
      */
-    private static void checkDegree(int degree) {
-        if (degree < MINIMUM_DEGREE) {
-            throw new IllegalArgumentException(
-            "The input degree (" + degree + ") is too small. Should be at " +
-            "least " + MINIMUM_DEGREE + ".");
-        }
-    }
-    
-    /**
-     * Validates the access index.
-     * 
-     * @param index the index to validate.
-     * 
-     * @throws IllegalArgumentException if the index is too small or too large.
-     */
-    private void checkIndexForAccess(int index) {
-        if (index < 0) {
-            throw new IllegalArgumentException(
-                    "The index is negative: " + index);
-        }
-        
-        if (index >= size()) {
-            throw new IllegalArgumentException(
-                    "The index is too large: " + index + ". " +
-                    "The size of this list is " + size() + ".");
-        }
-    }
-    
-    
-    private class LinkedArrayListIterator implements Iterator<E> {
+    private class BasicLinkedArrayListIterator implements Iterator<E> {
 
         /**
          * The expected mod count.

@@ -37,10 +37,6 @@ abstract class LinkedArrayListNode<E> {
         this.elementArray = new Object[degree];
     }
     
-    protected int size() {
-        return size;
-    }
-    
     /**
      * Appends the element to the tail of this node.
      * 
@@ -56,26 +52,6 @@ abstract class LinkedArrayListNode<E> {
      *         <code>false</code> otherwise.
      */
     protected abstract boolean contains(Object o);
-    
-    /**
-     * Checks whether this node is empty.
-     * 
-     * @return <code>true</code> if this node is empty, <code>false</code>
-     *         otherwise.
-     */
-    protected boolean isEmpty() {
-        return size() == 0;
-    }
-    
-    /**
-     * Checks whether this node is full.
-     * 
-     * @return <code>true</code> if this node is full, <code>false</code>
-     *         otherwise.
-     */
-    protected boolean isFull() {
-        return size() == elementArray.length;
-    }
     
     /**
      * Returns the <code>index</code>th element in this node.
@@ -117,4 +93,33 @@ abstract class LinkedArrayListNode<E> {
      *         call.
      */
     protected abstract LinkedArrayListNode<E> spawn();
+    
+    /**
+     * Checks whether this node is empty.
+     * 
+     * @return <code>true</code> if this node is empty, <code>false</code>
+     *         otherwise.
+     */
+    protected boolean isEmpty() {
+        return size() == 0;
+    }
+    
+    /**
+     * Checks whether this node is full.
+     * 
+     * @return <code>true</code> if this node is full, <code>false</code>
+     *         otherwise.
+     */
+    protected boolean isFull() {
+        return size() == elementArray.length;
+    }
+    
+    /**
+     * Returns the amount of elements in this node.
+     * 
+     * @return the size of this node.
+     */
+    protected int size() {
+        return size;
+    }
 }

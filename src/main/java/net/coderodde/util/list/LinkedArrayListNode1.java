@@ -39,6 +39,11 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
     }
 
     @Override
+    protected E get(int index) {
+        return (E) elementArray[index];
+    }
+
+    @Override
     protected boolean remove(Object o) {
         for (int i = 0; i < size(); ++i) {
             if (Objects.equals(o, elementArray[i])) {
@@ -54,21 +59,6 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
         
         return false;
     }
-    
-    @Override
-    protected LinkedArrayListNode<E> spawn() {
-        return new LinkedArrayListNode1<>(elementArray.length);
-    }
-
-    @Override
-    protected E get(int index) {
-        return (E) elementArray[index];
-    }
-
-    @Override
-    protected void set(int index, E element) {
-        elementArray[index] = element;
-    }
 
     @Override
     protected void removeAt(int index) {
@@ -77,5 +67,15 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
         }
         
         elementArray[--size] = null;
+    }
+
+    @Override
+    protected void set(int index, E element) {
+        elementArray[index] = element;
+    }
+    
+    @Override
+    protected LinkedArrayListNode<E> spawn() {
+        return new LinkedArrayListNode1<>(elementArray.length);
     }
 }

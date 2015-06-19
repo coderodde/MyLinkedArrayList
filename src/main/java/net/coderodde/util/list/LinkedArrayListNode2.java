@@ -25,17 +25,17 @@ class LinkedArrayListNode2<E> extends LinkedArrayListNode<E> {
     }
 
     @Override
+    protected E get(int index) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
     protected boolean remove(Object o) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    protected LinkedArrayListNode<E> spawn() {
-        return new LinkedArrayListNode2<>(super.elementArray.length);
-    }
-
-    @Override
-    protected E get(int index) {
+    protected void removeAt(int index) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -45,7 +45,7 @@ class LinkedArrayListNode2<E> extends LinkedArrayListNode<E> {
     }
 
     @Override
-    protected void removeAt(int index) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    protected LinkedArrayListNode<E> spawn() {
+        return new LinkedArrayListNode2<>(super.elementArray.length);
     }
 }
