@@ -3,11 +3,13 @@ package net.coderodde.util.list;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * This class implements a list data structure consisting of a list of arrays. 
@@ -233,7 +235,31 @@ public class LinkedArrayList<E> implements List<E> {
 
     @Override
     public boolean addAll(Collection<? extends E> c) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (c.isEmpty()) {
+            // List not changed, return 'false'.
+            return false;
+        }
+        
+        Iterator<? extends E> iter = c.iterator();
+        LinkedArrayListNode<E> node = tail;
+        
+        while (iter.hasNext()) {
+            E element = iter.next();
+            
+            if (node.isFull()) {
+                LinkedArrayListNode<E> newnode = node.spawn();
+                node.next = newnode;
+                newnode.prev = node;
+                node = newnode;
+            }
+            
+            node.append(element);
+        }
+        
+        tail = node;
+        size += c.size();
+        modCount += c.size();
+        return true;
     }
 
     @Override
@@ -243,12 +269,66 @@ public class LinkedArrayList<E> implements List<E> {
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Set<E> set = null;
+        
+        if (c instanceof HashSet) {
+            set = (HashSet<E>) c;
+        } else {
+            set = new HashSet<>((Collection<E>) c);
+        }
+        
+        boolean modified = false;
+        
+        for (LinkedArrayListNode<E> node = tail; 
+                node != null;
+                node = node.prev) {
+            for (int i = node.size() - 1; i >= 0; --i) {
+                if (set.contains(node.get(i))) {
+                    modified = true;
+                    node.removeAt(i);
+                    --size;
+                    ++modCount;
+                    
+                    if (node.isEmpty()) {
+                        unlinkNode(node);
+                    }
+                }
+            }
+        }
+        
+        return modified;
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Set<E> set = null;
+        
+        if (c instanceof HashSet) {
+            set = (HashSet<E>) c;
+        } else {
+            set = new HashSet<>((Collection<E>) c);
+        }
+        
+        boolean modified = false;
+        
+        for (LinkedArrayListNode<E> node = tail; 
+                node != null;
+                node = node.prev) {
+            for (int i = node.size() - 1; i >= 0; --i) {
+                if (!set.contains(node.get(i))) {
+                    modified = true;
+                    node.removeAt(i);
+                    --size;
+                    ++modCount;
+                    
+                    if (node.isEmpty()) {
+                        unlinkNode(node);
+                    }
+                }
+            }
+        }
+        
+        return modified;
     }
 
     @Override
@@ -265,59 +345,15 @@ public class LinkedArrayList<E> implements List<E> {
         checkIndexForAccess(index);
         searchElement(index);
         return searchNode.get(searchLocalIndex);
-//        if (index < size() / 2) {
-//            // Access starting from the head. There is a chance that we will 
-//            // traverse less nodes than starting from the tail.
-//            LinkedArrayListNode<E> node = head;
-//
-//            while (index >= node.size()) {
-//                index -= node.size();
-//                node = node.next;
-//            }
-//
-//            return node.get(index);
-//        } else {
-//            // Access starting from the tail moving to the "left".
-//            LinkedArrayListNode<E> node = tail;
-//            index = size() - index - 1;
-//            
-//            while (index >= node.size()) {
-//                index -= node.size();
-//                node = node.prev;
-//            }
-//            
-//            return node.get(node.size() - index - 1);
-//        }
     }
 
     @Override
     public E set(int index, E element) {
         checkIndexForAccess(index);
-        
-        if (index < size() / 2) {
-            LinkedArrayListNode<E> node = head;
-            
-            while (index >= node.size()) {
-                index -= node.size();
-                node = node.next;
-            }
-            
-            E ret = node.get(index);
-            node.set(index, element);
-            return ret;
-        } else {
-            LinkedArrayListNode<E> node = tail;
-            index = size() - index - 1;
-            
-            while (index >= node.size()) {
-                index -= node.size();
-                node = node.prev;
-            }
-            
-            E ret = node.get(index);
-            node.set(index, element);
-            return ret;
-        }
+        searchElement(index);
+        E ret = searchNode.get(searchLocalIndex);
+        searchNode.set(searchLocalIndex, element);
+        return ret;
     }
 
     @Override

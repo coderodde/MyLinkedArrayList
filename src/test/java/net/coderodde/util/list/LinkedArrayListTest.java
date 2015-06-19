@@ -1,7 +1,8 @@
 package net.coderodde.util.list;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -263,34 +264,253 @@ public class LinkedArrayListTest {
 
     @Test
     public void testAdd_GenericType() {
+        assertEquals(0, list.size());
+        assertTrue(list.isEmpty());
+        
+        list.add(10);
+        
+        assertEquals(1, list.size());
+        
+        list.add(11);
+        
+        assertEquals(2, list.size());
+        
+        list.add(12);
+        
+        assertEquals(3, list.size());
+        
+        list.add(13);
+        
+        assertEquals(4, list.size());
+        assertFalse(list.isEmpty());
+        
+        assertEquals(new Integer(10), list.get(0));
+        assertEquals(new Integer(11), list.get(1));
+        assertEquals(new Integer(12), list.get(2));
+        assertEquals(new Integer(13), list.get(3));
     }
 
     @Test
     public void testRemove_Object() {
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        eq();
+        
+        list.remove(new Integer(3));
+        test.remove(new Integer(3));
+        
+        list.remove(new Integer(3));
+        test.remove(new Integer(3));
+        
+        list.remove(new Integer(3));
+        test.remove(new Integer(3));
+        
+        eq();
+        
+        list.remove(new Integer(7));
+        test.remove(new Integer(7));
+        
+        eq();
     }
 
     @Test
     public void testContainsAll() {
+        Collection<Integer> col = new HashSet<>();
+        
+        col.add(1);
+        col.add(3);
+        col.add(7);
+        col.add(9);
+        
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        assertTrue(list.containsAll(col));
+        
+        col.add(-1);
+        
+        assertFalse(list.containsAll(col));
+        
+        col.remove(-1);
+        
+        assertTrue(list.containsAll(col));
+        
+        col.add(20);
+        
+        assertFalse(list.containsAll(col));
+        
+        col.clear();
+        
+        assertTrue(list.containsAll(col));
+        assertTrue(test.containsAll(col));
     }
 
     @Test
     public void testAddAll_Collection() {
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        eq();
+        
+        List<Integer> addList = new ArrayList<>();
+        
+        for (int i = 20; i < 30; ++i) {
+            addList.add(i);
+        }
+        
+        assertTrue(list.addAll(addList));
+        assertTrue(test.addAll(addList));
+        
+        eq();
+        
+        addList.clear();
+        
+        assertFalse(list.addAll(addList));
+        assertFalse(test.addAll(addList));
     }
 
     @Test
     public void testAddAll_int_Collection() {
+        
     }
 
     @Test
     public void testRemoveAll() {
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        Collection<Integer> col1 = new HashSet<>();
+       
+        col1.add(2);
+        col1.add(3);
+        col1.add(4);
+        col1.add(5);
+        
+        eq();
+        
+        assertTrue(list.removeAll(col1));
+        assertTrue(test.removeAll(col1));
+        
+        eq();
+        
+        col1.clear();
+        
+        assertFalse(list.removeAll(col1));
+        assertFalse(test.removeAll(col1));
+        
+        eq();
+        
+        col1.add(10);
+        col1.add(10);
+        col1.add(11);
+        col1.add(11);
+        
+        assertTrue(list.removeAll(col1));
+        assertTrue(test.removeAll(col1));
+        
+        eq();
+        
+        col1 = new ArrayList<>();
+        
+        col1.add(15);
+        col1.add(15);
+        col1.add(15);
+        col1.add(16);
+        
+        assertTrue(list.removeAll(col1));
+        assertTrue(test.removeAll(col1));
+        
+        eq();
     }
 
     @Test
     public void testRetainAll() {
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        Collection<Integer> col = new ArrayList<>();
+        
+        col.add(3);
+        col.add(4);
+        col.add(4);
+        col.add(4);
+        col.add(5);
+        col.add(5);
+        
+        col.add(7);
+        col.add(8);
+        
+        col.add(1);
+        col.add(2);
+        
+        assertTrue(list.retainAll(col));
+        assertTrue(test.retainAll(col));
+        
+        eq();
+        
+        col.clear();
+        
+        assertTrue(list.retainAll(col));
+        assertTrue(test.retainAll(col));
+        
+        assertTrue(list.isEmpty());
+        assertTrue(test.isEmpty());
+        
+        eq();
+        
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        col = new HashSet<>();
+        
+        for (int i = -10; i < 20; ++i) {
+            col.add(i);
+            col.add(i);
+        }
+        
+        assertFalse(list.retainAll(col));
+        assertFalse(test.retainAll(col));
+        
+        eq();
+        
+        col.remove(3);
+        col.remove(4);
+        col.remove(5);
+        
+        assertTrue(list.retainAll(col));
+        assertTrue(test.retainAll(col));
     }
 
     @Test
     public void testClear() {
+        assertTrue(list.isEmpty());
+        assertEquals(0, list.size());
+        
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+        }
+        
+        assertFalse(list.isEmpty());
+        assertEquals(20, list.size());
+        
+        list.clear();
+        
+        assertTrue(list.isEmpty());
+        assertEquals(0, list.size());
+        assertFalse(list.iterator().hasNext());
     }
 
     @Test
