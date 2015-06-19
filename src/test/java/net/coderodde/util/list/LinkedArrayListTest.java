@@ -110,7 +110,8 @@ public class LinkedArrayListTest {
         iterator.next(); // Now iterator points to '1'.
         
         iterator.remove(); // Remove '1'
-        System.out.println("Removed the element for the first time!");
+        System.out.println("Removed the element for the first time! If you " +
+                           "see this message, everytning up till now is o.k.");
         iterator.remove(); // This must throw.
     }
     
@@ -161,7 +162,7 @@ public class LinkedArrayListTest {
     
     @Test
     public void testIteratorBruteForce() {
-        final long mySeed = 1434561131835L;
+        final long mySeed = 1434648057381L;
         final long seed = mySeed != 0L ? mySeed : System.currentTimeMillis();
         System.out.println("Seed: " + seed);
         Random random = new Random(seed);
@@ -254,10 +255,50 @@ public class LinkedArrayListTest {
 
     @Test
     public void testGet() {
+        Integer[] data = new Integer[20];
+        for (int i = 0; i < 20; ++i) {
+            data[i] = i;
+            list.add(data[i]);
+            test.add(data[i]);
+        }
+        
+        assertEquals(test.size(), list.size());
+        
+        for (int i = 0; i < 20; ++i) {
+            assertEquals(data[i], list.get(i));
+        }
+        
+        eq();
     }
 
     @Test
     public void testSet() {
+        Integer[] data = new Integer[20];
+        for (int i = 0; i < 20; ++i) {
+            data[i] = i;
+            list.add(data[i]);
+            test.add(data[i]);
+        }
+        
+        assertEquals(test.size(), list.size());
+        
+        for (int i = 0; i < 20; ++i) {
+            assertEquals(data[i], list.get(i));
+        }
+        
+        eq();
+        
+        list.set(3, -3);
+        list.set(4, -4);
+        list.set(5, -5);
+        list.set(10, -10);
+        
+        test.set(3, -3);
+        test.set(4, -4);
+        test.set(5, -5);
+        test.set(10, -10);
+        
+        eq();
     }
 
     @Test
@@ -266,6 +307,57 @@ public class LinkedArrayListTest {
 
     @Test
     public void testRemove_int() {
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        assertEquals(test.size(), list.size());
+        
+        list.remove(10);
+        test.remove(10);
+        eq();
+        
+        list.remove(5);
+        test.remove(5);
+        eq();
+        
+        list.remove(4);
+        test.remove(4);
+        eq();
+        
+        list.remove(3);
+        test.remove(3);
+        eq();
+        
+        // Unlinks the head node.
+        list.remove(0);
+        test.remove(0);
+        eq();
+        
+        list.remove(0);
+        test.remove(0);
+        eq();
+        
+        list.remove(0);
+        test.remove(0);
+        eq();
+        
+        // Unlinks the tail node.
+        list.remove(list.size() - 1);
+        test.remove(test.size() - 1);
+        eq();
+        
+        list.remove(list.size() - 1);
+        test.remove(test.size() - 1);
+        eq();
+        
+        list.remove(list.size() - 1);
+        test.remove(test.size() - 1);
+        eq();
+        
+        System.out.println(test);
+        System.out.println(list);
     }
 
     @Test
@@ -292,7 +384,9 @@ public class LinkedArrayListTest {
         assertEquals(test.size(), list.size());
         
         for (int i = 0; i < list.size(); ++i) {
-            assertTrue(Objects.equals(list.get(i), test.get(i)));
+            Integer testInt = test.get(i);
+            Integer listInt = list.get(i);
+            assertTrue(Objects.equals(listInt, testInt));
         }
         
         Iterator<Integer> itList = list.iterator();

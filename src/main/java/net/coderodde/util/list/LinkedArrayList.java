@@ -1,5 +1,6 @@
 package net.coderodde.util.list;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
@@ -56,6 +57,16 @@ public class LinkedArrayList<E> implements List<E> {
      * This field holds the tail node of this list.
      */
     private LinkedArrayListNode<E> tail;
+    
+    /**
+     * Used for searching an element.
+     */
+    private transient LinkedArrayListNode<E> searchNode;
+    
+    /**
+     * Used for searching an element.
+     */
+    private transient int searchLocalIndex;
     
     /**
      * Constructs a new, empty list with given degree and node type.
@@ -137,12 +148,38 @@ public class LinkedArrayList<E> implements List<E> {
 
     @Override
     public Object[] toArray() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Object[] ret = new Object[size];
+        int index = 0;
+        int localIndex = 0;
+        
+        for (LinkedArrayListNode<E> node = head; 
+                node != null; 
+                node = node.next, ++index) {
+            ret[index] = node.get(localIndex++);
+            
+            if (localIndex == node.size()) {
+                localIndex = 0;
+            }
+        }
+        
+        return ret;
     }
 
     @Override
     public <T> T[] toArray(T[] a) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Object[] arr = toArray();
+        
+        if (a.length < size) {
+            return (T[]) Arrays.copyOf(arr, size, a.getClass());
+        }
+        
+        System.arraycopy(arr, 0, a, 0, size);
+        
+        if (a.length > size) {
+            a[size] = null;
+        }
+        
+        return a;
     }
 
     @Override
@@ -226,30 +263,31 @@ public class LinkedArrayList<E> implements List<E> {
     @Override
     public E get(int index) {
         checkIndexForAccess(index);
-        
-        if (index < size() / 2) {
-            // Access starting from the head. There is a chance that we will 
-            // traverse less nodes than starting from the tail.
-            LinkedArrayListNode<E> node = head;
-
-            while (index >= node.size()) {
-                index -= node.size();
-                node = node.next;
-            }
-
-            return node.get(index);
-        } else {
-            // Access starting from the tail moving to the "left".
-            LinkedArrayListNode<E> node = tail;
-            index = size() - index - 1;
-            
-            while (index >= node.size()) {
-                index -= node.size();
-                node = node.prev;
-            }
-            
-            return node.get(node.size() - index - 1);
-        }
+        searchElement(index);
+        return searchNode.get(searchLocalIndex);
+//        if (index < size() / 2) {
+//            // Access starting from the head. There is a chance that we will 
+//            // traverse less nodes than starting from the tail.
+//            LinkedArrayListNode<E> node = head;
+//
+//            while (index >= node.size()) {
+//                index -= node.size();
+//                node = node.next;
+//            }
+//
+//            return node.get(index);
+//        } else {
+//            // Access starting from the tail moving to the "left".
+//            LinkedArrayListNode<E> node = tail;
+//            index = size() - index - 1;
+//            
+//            while (index >= node.size()) {
+//                index -= node.size();
+//                node = node.prev;
+//            }
+//            
+//            return node.get(node.size() - index - 1);
+//        }
     }
 
     @Override
@@ -289,7 +327,18 @@ public class LinkedArrayList<E> implements List<E> {
 
     @Override
     public E remove(int index) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        checkIndexForAccess(index);
+        searchElement(index);
+        E ret = searchNode.get(searchLocalIndex);
+        searchNode.removeAt(searchLocalIndex);
+        
+        if (searchNode.isEmpty()) {
+            unlinkNode(searchNode);
+        }
+        
+        ++modCount;
+        --size;
+        return ret;
     }
 
     @Override
@@ -315,6 +364,58 @@ public class LinkedArrayList<E> implements List<E> {
     @Override
     public List<E> subList(int fromIndex, int toIndex) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("[");
+        int index = 0;
+        
+        for (E element : this) {
+            sb.append(element);
+            
+            if (index < size() - 1) {
+                sb.append(", ");
+            }
+            
+            ++index;
+        }
+        
+        return sb.append("]").toString();
+    }
+    
+    /**
+     * Loads the node and local index of the element at global index 
+     * <code>index</code>.
+     * 
+     * @param index the global index of the element to search.
+     */
+    private void searchElement(int index) {
+        if (index < size() / 2) {
+            // Access starting from the head. There is a chance that we will 
+            // traverse less nodes than starting from the tail.
+            LinkedArrayListNode<E> node = head;
+
+            while (index >= node.size()) {
+                index -= node.size();
+                node = node.next;
+            }
+
+            searchNode = node;
+            searchLocalIndex = index;
+        } else {
+            // Access starting from the tail moving to the "left".
+            LinkedArrayListNode<E> node = tail;
+            index = size() - index - 1;
+            
+            while (index >= node.size()) {
+                index -= node.size();
+                node = node.prev;
+            }
+            
+            searchNode = node;
+            searchLocalIndex = node.size() - index - 1;
+        }
     }
     
     /**
@@ -375,6 +476,7 @@ public class LinkedArrayList<E> implements List<E> {
                     "The size of this list is " + size() + ".");
         }
     }
+    
     
     private class LinkedArrayListIterator implements Iterator<E> {
 
