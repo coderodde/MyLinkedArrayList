@@ -1,6 +1,7 @@
 package net.coderodde.util.list;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -111,7 +112,7 @@ public class LinkedArrayListTest {
         
         iterator.remove(); // Remove '1'
         System.out.println("Removed the element for the first time! If you " +
-                           "see this message, everytning up till now is o.k.");
+                           "see this message, everything up till now is o.k.");
         iterator.remove(); // This must throw.
     }
     
@@ -215,10 +216,49 @@ public class LinkedArrayListTest {
 
     @Test
     public void testToArray_0args() {
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+        }
+        
+        Object[] arr = list.toArray();
+        assertEquals(20, arr.length);
+        
+        for (int i = 0; i < 20; ++i) {
+            Object o = arr[i];
+            assertEquals(i, o);
+        }
     }
 
     @Test
     public void testToArray_GenericType() {
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+        }
+        
+        Integer[] smallArray = new Integer[10];
+        Integer[] retArray = list.toArray(smallArray);
+        
+        assertTrue(smallArray != retArray);
+        assertEquals(list.size(), retArray.length);
+        
+        for (int i = 0; i < list.size(); ++i) {
+            assertEquals(new Integer(i), list.get(i));
+            assertEquals(new Integer(i), retArray[i]);
+        }
+        
+        Integer[] retArray2 = list.toArray(retArray);
+        assertTrue(retArray2 == retArray);
+        
+        Integer[] largeArray = new Integer[list.size() + 5];
+        retArray = list.toArray(largeArray);
+        
+        assertTrue(retArray == largeArray);
+        
+        for (int i = 0; i < list.size(); ++i) {
+            assertEquals(new Integer(i), largeArray[i]);
+        }
+        
+        assertNull(largeArray[list.size()]);
     }
 
     @Test
@@ -355,17 +395,54 @@ public class LinkedArrayListTest {
         list.remove(list.size() - 1);
         test.remove(test.size() - 1);
         eq();
-        
-        System.out.println(test);
-        System.out.println(list);
     }
 
     @Test
     public void testIndexOf() {
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+        }
+        
+        list.add(20);
+        list.add(20);
+        list.add(20); 
+        list.add(21);
+        list.add(21);
+        
+        for (int i = 0; i < 20; ++i) {
+            assertEquals(i, list.indexOf(i));
+        }
+        
+        assertEquals(-1, list.indexOf(-1));
+        assertEquals(-1, list.indexOf(-2));
+        assertEquals(-1, list.indexOf(-3));
+        
+        assertEquals(20, list.indexOf(20));
+        assertEquals(23, list.indexOf(21));
     }
 
     @Test
     public void testLastIndexOf() {
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+        }
+        
+        list.add(20);
+        list.add(20);
+        list.add(20); 
+        list.add(21);
+        list.add(21);
+        
+        for (int i = 0; i < 20; ++i) {
+            assertEquals(i, list.lastIndexOf(i));
+        }
+        
+        assertEquals(-1, list.lastIndexOf(-1));
+        assertEquals(-1, list.lastIndexOf(-2));
+        assertEquals(-1, list.lastIndexOf(-3));
+        
+        assertEquals(22, list.lastIndexOf(20));
+        assertEquals(24, list.lastIndexOf(21));
     }
 
     @Test

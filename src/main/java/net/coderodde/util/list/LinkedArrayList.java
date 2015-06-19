@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * This class implements a list data structure consisting of a list of arrays. 
@@ -150,15 +151,14 @@ public class LinkedArrayList<E> implements List<E> {
     public Object[] toArray() {
         Object[] ret = new Object[size];
         int index = 0;
-        int localIndex = 0;
         
         for (LinkedArrayListNode<E> node = head; 
                 node != null; 
-                node = node.next, ++index) {
-            ret[index] = node.get(localIndex++);
+                node = node.next) {
+            final int nodeSize = node.size();
             
-            if (localIndex == node.size()) {
-                localIndex = 0;
+            for (int i = 0; i < nodeSize; ++i, ++index) {
+                ret[index] = node.get(i);
             }
         }
         
@@ -343,12 +343,40 @@ public class LinkedArrayList<E> implements List<E> {
 
     @Override
     public int indexOf(Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        int index = 0;
+        
+        for (LinkedArrayListNode<E> node = head; 
+                node != null; 
+                node = node.next) {
+            final int nodeSize = node.size();
+            
+            for (int i = 0; i < nodeSize; ++i, ++index) {
+                if (Objects.equals(o, node.get(i))) {
+                    return index;
+                }
+            }
+        }
+        
+        return -1;
     }
 
     @Override
     public int lastIndexOf(Object o) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        int index = size() - 1;
+        
+        for (LinkedArrayListNode<E> node = tail;
+                node != null;
+                node = node.prev) {
+            final int nodeSize = node.size();
+            
+            for (int i = nodeSize - 1; i >= 0; --i, --index) {
+                if (Objects.equals(o, node.get(i))) {
+                    return index;
+                }
+            }
+        }
+        
+        return -1;
     }
 
     @Override
