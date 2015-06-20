@@ -388,6 +388,30 @@ public class LinkedArrayListTest {
     }
 
     @Test
+    public void testClone() {
+        for (int i = 0; i < 100; ++i) {
+            list.add(i);
+        }
+        
+        Random random = new Random();
+        float removeFactor = random.nextFloat();
+        Iterator<Integer> iter = list.iterator();
+        
+        while (iter.hasNext()) {
+            iter.next();
+            
+            if (random.nextFloat() < removeFactor) {
+                iter.remove();
+            }
+        }
+        
+        LinkedArrayList<Integer> clone = 
+                (LinkedArrayList<Integer>) list.clone();
+        
+        eq(list, clone);
+    }
+    
+    @Test
     public void testAddAll_Collection() {
         for (int i = 0; i < 20; ++i) {
             list.add(i);
@@ -734,7 +758,7 @@ public class LinkedArrayListTest {
         assertFalse(itList.hasNext());
     }
     
-    private void eq(LinkedArrayList<Integer> test, ArrayList<Integer> list) {
+    private void eq(List<Integer> test, List<Integer> list) {
         assertEquals(test.size(), list.size());
         
         for (int i = 0; i < list.size(); ++i) {

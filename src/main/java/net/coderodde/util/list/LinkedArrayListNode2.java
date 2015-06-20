@@ -45,6 +45,11 @@ class LinkedArrayListNode2<E> extends LinkedArrayListNode<E> {
     }
 
     @Override
+    protected void shiftToBegining() {
+    
+    }
+
+    @Override
     protected LinkedArrayListNode<E> spawn() {
         return new LinkedArrayListNode2<>(super.elementArray.length);
     }

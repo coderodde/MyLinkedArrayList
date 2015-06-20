@@ -73,6 +73,12 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
     protected void set(int index, E element) {
         elementArray[index] = element;
     }
+
+    @Override
+    protected void shiftToBegining() {
+        // This node type already aligns all the elements to the beginning of
+        // the storage array.
+    }
     
     @Override
     protected LinkedArrayListNode<E> spawn() {

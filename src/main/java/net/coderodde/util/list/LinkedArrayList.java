@@ -1,5 +1,6 @@
 package net.coderodde.util.list;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
@@ -20,7 +21,7 @@ import java.util.Set;
  * @version   1.6
  * @param <E> the actual list element type.
  */
-public class LinkedArrayList<E> implements List<E> {
+public class LinkedArrayList<E> implements List<E>, Cloneable {
 
     /**
      * This enumeration is used for choosing the actual list node 
@@ -42,9 +43,14 @@ public class LinkedArrayList<E> implements List<E> {
     private static final int DEFAULT_DEGREE = 16;
     
     /**
+     * The node type of this list.
+     */
+    private NodeType nodeType;
+    
+    /**
      * This field caches the amount of elements stored in this list.
      */
-    private transient int size;
+    private int size;
     
     /**
      * This field caches the amount of modifications made to this list.
@@ -54,12 +60,12 @@ public class LinkedArrayList<E> implements List<E> {
     /**
      * This field holds the head node of this list.
      */
-    private LinkedArrayListNode<E> head;
+    private transient LinkedArrayListNode<E> head;
     
     /**
      * This field holds the tail node of this list.
      */
-    private LinkedArrayListNode<E> tail;
+    private transient LinkedArrayListNode<E> tail;
     
     /**
      * Used for searching an element.
@@ -72,6 +78,11 @@ public class LinkedArrayList<E> implements List<E> {
     private transient int searchLocalIndex;
     
     /**
+     * Used for more efficient bulk addition.
+     */
+    private transient List<E> bulkLoadList;
+    
+    /**
      * Constructs a new, empty list with given degree and node type.
      * 
      * @param degree   the degree of the new list.
@@ -79,6 +90,7 @@ public class LinkedArrayList<E> implements List<E> {
      */
     public LinkedArrayList(int degree, NodeType nodeType) {
         checkDegree(degree);
+        this.nodeType = nodeType;
         
         switch (nodeType) {
             case TRIVIAL:
@@ -95,6 +107,7 @@ public class LinkedArrayList<E> implements List<E> {
         }
         
         this.tail = head;
+        this.bulkLoadList = new ArrayList<>(degree);
     }
     
     /**
@@ -174,7 +187,50 @@ public class LinkedArrayList<E> implements List<E> {
 
     @Override
     public boolean addAll(int index, Collection<? extends E> c) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        checkIndexForAddition(index);
+        
+        if (index == size()) {
+            return addAll(c);
+        }
+        
+        if (c.isEmpty()) {
+            return false;
+        }
+        
+        // Find the node containing the insert location.
+        searchElement(index);
+        final Iterator<? extends E> iterator = c.iterator();
+        
+        searchNode.shiftToBegining();
+
+        while (!searchNode.isFull() && iterator.hasNext()) {
+            searchNode.append(iterator.next());
+        }
+        
+        if (iterator.hasNext()) {
+            LinkedArrayListNode<E> insertHead = head.spawn();
+            LinkedArrayListNode<E> insertTail = insertHead;
+            
+            while (iterator.hasNext()) {
+                bulkLoadList.add(iterator.next());
+                
+                if (bulkLoadList.size() == getDegree()) {
+                    insertTail.setAll(bulkLoadList);
+                    
+                    if (iterator.hasNext()) {
+                        LinkedArrayListNode<E> newnode = head.spawn();
+                        insertTail.next = newnode;
+                        newnode.prev = insertTail;
+                        insertTail = newnode;
+                    }
+                }
+            }
+            
+            linkChain(searchNode, insertHead, insertTail);
+        }
+        
+        bulkLoadList.clear();
+        return true;
     }
 
     @Override
@@ -183,6 +239,35 @@ public class LinkedArrayList<E> implements List<E> {
         tail = head;
         size = 0;
         ++modCount;
+    }
+    
+    @Override
+    public Object clone() {
+        final int degree = head.elementArray.length;
+        List<E> ret = new LinkedArrayList<>(degree, nodeType);
+        List<E> tmp = new ArrayList<>(degree);
+
+        for (LinkedArrayListNode<E> node = head;
+                node != null;
+                node = node.next) {
+            final int nodeSize = node.size();
+
+            for (int i = 0; i < nodeSize; ++i) {
+                tmp.add(node.get(i));
+
+                if (tmp.size() == degree) {
+                    ret.addAll(tmp);
+                    tmp.clear();
+                }
+            }
+        }
+
+        if (!tmp.isEmpty()) {
+            System.out.println("Yoo! ^^");
+            ret.addAll(tmp);
+        }
+
+        return ret;
     }
     
     @Override
@@ -214,6 +299,15 @@ public class LinkedArrayList<E> implements List<E> {
         checkIndexForAccess(index);
         searchElement(index);
         return searchNode.get(searchLocalIndex);
+    }
+    
+    /**
+     * Returns the degree of this list.
+     * 
+     * @return the degree.
+     */
+    public int getDegree() {
+        return head.elementArray.length;
     }
     
     @Override
@@ -413,6 +507,19 @@ public class LinkedArrayList<E> implements List<E> {
         }
     }
     
+    private void checkIndexForAddition(int index) {
+        if (index < 0) {
+            throw new IllegalArgumentException(
+                    "The index is negative: " + index);
+        }
+        
+        if (index > size()) {
+            throw new IllegalArgumentException(
+                    "The index is tool large: " + index + ". " +
+                    "The size of this list is " + size() + ".");
+        }
+    }
+    
     /**
      * Validates the degree.
      * 
@@ -466,6 +573,28 @@ public class LinkedArrayList<E> implements List<E> {
         }
         
         return modified;
+    }
+    
+    /**
+     * Links the chain of nodes between <code>chainBegin</code> and 
+     * <code>chainEnd</code> between <code>predecessor</code> and
+     * <code>predecessor.next</code>.
+     * 
+     * @param predecessor the predecessor node of the entire chain.
+     * @param chainBegin  the first node of the chain to insert.
+     * @param chainEnd    the last node of the chain to insert.
+     */
+    private void linkChain(LinkedArrayListNode<E> predecessor,
+                           LinkedArrayListNode<E> chainBegin,
+                           LinkedArrayListNode<E> chainEnd) {
+        chainEnd.next = predecessor.next;
+        predecessor.next.prev = chainEnd;
+        predecessor.next = chainBegin;
+        chainBegin.prev = predecessor;
+        
+        if (chainEnd.next == null) {
+            tail = chainEnd;
+        }
     }
     
     /**

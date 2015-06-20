@@ -1,5 +1,7 @@
 package net.coderodde.util.list;
 
+import java.util.List;
+
 /**
  * This interface defines the API for nodes of {@link LinkedArrayList}.
  * 
@@ -85,6 +87,25 @@ abstract class LinkedArrayListNode<E> {
      * @param element the new element to set.
      */
     protected abstract void set(int index, E element);
+    
+    /**
+     * Sets the contents of this node.
+     * 
+     * @param list the list of elements to set.
+     */
+    protected void setAll(List<E> list) {
+        int index = 0;
+        
+        for (E element : list) {
+            elementArray[index++] = element;
+        }
+    }
+    
+    /**
+     * Shifts all the bunch of elements in this node to the beginning of this
+     * node.
+     */
+    protected abstract void shiftToBegining();
     
     /**
      * Constructs a new node with the same implementation.
