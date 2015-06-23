@@ -203,7 +203,7 @@ public class LinkedArrayListTest {
     public void testIteratorBruteForce() {
         final long mySeed = 1434648057381L;
         final long seed = mySeed != 0L ? mySeed : System.currentTimeMillis();
-        System.out.println("Seed: " + seed);
+        System.out.println("testIteratorBruteForce: seed = " + seed);
         Random random = new Random(seed);
         
         for (int i = 0; i < 1000; ++i) {
@@ -490,7 +490,9 @@ public class LinkedArrayListTest {
                 int insertIndex = random.nextInt(list.size() + 1);
                 list.addAll(insertIndex, addList);
                 test.addAll(insertIndex, addList);
-                System.out.println("run: " + run + ", addition: " + addition);
+                
+                //System.out.println("run: " + run + ", addition: " + addition);
+                
                 eq();
                 addList.clear();
             }

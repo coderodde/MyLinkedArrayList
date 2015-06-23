@@ -68,7 +68,7 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
             chainTail.append(iterator.next());
         }
         
-        workList.clear();
+        // 'workList' is cleared in the calling method.
         
         if (chainHead == chainTail) {
             // The added elements fit entirely in this node. No relinking,

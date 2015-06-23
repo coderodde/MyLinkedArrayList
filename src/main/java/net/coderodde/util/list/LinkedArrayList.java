@@ -78,16 +78,6 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
     private transient int searchLocalIndex;
     
     /**
-     * Used for more efficient bulk addition.
-     */
-    private transient List<E> bulkLoadList;
-    
-    /**
-     * Used for more efficient bulk addition.
-     */
-    private transient List<E> nodeLeftoverList;
-    
-    /**
      * Used for holding the elements while inserting a collection at random 
      * index.
      */
@@ -119,8 +109,6 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         
         this.tail = head;
         this.workList = new ArrayList<>(getDegree());
-        this.bulkLoadList = new ArrayList<>(degree);
-        this.nodeLeftoverList = new ArrayList<>(degree);
     }
     
     /**
@@ -218,52 +206,8 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             tail = newTail;
         }
         
-//        // Find the node containing the insert location.
-//        searchElement(index);
-//        final Iterator<? extends E> iterator = c.iterator();
-//        
-//        searchNode.split(searchLocalIndex, nodeLeftoverList);
-//        
-//        while (!searchNode.isFull() && iterator.hasNext()) {
-//            searchNode.append(iterator.next());
-//        }
-//        
-//        if (iterator.hasNext()) {
-//            LinkedArrayListNode<E> insertHead = head.spawn();
-//            LinkedArrayListNode<E> insertTail = insertHead;
-//            
-//            while (iterator.hasNext()) {
-//                bulkLoadList.add(iterator.next());
-//                
-//                if (bulkLoadList.size() == getDegree()) {
-//                    insertTail.setAll(bulkLoadList);
-//                    bulkLoadList.clear();
-//                    
-//                    if (iterator.hasNext()) {
-//                        LinkedArrayListNode<E> newnode = head.spawn();
-//                        insertTail.next = newnode;
-//                        newnode.prev = insertTail;
-//                        insertTail = newnode;
-//                    }
-//                }
-//            }
-//            
-//            if (!bulkLoadList.isEmpty()) {
-//                insertTail.setAll(bulkLoadList);
-//                bulkLoadList.clear();
-//            }
-//            
-//            linkChain(searchNode, insertHead, insertTail);
-//        }
-//        
-//        if (!nodeLeftoverList.isEmpty()) {
-//            
-//        }
-        
         size += c.size();
         modCount += c.size();
-        bulkLoadList.clear();
-        nodeLeftoverList.clear();
         workList.clear();
         return true;
     }
@@ -298,7 +242,6 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         }
 
         if (!tmp.isEmpty()) {
-            System.out.println("Yoo! ^^");
             ret.addAll(tmp);
         }
 
