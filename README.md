@@ -7,5 +7,7 @@ This is basically an "average" between `ArrayList` and `LinkedList`, and is impl
 - [ ] Implement the entire `java.util.Deque` interface
 - [ ] Implement `java.io.Serializable` interface
 - [ ] Experiment with another node type
+
 ### xList
+<h4>Future milestones</h4>
 - [ ] Determine what `x` is
