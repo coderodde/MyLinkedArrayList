@@ -439,7 +439,21 @@ public class LinkedArrayListTest {
 
     @Test
     public void testAddAll_int_Collection() {
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+            test.add(i);
+        }
         
+        List<Integer> toadd = new ArrayList<>();
+        
+        for (int i = -10; i < 0; ++i) {
+            toadd.add(i);
+        }
+        
+        list.addAll(10, toadd);
+        test.addAll(10, toadd);
+        
+        eq();
     }
 
     @Test

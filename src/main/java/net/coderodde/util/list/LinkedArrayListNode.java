@@ -1,5 +1,6 @@
 package net.coderodde.util.list;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -40,6 +41,20 @@ abstract class LinkedArrayListNode<E> {
     }
     
     /**
+     * Inserts the elements in <code>collection</code> starting from this node
+     * at index <code>index</code>. The elements are inserted in the same order
+     * as the iterator of {@code collection} returns them.
+     * 
+     * @param index      the insertion index.
+     * @param collection the collection
+     * @param workList   the auxiliary list.
+     * @return           a chain of new nodes or null if {@code collection} fits
+     *                   in this node.
+     */
+    protected abstract LinkedArrayListNode[] 
+        addAll(int index, Collection<? extends E> collection, List<E> workList);
+    
+    /**
      * Appends the element to the tail of this node.
      * 
      * @param element the element to add.
@@ -62,6 +77,13 @@ abstract class LinkedArrayListNode<E> {
      * @return the requested element.
      */
     protected abstract E get(int index);
+    
+    /**
+     * Returns the degree of this node, which effectively is its capacity.
+     * 
+     * @return the degree of this node.
+     */
+    protected abstract int getDegree();
     
     /**
      * Attempts to remove <code>o</code> from this node. If this node contains
@@ -99,6 +121,8 @@ abstract class LinkedArrayListNode<E> {
         for (E element : list) {
             elementArray[index++] = element;
         }
+        
+        size = list.size();
     }
     
     /**
@@ -114,6 +138,15 @@ abstract class LinkedArrayListNode<E> {
      *         call.
      */
     protected abstract LinkedArrayListNode<E> spawn();
+    
+    /**
+     * Loads into the <code>list</code> all elements from this node whose
+     * indices are at least <code>splitIndex</code>.
+     * 
+     * @param splitIndex the split index.
+     * @param list       the backup list.
+     */
+    protected abstract void split(int splitIndex, List<E> list);
     
     /**
      * Checks whether this node is empty.

@@ -1,5 +1,8 @@
 package net.coderodde.util.list;
 
+import java.util.Collection;
+import java.util.List;
+
 /**
  * This class implements the advanced node for <code>LinkedArrayList</code>.
  */
@@ -12,6 +15,11 @@ class LinkedArrayListNode2<E> extends LinkedArrayListNode<E> {
      */
     LinkedArrayListNode2(int degree) {
         super(degree);
+    }
+
+    @Override
+    protected LinkedArrayListNode[] addAll(int index, Collection<? extends E> collection, List<E> workList) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
@@ -29,6 +37,11 @@ class LinkedArrayListNode2<E> extends LinkedArrayListNode<E> {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    @Override
+    protected int getDegree() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
     @Override
     protected boolean remove(Object o) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -52,5 +65,10 @@ class LinkedArrayListNode2<E> extends LinkedArrayListNode<E> {
     @Override
     protected LinkedArrayListNode<E> spawn() {
         return new LinkedArrayListNode2<>(super.elementArray.length);
+    }
+    
+    @Override
+    protected void split(int splitIndex, List<E> list) {
+        
     }
 }

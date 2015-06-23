@@ -83,6 +83,17 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
     private transient List<E> bulkLoadList;
     
     /**
+     * Used for more efficient bulk addition.
+     */
+    private transient List<E> nodeLeftoverList;
+    
+    /**
+     * Used for holding the elements while inserting a collection at random 
+     * index.
+     */
+    private transient List<E> workList;
+    
+    /**
      * Constructs a new, empty list with given degree and node type.
      * 
      * @param degree   the degree of the new list.
@@ -107,7 +118,9 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         }
         
         this.tail = head;
+        this.workList = new ArrayList<>(getDegree());
         this.bulkLoadList = new ArrayList<>(degree);
+        this.nodeLeftoverList = new ArrayList<>(degree);
     }
     
     /**
@@ -197,39 +210,62 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             return false;
         }
         
-        // Find the node containing the insert location.
         searchElement(index);
-        final Iterator<? extends E> iterator = c.iterator();
+        LinkedArrayListNode[] chain = searchNode.addAll(searchLocalIndex, 
+                                                        c, 
+                                                        workList);
         
-        searchNode.shiftToBegining();
-
-        while (!searchNode.isFull() && iterator.hasNext()) {
-            searchNode.append(iterator.next());
+        if (chain != null) {
+            linkChain(searchNode, chain[0], chain[1]);
         }
         
-        if (iterator.hasNext()) {
-            LinkedArrayListNode<E> insertHead = head.spawn();
-            LinkedArrayListNode<E> insertTail = insertHead;
-            
-            while (iterator.hasNext()) {
-                bulkLoadList.add(iterator.next());
-                
-                if (bulkLoadList.size() == getDegree()) {
-                    insertTail.setAll(bulkLoadList);
-                    
-                    if (iterator.hasNext()) {
-                        LinkedArrayListNode<E> newnode = head.spawn();
-                        insertTail.next = newnode;
-                        newnode.prev = insertTail;
-                        insertTail = newnode;
-                    }
-                }
-            }
-            
-            linkChain(searchNode, insertHead, insertTail);
-        }
+//        // Find the node containing the insert location.
+//        searchElement(index);
+//        final Iterator<? extends E> iterator = c.iterator();
+//        
+//        searchNode.split(searchLocalIndex, nodeLeftoverList);
+//        
+//        while (!searchNode.isFull() && iterator.hasNext()) {
+//            searchNode.append(iterator.next());
+//        }
+//        
+//        if (iterator.hasNext()) {
+//            LinkedArrayListNode<E> insertHead = head.spawn();
+//            LinkedArrayListNode<E> insertTail = insertHead;
+//            
+//            while (iterator.hasNext()) {
+//                bulkLoadList.add(iterator.next());
+//                
+//                if (bulkLoadList.size() == getDegree()) {
+//                    insertTail.setAll(bulkLoadList);
+//                    bulkLoadList.clear();
+//                    
+//                    if (iterator.hasNext()) {
+//                        LinkedArrayListNode<E> newnode = head.spawn();
+//                        insertTail.next = newnode;
+//                        newnode.prev = insertTail;
+//                        insertTail = newnode;
+//                    }
+//                }
+//            }
+//            
+//            if (!bulkLoadList.isEmpty()) {
+//                insertTail.setAll(bulkLoadList);
+//                bulkLoadList.clear();
+//            }
+//            
+//            linkChain(searchNode, insertHead, insertTail);
+//        }
+//        
+//        if (!nodeLeftoverList.isEmpty()) {
+//            
+//        }
         
+        size += c.size();
+        modCount += c.size();
         bulkLoadList.clear();
+        nodeLeftoverList.clear();
+        workList.clear();
         return true;
     }
 
@@ -243,7 +279,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
     
     @Override
     public Object clone() {
-        final int degree = head.elementArray.length;
+        final int degree = head.getDegree();
         List<E> ret = new LinkedArrayList<>(degree, nodeType);
         List<E> tmp = new ArrayList<>(degree);
 
@@ -307,7 +343,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
      * @return the degree.
      */
     public int getDegree() {
-        return head.elementArray.length;
+        return head.getDegree();
     }
     
     @Override
