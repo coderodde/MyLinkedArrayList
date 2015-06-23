@@ -211,12 +211,11 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         }
         
         searchElement(index);
-        LinkedArrayListNode[] chain = searchNode.addAll(searchLocalIndex, 
-                                                        c, 
-                                                        workList);
-        
-        if (chain != null) {
-            linkChain(searchNode, chain[0], chain[1]);
+        LinkedArrayListNode<E> newTail = searchNode.addAll(searchLocalIndex, 
+                                                           c, 
+                                                           workList);
+        if (newTail != null) {
+            tail = newTail;
         }
         
 //        // Find the node containing the insert location.
@@ -632,7 +631,6 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             tail = chainEnd;
         }
     }
-    
     /**
      * Loads the node and local index of the element at global index 
      * <code>index</code>.

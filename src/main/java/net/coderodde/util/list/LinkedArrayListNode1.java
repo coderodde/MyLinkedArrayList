@@ -25,64 +25,65 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
     }
     
     @Override
-    protected LinkedArrayListNode[] 
+    protected LinkedArrayListNode<E> 
         addAll(int localIndex, 
                Collection<? extends E> collection, 
                List<E> workList) {
-        final int freeComponentAmount = getDegree() - size();
-        final int collectionSize = collection.size();
-        
-        if (collection.size() <= freeComponentAmount) {
-            // Once here, 'collection' fits in this node.
-            for (int i = size() - 1; i >= localIndex; --i) {
-                elementArray[i] = elementArray[i + collectionSize];
-            }
-            
-            for (E element : collection) {
-                elementArray[localIndex++] = element;
-            }
-            
-            size += collectionSize;
-            return null;
-        }
-        
-        // Once here, 'collection' does NOT fit in this node.
+        final LinkedArrayListNode<E> nextNode = next;
         final int degree = getDegree();
-        Iterator<? extends E> iterator = collection.iterator();
         
-        for (int i = localIndex; i < degree; ++i) {
+        // Collect everything that is to be moved in this node.
+        for (int i = localIndex; i < size; ++i) {
             workList.add((E) elementArray[i]);
-            elementArray[i] = iterator.next();
         }
         
-        LinkedArrayListNode<E> insertHead = spawn();
-        LinkedArrayListNode<E> insertTail = insertHead;
+        // Update the size field.
+        size = localIndex;
+            
+        Iterator<? extends E> iterator = collection.iterator();
+        LinkedArrayListNode<E> chainHead = this;
+        LinkedArrayListNode<E> chainTail = this;
         
         while (iterator.hasNext()) {
-            insertTail.append(iterator.next());
-            
-            if (insertTail.isFull()) {
+            if (chainTail.isFull()) {
                 LinkedArrayListNode<E> newnode = spawn();
-                insertTail.next = newnode;
-                newnode.prev = insertTail;
-                insertTail = newnode;
+                newnode.prev = chainTail;
+                chainTail.next = newnode;
+                chainTail = newnode;
             }
+            
+            chainTail.append(iterator.next());
         }
         
-        // Now, add only the elements from 'workList'.
-        for (E element : workList) {
-            insertTail.append(element);
-            
-            if (insertTail.isFull()) {
+        iterator = workList.iterator();
+        
+        while (iterator.hasNext()) {
+            if (chainTail.isFull()) {
                 LinkedArrayListNode<E> newnode = spawn();
-                insertTail.next = newnode;
-                newnode.prev = insertTail;
-                insertTail = newnode;
+                newnode.prev = chainTail;
+                chainTail.next = newnode;
+                chainTail = newnode;
             }
+            
+            chainTail.append(iterator.next());
         }
         
         workList.clear();
-        return new LinkedArrayListNode[]{ insertHead, insertTail };
+        
+        if (chainHead == chainTail) {
+            // The added elements fit entirely in this node. No relinking,
+            // return null.
+            return null;
+        }
+        
+        chainTail.next = nextNode;
+        
+        if (nextNode != null) {
+            nextNode.prev = chainTail;
+            return null;
+        }
+        
+        return chainTail;
     }
     
     @Override

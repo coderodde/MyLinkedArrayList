@@ -18,7 +18,7 @@ class LinkedArrayListNode2<E> extends LinkedArrayListNode<E> {
     }
 
     @Override
-    protected LinkedArrayListNode[] addAll(int index, Collection<? extends E> collection, List<E> workList) {
+    protected LinkedArrayListNode<E> addAll(int index, Collection<? extends E> collection, List<E> workList) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

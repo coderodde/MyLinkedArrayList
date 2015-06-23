@@ -446,14 +446,55 @@ public class LinkedArrayListTest {
         
         List<Integer> toadd = new ArrayList<>();
         
-        for (int i = -10; i < 0; ++i) {
+        for (int i = -10; i < -9; ++i) {
             toadd.add(i);
         }
         
-        list.addAll(10, toadd);
-        test.addAll(10, toadd);
+        list.addAll(18, toadd);
+        test.addAll(18, toadd);
         
         eq();
+    }
+    
+    @Test
+    public void testAddAll_int_Collection_brute() {
+        long seed = System.currentTimeMillis();
+        Random random = new Random(seed);
+        List<Integer> addList = new ArrayList<>();
+        
+        System.out.println("testAddAll_int_Collection_brute: seed = " + seed);
+        
+        for (int run = 0; run < 100; ++run) {
+            list.clear();
+            test.clear();
+            
+            final int initialSize = random.nextInt(217);
+            
+            for (int i = 0; i < initialSize; ++i) {
+                int num = random.nextInt();
+                list.add(num);
+                test.add(num);
+            }
+            
+            eq();
+            
+            int additions = random.nextInt(30);
+            
+            for (int addition = 0; addition < additions; ++addition) {
+                int additionLength = random.nextInt(30);
+                
+                for (int i = 0; i < additionLength; ++i) {
+                    addList.add(random.nextInt());
+                }
+            
+                int insertIndex = random.nextInt(list.size() + 1);
+                list.addAll(insertIndex, addList);
+                test.addAll(insertIndex, addList);
+                System.out.println("run: " + run + ", addition: " + addition);
+                eq();
+                addList.clear();
+            }
+        }
     }
 
     @Test

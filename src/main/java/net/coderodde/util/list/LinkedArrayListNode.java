@@ -51,7 +51,7 @@ abstract class LinkedArrayListNode<E> {
      * @return           a chain of new nodes or null if {@code collection} fits
      *                   in this node.
      */
-    protected abstract LinkedArrayListNode[] 
+    protected abstract LinkedArrayListNode<E>
         addAll(int index, Collection<? extends E> collection, List<E> workList);
     
     /**
