@@ -154,7 +154,43 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
 
     @Override
     public void add(int index, E element) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        checkIndexForAddition(index);
+        
+        if (index == size) {
+            add(element);
+            return;
+        }
+        
+        searchElement(index);
+        
+        if (searchNode.isFull()) {
+            LinkedArrayListNode<E> newnode = head.spawn();
+            final int searchNodeSize = searchNode.size();
+            
+            for (int i = searchLocalIndex; i < searchNodeSize; ++i) {
+                newnode.append((E) searchNode.elementArray[i]);
+                searchNode.elementArray[i] = null;
+            }
+            
+            searchNode.size = searchLocalIndex;
+            searchNode.append(element);
+            
+            if (searchNode.next == null) {
+                searchNode.next = newnode;
+                newnode.prev = searchNode;
+                tail = newnode;
+            } else {
+                newnode.next = searchNode.next;
+                searchNode.next.prev = newnode;
+                searchNode.next = newnode;
+                newnode.prev = searchNode;
+            }
+        } else {
+            searchNode.insert(searchLocalIndex, element);
+        }
+        
+        ++size;
+        ++modCount;
     }
 
     @Override
@@ -242,6 +278,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         }
 
         if (!tmp.isEmpty()) {
+            // Add the leftovers.
             ret.addAll(tmp);
         }
 

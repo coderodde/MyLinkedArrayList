@@ -446,7 +446,7 @@ public class LinkedArrayListTest {
         
         List<Integer> toadd = new ArrayList<>();
         
-        for (int i = -10; i < -9; ++i) {
+        for (int i = -10; i < -5; ++i) {
             toadd.add(i);
         }
         
@@ -681,6 +681,54 @@ public class LinkedArrayListTest {
 
     @Test
     public void testAdd_int_GenericType() {
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        list.add(list.size(), 100);
+        test.add(test.size(), 100);
+        
+        eq();
+        
+        list.add(list.size(), 101);
+        test.add(test.size(), 101);
+        
+        eq();
+        
+        list.add(list.size() - 1, 102);
+        test.add(test.size() - 1, 102);
+        
+        eq();
+        
+        list.add(10, 103);
+        test.add(10, 103);
+        
+        eq();
+    }
+    
+    @Test 
+    public void testAdd_int_GenericType_brute() {
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        final long seed = System.currentTimeMillis();
+        Random random = new Random(seed);
+        System.out.println("testAdd_int_GenericType_brute: seed = " + seed);
+        
+        int n = random.nextInt(200) + 100;
+        
+        for (int i = 0; i < n; ++i) {
+            Integer num = random.nextInt();
+            int index = random.nextInt(list.size() + 1);
+            
+            list.add(index, num);
+            test.add(index, num);
+            
+            eq();
+        }
     }
 
     @Test

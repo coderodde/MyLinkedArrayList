@@ -43,6 +43,11 @@ class LinkedArrayListNode2<E> extends LinkedArrayListNode<E> {
     }
     
     @Override
+    protected void insert(int localIndex, E element) {
+        
+    }
+    
+    @Override
     protected boolean remove(Object o) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

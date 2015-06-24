@@ -86,6 +86,15 @@ abstract class LinkedArrayListNode<E> {
     protected abstract int getDegree();
     
     /**
+     * Inserts the {@code element} into this node before the element with index
+     * {@code localIndex}.
+     * 
+     * @param localIndex the local index of insertion.
+     * @param element    the element to insert.
+     */
+    protected abstract void insert(int localIndex, E element);
+    
+    /**
      * Attempts to remove <code>o</code> from this node. If this node contains
      * <code>o</code>, it removes it and returns <code>true</code>. Otherwise,
      * this node is not modified and <code>false</code> is returned.

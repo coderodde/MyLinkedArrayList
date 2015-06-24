@@ -114,6 +114,16 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
     }
 
     @Override
+    protected void insert(int localIndex, E element) {
+        for (int i = size; i > localIndex; --i) {
+            elementArray[i] = elementArray[i - 1];
+        }
+        
+        elementArray[localIndex] = element;
+        ++size;
+    }
+    
+    @Override
     protected boolean remove(Object o) {
         for (int i = 0; i < size(); ++i) {
             if (Objects.equals(o, elementArray[i])) {
