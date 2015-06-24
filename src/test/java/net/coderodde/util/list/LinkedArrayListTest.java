@@ -6,6 +6,7 @@ import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Random;
 import org.junit.Test;
@@ -833,10 +834,76 @@ public class LinkedArrayListTest {
 
     @Test
     public void testListIterator_0args() {
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        ListIterator<Integer> listIter = list.listIterator();
+        ListIterator<Integer> testIter = test.listIterator();
+        
+        while (testIter.hasNext()) {
+            assertTrue(listIter.hasNext());
+            assertEquals(testIter.previousIndex(), listIter.previousIndex());
+            assertEquals(testIter.nextIndex(), listIter.nextIndex());
+            
+            Integer listInt = listIter.next();
+            Integer testInt = testIter.next();
+            
+            assertEquals(testInt, listInt);
+        }
+        
+        assertFalse(listIter.hasNext());
+        
+        while (testIter.hasPrevious()) {
+            assertTrue(listIter.hasPrevious());
+            assertEquals(testIter.previousIndex(), listIter.previousIndex());
+            assertEquals(testIter.nextIndex(), listIter.nextIndex());
+            
+            Integer listInt = listIter.previous();
+            Integer testInt = testIter.previous();
+            
+            assertEquals(testInt, listInt);
+        }
+        
+        assertFalse(listIter.hasPrevious());
     }
 
     @Test
     public void testListIterator_int() {
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        ListIterator<Integer> listIter = list.listIterator(10);
+        ListIterator<Integer> testIter = test.listIterator(10);
+        
+        while (testIter.hasNext()) {
+            assertTrue(listIter.hasNext());
+            assertEquals(testIter.previousIndex(), listIter.previousIndex());
+            assertEquals(testIter.nextIndex(), listIter.nextIndex());
+            
+            Integer listInt = listIter.next();
+            Integer testInt = testIter.next();
+            
+            assertEquals(testInt, listInt);
+        }
+        
+        assertFalse(listIter.hasNext());
+        
+        while (testIter.hasPrevious()) {
+            assertTrue(listIter.hasPrevious());
+            assertEquals(testIter.previousIndex(), listIter.previousIndex());
+            assertEquals(testIter.nextIndex(), listIter.nextIndex());
+            
+            Integer listInt = listIter.previous();
+            Integer testInt = testIter.previous();
+            
+            assertEquals(testInt, listInt);
+        }
+        
+        assertFalse(listIter.hasPrevious());
     }
 
     @Test

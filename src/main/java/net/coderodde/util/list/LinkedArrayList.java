@@ -354,12 +354,12 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
 
     @Override
     public ListIterator<E> listIterator() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return new AdvancedLinkedArrayListIterator(0);
     }
 
     @Override
     public ListIterator<E> listIterator(int index) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return new AdvancedLinkedArrayListIterator(index);
     }
 
     @Override
@@ -764,6 +764,113 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             if (expectedModCount != modCount) {
                 throw new ConcurrentModificationException();
             }
+        }
+    }
+    
+    /**
+     * Implements the {@code #ListIterator} of this list.
+     */
+    private class AdvancedLinkedArrayListIterator implements ListIterator<E> {
+
+        /**
+         * Used for global navigation.
+         */
+        private int cursor;
+        
+        /**
+         * Used for local navigation within a node.
+         */
+        private int localCursor;
+        
+        /**
+         * Caches the current node.
+         */
+        private LinkedArrayListNode<E> currentNode;
+        
+        /**
+         * Constructs this {@code ListIterator} and sets its cursors position.
+         * 
+         * @param index the amount of elements from head to skip.
+         */
+        AdvancedLinkedArrayListIterator(int index) {
+            checkIndexForAddition(index);
+            cursor = index;
+            
+            if (index == size) {
+                localCursor = tail.size();
+                currentNode = tail;
+            } else {
+                searchElement(index);
+                currentNode = searchNode;
+                localCursor = searchLocalIndex;
+            }
+        }
+        
+        @Override
+        public boolean hasNext() {
+            return cursor != size;
+        }
+
+        @Override
+        public E next() {
+            if (cursor == size) {
+                throw new NoSuchElementException(
+                        "The forward iteration exceeded.");
+            }
+        
+            if (localCursor == currentNode.size()) {
+                localCursor = 0;
+                currentNode = currentNode.next;
+            }
+            
+            ++cursor;
+            return currentNode.get(localCursor++);
+        }
+
+        @Override
+        public boolean hasPrevious() {
+            return cursor != 0;
+        }
+
+        @Override
+        public E previous() {
+            if (cursor == 0) {
+                throw new NoSuchElementException(
+                        "The backward iteration exceeded.");
+            }
+            
+            if (localCursor == 0) {
+                currentNode = currentNode.prev;
+                localCursor = currentNode.size;
+            }
+            
+            --cursor;
+            return currentNode.get(--localCursor);
+        }
+
+        @Override
+        public int nextIndex() {
+            return cursor;
+        }
+
+        @Override
+        public int previousIndex() {
+            return cursor - 1;
+        }
+
+        @Override
+        public void remove() {
+            
+        }
+
+        @Override
+        public void set(E e) {
+        
+        }
+
+        @Override
+        public void add(E e) {
+        
         }
     }
 }
