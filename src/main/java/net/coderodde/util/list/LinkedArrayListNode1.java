@@ -114,13 +114,27 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
     }
 
     @Override
-    protected void insert(int localIndex, E element) {
-        for (int i = size; i > localIndex; --i) {
-            elementArray[i] = elementArray[i - 1];
+    protected LinkedArrayListNode<E> insert(int localIndex, E element) {
+        if (!isFull()) {
+            for (int i = size; i > localIndex; --i) {
+                elementArray[i] = elementArray[i - 1];
+            }
+
+            elementArray[localIndex] = element;
+            ++size;
+            return null;
+        } else {
+            LinkedArrayListNode<E> newnode = spawn();
+            
+            for (int i = localIndex; i < size; ++i) {
+                newnode.append((E) elementArray[i]);
+                elementArray[i] = null;
+            }
+            
+            elementArray[localIndex] = element;
+            size = localIndex + 1;
+            return newnode;
         }
-        
-        elementArray[localIndex] = element;
-        ++size;
     }
     
     @Override

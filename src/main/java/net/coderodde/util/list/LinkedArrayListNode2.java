@@ -43,8 +43,8 @@ class LinkedArrayListNode2<E> extends LinkedArrayListNode<E> {
     }
     
     @Override
-    protected void insert(int localIndex, E element) {
-        
+    protected LinkedArrayListNode<E> insert(int localIndex, E element) {
+        return null;
     }
     
     @Override

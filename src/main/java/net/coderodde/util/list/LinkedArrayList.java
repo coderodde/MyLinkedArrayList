@@ -162,33 +162,12 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         }
         
         searchElement(index);
-        
-        if (searchNode.isFull()) {
-            LinkedArrayListNode<E> newnode = head.spawn();
-            final int searchNodeSize = searchNode.size();
-            
-            for (int i = searchLocalIndex; i < searchNodeSize; ++i) {
-                newnode.append((E) searchNode.elementArray[i]);
-                searchNode.elementArray[i] = null;
-            }
-            
-            searchNode.size = searchLocalIndex;
-            searchNode.append(element);
-            
-            if (searchNode.next == null) {
-                searchNode.next = newnode;
-                newnode.prev = searchNode;
-                tail = newnode;
-            } else {
-                newnode.next = searchNode.next;
-                searchNode.next.prev = newnode;
-                searchNode.next = newnode;
-                newnode.prev = searchNode;
-            }
-        } else {
-            searchNode.insert(searchLocalIndex, element);
+        LinkedArrayListNode<E> newnode = searchNode.insert(searchLocalIndex, 
+                                                           element);
+        if (newnode != null) {
+            linkNode(searchNode, newnode);
         }
-        
+            
         ++size;
         ++modCount;
     }
@@ -611,6 +590,20 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             tail = chainEnd;
         }
     }
+    
+    private void linkNode(LinkedArrayListNode<E> predecessor,
+                          LinkedArrayListNode<E> node) {
+        node.prev = predecessor;
+        node.next = predecessor.next;
+        predecessor.next = node;
+        
+        if (node.next != null) {
+            node.next.prev = node;
+        } else {
+            tail = node;
+        }
+    }
+    
     /**
      * Loads the node and local index of the element at global index 
      * <code>index</code>.

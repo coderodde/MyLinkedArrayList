@@ -87,12 +87,17 @@ abstract class LinkedArrayListNode<E> {
     
     /**
      * Inserts the {@code element} into this node before the element with index
-     * {@code localIndex}.
+     * {@code localIndex}. If {@code element} does not fit into this node, this
+     * node is spawns a new, empty node. Then, it appends everything starting at
+     * index {@code localIndex} to the spawned node, and inserts {@code element}
+     * into this node.
      * 
      * @param localIndex the local index of insertion.
      * @param element    the element to insert.
+     * @return the continuation node if this node is full. {@code null} 
+     *         otherwise.
      */
-    protected abstract void insert(int localIndex, E element);
+    protected abstract LinkedArrayListNode<E> insert(int localIndex, E element);
     
     /**
      * Attempts to remove <code>o</code> from this node. If this node contains
