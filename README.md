@@ -1,6 +1,5 @@
 # coderodde.lists
-
-<h2><tt>LinkedArrayList<tt></h2>
+### LinkedArrayList
 This is basically an "average" between `ArrayList` and `LinkedList`, and is implemented as a linked list of small arrays. Each array/node has the same capacity generally called __degree__.
 <h4>Future milestones</h4>
 - [ ] Implement the entire `java.util.List` interface
@@ -9,5 +8,6 @@ This is basically an "average" between `ArrayList` and `LinkedList`, and is impl
 - [ ] Implement `java.io.Serializable` interface
 - [ ] Experiment with another node type
 
-<h2><tt>xList<tt></h2>
+### xList
+<h4>Future milestones</h4>
 - [ ] Determine what `x` is
