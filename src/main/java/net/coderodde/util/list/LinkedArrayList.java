@@ -33,7 +33,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
     }
     
     /**
-     * The minimum degree of any <code>LinkedArrayList</code>.
+     * The minimum degree of any {@code LinkedArrayList}.
      */
     private static final int MINIMUM_DEGREE = 2;
     
@@ -122,19 +122,26 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
     
     /**
      * Constructs a new, empty list with default degree and input node type.
-     * @param nodeType 
+     * 
+     * @param nodeType the type of internal node type.
      */
     public LinkedArrayList(NodeType nodeType) {
         this(DEFAULT_DEGREE);
     }
     
     /**
-     * Constructs a new, empty list with default degree and node type.
+     * Constructs a new, empty list with default degree and default node type.
      */
     public LinkedArrayList() {
         this(DEFAULT_DEGREE);
     }
 
+    /**
+     * Appends {@code e} to the tail of this list.
+     * 
+     * @param  e the element to append.
+     * @return always {@code true}.
+     */
     @Override
     public boolean add(E e) {
         if (tail.isFull()) {
@@ -152,6 +159,13 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         return true;
     }
 
+    /**
+     * Inserts {@code element} between the elements with indices 
+     * {@code index - 1} and {@code index}.
+     * 
+     * @param index   the insertion index.
+     * @param element the element to insert.
+     */
     @Override
     public void add(int index, E element) {
         checkIndexForAddition(index);
@@ -172,6 +186,14 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         ++modCount;
     }
 
+    /**
+     * Appends elements from {@code c} to the tail of this list. The elements
+     * are appended in the same order as they are returned by the iterator of
+     * {@code c}.
+     * 
+     * @param  c the collection holding the elements to append.
+     * @return {@code true} if this list changed after this operation.
+     */
     @Override
     public boolean addAll(Collection<? extends E> c) {
         if (c.isEmpty()) {
@@ -201,6 +223,16 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         return true;
     }
 
+    /**
+     * Inserts the elements in {@code c} in this list between elements with 
+     * indices {@code index - 1} and {@code index}. The elements are inserted in
+     * the same order as the iterator of {@code c} returns them.
+     * 
+     * @param  index the insertion index.
+     * @param  c     the collection holding the elements to insert.
+     * @return {@code true} if this list changed after the operation, 
+     *         {@code false} otherwise, or namely, if {@code c} is empty.
+     */
     @Override
     public boolean addAll(int index, Collection<? extends E> c) {
         checkIndexForAddition(index);
@@ -227,6 +259,9 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         return true;
     }
 
+    /**
+     * Makes this list empty dropping all the elements.
+     */
     @Override
     public void clear() {
         head = head.spawn();
@@ -235,6 +270,12 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         ++modCount;
     }
     
+    /**
+     * Returns another {@code LinkedArrayList} with the same degree and node
+     * type, containing the same sequence of elements as this list.
+     * 
+     * @return another list with the same contents.
+     */
     @Override
     public Object clone() {
         final int degree = head.getDegree();
@@ -264,6 +305,13 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         return ret;
     }
     
+    /**
+     * Return {@code true} if this list contains {@code o}. 
+     * 
+     * @param  o the object to search.
+     * @return {@code true} if {@code o} appears in this list. {@code false} 
+     *         otherwise.
+     */
     @Override
     public boolean contains(Object o) {
         for (LinkedArrayListNode<E> node = head;
@@ -277,6 +325,14 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         return false;
     }
 
+    /**
+     * Returns {@code true} if this list contains <b>all</b> elements in 
+     * {@code c}.
+     * 
+     * @param  c the collection to check for inclusion.
+     * @return {@code true} if this list contains all the elements in 
+     *         {@code c}, and {@code false} otherwise.
+     */
     @Override
     public boolean containsAll(Collection<?> c) {
         for (Object o : c) {
@@ -288,6 +344,13 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         return true;
     }
 
+    /**
+     * Returns the element at index {@code index}.
+     * 
+     * @param  index the index of the desired element.
+     * @return the element at index {@code index}.
+     * @throws IndexOutOfBoundsException if {@code index} is invalid.
+     */
     @Override
     public E get(int index) {
         checkIndexForAccess(index);
@@ -304,6 +367,14 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         return head.getDegree();
     }
     
+    /**
+     * Returns the least index of the element {@code o} or -1 if this list does
+     * not contain such.
+     * 
+     * @param  o the element whose index to look for.
+     * @return the least index of the first occurrence of element {@code o} in 
+     *         this list or -1 if this list does not contain such element.
+     */
     @Override
     public int indexOf(Object o) {
         int index = 0;
@@ -323,16 +394,65 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         return -1;
     }
 
+    /**
+     * Checks whether this list is empty.
+     * 
+     * @return {@code true} if this list does not contain any elements, and
+     *         {@code false} otherwise.
+     */
     @Override
     public boolean isEmpty() {
         return size() == 0;
     }
+    
+    /**
+     * Checks that this list maintains the invariants of 
+     * {@code LinkedArrayList}. The first invariant is that there is no empty 
+     * nodes in the chain of nodes of this list. The second invariant is that
+     * there is no node that wastes space, or namely, every node has values
+     * {@code null} at every storage array component that does not logically 
+     * hold a value. The third invariant is that the sums of node sizes equals 
+     * the value of {@code size} field of this list.
+     * 
+     * @throws IllegalStateException if this list is not healthy.
+     */
+    public void checkHealth() {
+        int s = 0;
+        
+        for (LinkedArrayListNode<E> node = head;
+                node != null;
+                node = node.next) {
+            if (!node.isHealthy()) {
+                throw new IllegalStateException("Unhealthy node encountered.");
+            }
+            
+            s += node.size();
+        }
+        
+        if (size != s) {
+            throw new IllegalStateException("Wrong accumulated size: " + 
+                    s + "; list reports containing " + size + " elements.");
+        }
+    }
 
+    /**
+     * Returns an {@code java.util.Iterator} over this list.
+     * 
+     * @return an iterator.
+     */
     @Override
     public Iterator<E> iterator() {
         return new BasicLinkedArrayListIterator();
     }
 
+    /**
+     * Returns the greatest index of element {@code o} or -1 if this list does 
+     * not contain {@code o}.
+     * 
+     * @param  o the element whose index to search. 
+     * @return the index of the last occurrence of {@code o} in this list or
+     *         -1, if this list does not contain {@code o}.
+     */
     @Override
     public int lastIndexOf(Object o) {
         int index = size() - 1;
@@ -352,16 +472,37 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         return -1;
     }
 
+    /**
+     * Returns a {@code java.util.ListIterator} over this list. The cursor of 
+     * the result iterator is placed at the beginning of this list.
+     * 
+     * @return a {@code ListIterator} over this list.
+     */
     @Override
     public ListIterator<E> listIterator() {
         return new AdvancedLinkedArrayListIterator(0);
     }
 
+    /**
+     * Returns a {@code java.util.ListIterator} over this list. The cursor of 
+     * the result iterator is placed after {@code index} elements from beginning
+     * of this list.
+     * 
+     * @param  index the initial location of {@code ListIterator}.
+     * @return a {@code ListIterator}.
+     */
     @Override
     public ListIterator<E> listIterator(int index) {
         return new AdvancedLinkedArrayListIterator(index);
     }
 
+    /**
+     * Removes the element at index {@code index} and returns it.
+     * 
+     * @param  index the index of the element to remove.
+     * @return the removed element.
+     * @throws IndexOutOfBoundsException if the index is invalid.
+     */
     @Override
     public E remove(int index) {
         checkIndexForAccess(index);
@@ -378,6 +519,13 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         return ret;
     }
     
+    /**
+     * Removes the first occurrence of {@code o} from this list.
+     * 
+     * @param  o the element to remove.
+     * @return {@code true} if this list contained {@code o}, and {@code false}
+     *         otherwise.
+     */
     @Override
     public boolean remove(Object o) {
         for (LinkedArrayListNode<E> node = head; 
@@ -399,16 +547,36 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         return false;
     }
     
+    /**
+     * Removes all elements contained in {@code c} from this list.
+     * 
+     * @param  c the collection of elements to remove.
+     * @return {@code true} only if this list changed after the call.
+     */
     @Override
     public boolean removeAll(Collection<?> c) {
         return bulkContainOperation(c, true);
     }
 
+    /**
+     * Retains only those elements in this list that are contained in {@code c}.
+     * The elements in this list and not contained in {@code c} will be removed.
+     * 
+     * @param  c the collection of elements to retain.
+     * @return {@code true} only if this list changed after the call.
+     */
     @Override
     public boolean retainAll(Collection<?> c) {
         return bulkContainOperation(c, false);
     }
 
+    /**
+     * Sets a new element {@code element} at index {@code index}.
+     * 
+     * @param index   the index of element to replace.
+     * @param element the new value for the element location.
+     * @return        the old value at the specified index.
+     */
     @Override
     public E set(int index, E element) {
         checkIndexForAccess(index);
@@ -418,16 +586,34 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         return ret;
     }
     
+    /**
+     * Returns the amount of elements in this list.
+     * 
+     * @return the size of this list.
+     */
     @Override
     public int size() {
         return size;
     }
     
+    /**
+     * Returns a view over a portion of this list.
+     * 
+     * @param  fromIndex the inclusive index of the first element in the view. 
+     * @param  toIndex   the exclusive index of the last element in the view.
+     * @return a view over this list.
+     */
     @Override
     public List<E> subList(int fromIndex, int toIndex) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * Creates an {@code Object} array holding the elements of this list and 
+     * returns it.
+     * 
+     * @return an array of elements.
+     */
     @Override
     public Object[] toArray() {
         Object[] ret = new Object[size];
@@ -446,6 +632,15 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         return ret;
     }
 
+    /**
+     * Returns an array holding all the elements of this list. If {@code a} can
+     * accommodate all the elements, it is loaded and returned. Otherwise,
+     * the method creates an array large enough, loads it and returns it.
+     * 
+     * @param  <T> the actual element type.
+     * @param  a   the input array.
+     * @return     the array containing all the elements of this list.
+     */
     @Override
     public <T> T[] toArray(T[] a) {
         Object[] arr = toArray();
@@ -463,6 +658,11 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         return a;
     }
     
+    /**
+     * Returns a textual representation of this list.
+     * 
+     * @return a {@code String} representing this list.
+     */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("[");
@@ -486,29 +686,36 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
      * 
      * @param index the index to validate.
      * 
-     * @throws IllegalArgumentException if the index is too small or too large.
+     * @throws IndexOutOfBoundsException if the index is too small or too large.
      */
     private void checkIndexForAccess(int index) {
         if (index < 0) {
-            throw new IllegalArgumentException(
+            throw new IndexOutOfBoundsException(
                     "The index is negative: " + index);
         }
         
         if (index >= size()) {
-            throw new IllegalArgumentException(
+            throw new IndexOutOfBoundsException(
                     "The index is too large: " + index + ". " +
                     "The size of this list is " + size() + ".");
         }
     }
     
+    /**
+     * Validates the insertion index.
+     * 
+     * @param index the insertion index.
+     * 
+     * @throws IndexOutOfBoundsException if the index is too small or too large.
+     */
     private void checkIndexForAddition(int index) {
         if (index < 0) {
-            throw new IllegalArgumentException(
+            throw new IndexOutOfBoundsException(
                     "The index is negative: " + index);
         }
         
         if (index > size()) {
-            throw new IllegalArgumentException(
+            throw new IndexOutOfBoundsException(
                     "The index is tool large: " + index + ". " +
                     "The size of this list is " + size() + ".");
         }
@@ -558,11 +765,11 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
                     node.removeAt(i);
                     --size;
                     ++modCount;
-                    
-                    if (node.isEmpty()) {
-                        unlinkNode(node);
-                    }
                 }
+            }
+
+            if (node.isEmpty()) {
+                unlinkNode(node);
             }
         }
         

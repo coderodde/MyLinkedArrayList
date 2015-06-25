@@ -451,10 +451,15 @@ public class LinkedArrayListTest {
             toadd.add(i);
         }
         
-        list.addAll(18, toadd);
-        test.addAll(18, toadd);
+        assertTrue(list.addAll(18, toadd));
+        assertTrue(test.addAll(18, toadd));
         
         eq();
+        
+        toadd.clear();
+        
+        assertFalse(list.addAll(18, toadd));
+        assertFalse(test.addAll(18, toadd));
     }
     
     @Test
@@ -649,7 +654,43 @@ public class LinkedArrayListTest {
         
         eq();
     }
-
+    
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void testGetBadIndexThrows1() {
+        for (int i = 0; i < 7; ++i) {
+            list.add(i);
+        }
+        
+        list.get(-1);
+    }
+    
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void testGetBadIndexThrows2() {
+        for (int i = 0; i < 7; ++i) {
+            list.add(i);
+        }
+        
+        list.get(list.size());
+    }
+    
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void testAddBadIndexThrows1() {
+        for (int i = 0; i < 7; ++i) {
+            list.add(i);
+        }
+        
+        list.get(-1);
+    }
+    
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void testAddBadIndexThrows2() {
+        for (int i = 0; i < 7; ++i) {
+            list.add(i);
+        }
+        
+        list.get(list.size() + 1);
+    }
+    
     @Test
     public void testSet() {
         Integer[] data = new Integer[20];
@@ -928,9 +969,10 @@ public class LinkedArrayListTest {
         }
         
         assertFalse(itList.hasNext());
+//        list.checkHealth();
     }
     
-    private void eq(List<Integer> test, List<Integer> list) {
+    private void eq(LinkedArrayList<Integer> test, List<Integer> list) {
         assertEquals(test.size(), list.size());
         
         for (int i = 0; i < list.size(); ++i) {
@@ -946,5 +988,6 @@ public class LinkedArrayListTest {
         }
         
         assertFalse(itList.hasNext());
+//        test.checkHealth();
     }
 }

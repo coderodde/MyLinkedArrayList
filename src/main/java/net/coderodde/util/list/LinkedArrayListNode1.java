@@ -138,6 +138,24 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
     }
     
     @Override
+    protected boolean isHealthy() {
+        if (size == 0) {
+            // The empty nodes should not be kept around.
+            return false;
+        }
+        
+        final int degree = getDegree();
+        
+        for (int i = size; i < degree; ++i) {
+            if (elementArray[i] != null) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    @Override
     protected boolean remove(Object o) {
         for (int i = 0; i < size(); ++i) {
             if (Objects.equals(o, elementArray[i])) {

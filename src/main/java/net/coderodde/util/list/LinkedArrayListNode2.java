@@ -48,6 +48,11 @@ class LinkedArrayListNode2<E> extends LinkedArrayListNode<E> {
     }
     
     @Override
+    protected boolean isHealthy() {
+        return false;
+    }
+    
+    @Override
     protected boolean remove(Object o) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

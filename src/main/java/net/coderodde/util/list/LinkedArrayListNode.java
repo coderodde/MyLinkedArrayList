@@ -100,6 +100,16 @@ abstract class LinkedArrayListNode<E> {
     protected abstract LinkedArrayListNode<E> insert(int localIndex, E element);
     
     /**
+     * Checks that this node is healthy. The node is considered healthy if its
+     * unused array components hold value {@code null}. Basically we try to 
+     * assert that the garbage collector frees the objects as early as possible.
+     * Also, we try to assert that this node is not empty for the same reason.
+     * 
+     * @return {@code true} if this node is healthy.
+     */
+    protected abstract boolean isHealthy();
+    
+    /**
      * Attempts to remove <code>o</code> from this node. If this node contains
      * <code>o</code>, it removes it and returns <code>true</code>. Otherwise,
      * this node is not modified and <code>false</code> is returned.
