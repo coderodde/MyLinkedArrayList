@@ -4,9 +4,10 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * This interface defines the API for nodes of {@link LinkedArrayList}.
+ * This abstract class defines the API for nodes of {@link LinkedArrayList}.
  * 
- * @author Rodion "rodde" Efremov
+ * @author  Rodion "rodde" Efremov
+ * @version 1.6
  */
 abstract class LinkedArrayListNode<E> {
     

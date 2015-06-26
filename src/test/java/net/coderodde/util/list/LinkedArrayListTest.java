@@ -506,6 +506,63 @@ public class LinkedArrayListTest {
     }
 
     @Test
+    public void testEquals() {
+        assertTrue(test.equals(list));
+        assertTrue(list.equals(test));
+        
+        for (int i = 0; i < 40; ++i) {
+            list.add(i);
+            
+            assertFalse(test.equals(list));
+            assertFalse(list.equals(test));
+            
+            test.add(i);
+            
+            assertTrue(test.equals(list));
+            assertTrue(list.equals(test));
+        }
+        
+        test.remove(11);
+        
+        assertFalse(test.equals(list));
+        
+        list.remove(11);
+        
+        assertTrue(test.equals(list));
+    }
+    
+    @Test
+    public void testHashCode() {
+        assertEquals(test.hashCode(), list.hashCode());
+        
+        for (int i = 0; i < 40; ++i) {
+            list.add(i);
+            
+            assertFalse(list.hashCode() == test.hashCode());
+            
+            test.add(i);
+            
+            assertTrue(list.hashCode() == test.hashCode());
+        }
+        
+        list.remove(new Integer(14));
+        
+        assertFalse(list.hashCode() == test.hashCode());
+        
+        test.remove(new Integer(15));
+        
+        assertFalse(list.hashCode() == test.hashCode());
+        
+        list.remove(new Integer(15));
+        
+        assertFalse(list.hashCode() == test.hashCode());
+        
+        test.remove(new Integer(14));
+        
+        assertEquals(test.hashCode(), list.hashCode());
+    }
+    
+    @Test
     public void testRemoveAll() {
         for (int i = 0; i < 20; ++i) {
             list.add(i);

@@ -5,11 +5,14 @@ import java.util.List;
 
 /**
  * This class implements the advanced node for <code>LinkedArrayList</code>.
+ * 
+ * @author  Rodion "rodde" Efremov
+ * @version 1.6
  */
 class LinkedArrayListNode2<E> extends LinkedArrayListNode<E> {
     
     /**
-     * Constructs a new, empty <code>LinkedArrayListNode2</code>.
+     * Constructs a new, empty {@code LinkedArrayListNode2}.
      * 
      * @param degree the degree of the new node.
      */

@@ -345,6 +345,41 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
     }
 
     /**
+     * Returns {@code true} if {@code o} is a {@link java.util.List}, it has the
+     * same size as this list, and its element sequence is equal to the element
+     * sequence of this list.
+     * 
+     * @param  o the object to test for equality.
+     * @return {@code true} only if this list and {@code o} are list with the 
+     *         same contents.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof List)) {
+            return false;
+        }
+        
+        if (o == this) {
+            return true;
+        }
+        
+        Iterator<E> thisIter = iterator();
+        Iterator<E> argIter = ((List<E>) o).iterator();
+        
+        while (argIter.hasNext()) {
+            if (!thisIter.hasNext()) {
+                return false;
+            }
+            
+            if (!Objects.equals(argIter.next(), thisIter.next())) {
+                return false;
+            }
+        }
+        
+        return !thisIter.hasNext();
+    }
+    
+    /**
      * Returns the element at index {@code index}.
      * 
      * @param  index the index of the desired element.
@@ -365,6 +400,20 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
      */
     public int getDegree() {
         return head.getDegree();
+    }
+    
+    /**
+     * Returns the hash code of this list. This routine was copied from 
+     * {@link java.util.ArrayList#hashCode()} for compatibility.
+     * 
+     * @return the hash code of this list.
+     */
+    @Override
+    public int hashCode() {
+        int hashCode = 1;
+        for (E e : this)
+            hashCode = 31*hashCode + (e==null ? 0 : e.hashCode());
+        return hashCode;
     }
     
     /**
@@ -417,6 +466,16 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
      * @throws IllegalStateException if this list is not healthy.
      */
     public void checkHealth() {
+        if (head == tail) {
+            // Only one node in this list. It is allowed to be empty.
+            if (!head.isHealthy()) {
+                throw new IllegalStateException(
+                        "The only node in this list is unhealthy.");
+            }
+            
+            return;
+        }
+        
         int s = 0;
         
         for (LinkedArrayListNode<E> node = head;
@@ -777,27 +836,12 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
     }
     
     /**
-     * Links the chain of nodes between <code>chainBegin</code> and 
-     * <code>chainEnd</code> between <code>predecessor</code> and
-     * <code>predecessor.next</code>.
+     * Links {@code node} between {@code predecessor} and 
+     * {@code predecessor.next}.
      * 
-     * @param predecessor the predecessor node of the entire chain.
-     * @param chainBegin  the first node of the chain to insert.
-     * @param chainEnd    the last node of the chain to insert.
+     * @param predecessor the predecessor node.
+     * @param node        the node to link.
      */
-    private void linkChain(LinkedArrayListNode<E> predecessor,
-                           LinkedArrayListNode<E> chainBegin,
-                           LinkedArrayListNode<E> chainEnd) {
-        chainEnd.next = predecessor.next;
-        predecessor.next.prev = chainEnd;
-        predecessor.next = chainBegin;
-        chainBegin.prev = predecessor;
-        
-        if (chainEnd.next == null) {
-            tail = chainEnd;
-        }
-    }
-    
     private void linkNode(LinkedArrayListNode<E> predecessor,
                           LinkedArrayListNode<E> node) {
         node.prev = predecessor;
