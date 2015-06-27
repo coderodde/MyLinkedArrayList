@@ -1023,7 +1023,74 @@ public class LinkedArrayListTest {
         System.out.println(test);
         System.out.println(list);
     }
+    
+    @Test 
+    public void testListIteratorAlternation() {
+        list.add(10);
+        ListIterator<Integer> iter = list.listIterator();
+        
+        assertFalse(iter.hasPrevious());
+        assertTrue(iter.hasNext());
+        assertEquals(-1, iter.previousIndex());
+        assertEquals(0, iter.nextIndex());
+        
+        assertEquals(new Integer(10), iter.next());
+        
+        assertTrue(iter.hasPrevious());
+        assertFalse(iter.hasNext());
+        assertEquals(0, iter.previousIndex());
+        assertEquals(1, iter.nextIndex());
+        
+        assertEquals(new Integer(10), iter.previous());
+        
+        assertFalse(iter.hasPrevious());
+        assertTrue(iter.hasNext());
+        assertEquals(-1, iter.previousIndex());
+        assertEquals(0, iter.nextIndex());
+    }
 
+    @Test
+    public void testListIteratorSet() {
+        for (int i = 0; i < 4; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        ListIterator<Integer> listIter = list.listIterator(2);
+        ListIterator<Integer> testIter = test.listIterator(2);
+        
+        assertEquals(1, listIter.previousIndex());
+        assertEquals(1, testIter.previousIndex());
+        
+        assertEquals(2, listIter.nextIndex());
+        assertEquals(2, testIter.nextIndex());
+        
+        eq();
+        
+        assertEquals(new Integer(2), listIter.next());
+        assertEquals(new Integer(2), testIter.next());
+        
+        eq();
+        
+        listIter.set(10);
+        testIter.set(10);
+        
+        assertTrue(listIter.hasNext());
+        assertTrue(testIter.hasNext());
+        
+        eq();
+        
+        listIter.set(25);
+        testIter.set(25);
+        
+        eq();
+        
+        listIter.set(29);
+        testIter.set(29);
+        
+        eq();
+    }
+    
     @Test
     public void testListIterator_int() {
         for (int i = 0; i < 20; ++i) {
@@ -1086,11 +1153,11 @@ public class LinkedArrayListTest {
 //        list.checkHealth();
     }
     
-    private void eq(LinkedArrayList<Integer> test, List<Integer> list) {
-        assertEquals(test.size(), list.size());
+    private void eq(LinkedArrayList<Integer> list, List<Integer> test) {
+        assertEquals(list.size(), test.size());
         
-        for (int i = 0; i < list.size(); ++i) {
-            assertTrue(Objects.equals(list.get(i), test.get(i)));
+        for (int i = 0; i < test.size(); ++i) {
+            assertTrue(Objects.equals(test.get(i), list.get(i)));
         }
         
         Iterator<Integer> itList = list.iterator();
@@ -1102,6 +1169,25 @@ public class LinkedArrayListTest {
         }
         
         assertFalse(itList.hasNext());
+        
+        ListIterator<Integer> itList2 = list.listIterator();
+        ListIterator<Integer> itTest2 = test.listIterator();
+        
+        while (itTest2.hasNext()) {
+            assertTrue(itList2.hasNext());
+            assertTrue(Objects.equals(itList2.next(), itTest2.next()));
+            assertEquals(itTest2.previousIndex(), itList2.previousIndex());
+            assertEquals(itTest2.nextIndex(), itList2.nextIndex());
+        }
+            
+        assertFalse(itList2.hasNext());
+        
+        while (itTest2.hasPrevious()) {
+            assertTrue(itList2.hasPrevious());
+            assertTrue(Objects.equals(itList2.previous(), itTest2.previous()));
+            assertEquals(itTest2.previousIndex(), itList2.previousIndex());
+            assertEquals(itTest2.nextIndex(), itList2.nextIndex());
+        }
 //        test.checkHealth();
     }
 }
