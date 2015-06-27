@@ -998,6 +998,117 @@ public class LinkedArrayListTest {
         fail("The list iterator should have thrown an exception.");
     }
     
+    @Test(expected = IllegalStateException.class)
+    public void testListIteratorThrowsOnRemovingSameElementTwice() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        ListIterator<Integer> iterList = list.listIterator(3);
+        ListIterator<Integer> iterTest = test.listIterator(3);
+        
+        iterList.next();
+        iterTest.next();
+        
+        iterTest.remove();
+        iterList.remove();
+        
+        eq();
+        
+        try {
+            iterTest.remove();
+            fail("ArrayList did not throw no removing an element twice.");
+        } catch (IllegalStateException ex) {
+            
+        }
+        
+        iterTest.remove();
+    }
+    
+    @Test
+    public void testListIterator_brute() {
+        long seed = System.currentTimeMillis();
+        Random random = new Random(seed);
+        
+        System.out.println("testListIterator_brute: seed = " + seed);
+        
+        for (int runId = 0; runId < 100; ++runId) {
+            for (int i = 0; i < 10; ++i) {
+                list.add(i);
+                test.add(i);
+            }
+
+            int operationAmount = random.nextInt(80) + 20;
+            int startIndex = random.nextInt(list.size() + 1);
+            
+            ListIterator<Integer> listIterator = list.listIterator(startIndex);
+            ListIterator<Integer> testIterator = test.listIterator(startIndex);
+            
+            assertEquals(listIterator.next(), testIterator.next());
+            
+            boolean lastAdd = false;
+            boolean lastRemove = false;
+            
+            for (int operation = 0; operation < operationAmount; ++operation) {
+                assertEquals(listIterator.previousIndex(), 
+                             testIterator.previousIndex());
+                
+                assertEquals(listIterator.nextIndex(),
+                             testIterator.nextIndex());
+                
+                assertEquals(listIterator.hasPrevious(), 
+                             testIterator.hasPrevious());
+                
+                assertEquals(listIterator.hasNext(), testIterator.hasNext());
+                
+                float chance = random.nextFloat();
+                
+                if (chance < 0.1f) {
+                    if (!lastRemove) {
+                        lastRemove = true;
+                        listIterator.remove();
+                        testIterator.remove();
+                    }
+                } else if (chance < 0.27f) {
+                    
+                }
+                
+                eq();
+            }
+            
+            list.clear();
+            test.clear();
+        }
+    }
+    
+    @Test
+    public void testListIteratorValuesAfterAdd() {
+        for (int i = 0; i < 5; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        ListIterator<Integer> listIter = list.listIterator();
+        ListIterator<Integer> testIter = test.listIterator();
+        
+        assertEquals(listIter.next(), testIter.next());
+        assertEquals(listIter.next(), testIter.next());
+        assertEquals(listIter.next(), testIter.next());
+        
+        listIter.add(29);
+        testIter.add(29);
+        
+        assertEquals(new Integer(3), listIter.next());
+        assertEquals(new Integer(3), testIter.next());
+        
+        assertEquals(new Integer(3), listIter.previous());
+        assertEquals(new Integer(3), testIter.previous());
+        
+        assertEquals(new Integer(29), testIter.previous());
+        assertEquals(new Integer(29), listIter.previous());
+    }
+    
     @Test
     public void testListIteratorAdd() {
         ListIterator<Integer> iterTest = test.listIterator();
@@ -1023,6 +1134,8 @@ public class LinkedArrayListTest {
         System.out.println(test);
         System.out.println(list);
     }
+    
+    
     
     @Test 
     public void testListIteratorAlternation() {
