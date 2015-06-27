@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Random;
 import org.junit.Test;
@@ -965,6 +966,62 @@ public class LinkedArrayListTest {
         }
         
         assertFalse(listIter.hasPrevious());
+    }
+    
+    @Test(expected = NoSuchElementException.class)
+    public void testListIteratorThrowsOnIterationOverEmptyListBackward() {
+        ListIterator<Integer> iter = list.listIterator();
+        
+        assertEquals(-1, iter.previousIndex());
+        assertEquals(0, iter.nextIndex());
+        
+        assertFalse(iter.hasPrevious());
+        assertFalse(iter.hasNext());
+        
+        iter.previous();
+        
+        fail("The list iterator should have thrown an exception.");
+    }
+    
+    @Test(expected = NoSuchElementException.class)
+    public void testListIteratorThrowsOnIterationOverEmptyListForward() {
+        ListIterator<Integer> iter = list.listIterator();
+        
+        assertEquals(-1, iter.previousIndex());
+        assertEquals(0, iter.nextIndex());
+        
+        assertFalse(iter.hasPrevious());
+        assertFalse(iter.hasNext());
+        
+        iter.next();
+        
+        fail("The list iterator should have thrown an exception.");
+    }
+    
+    @Test
+    public void testListIteratorAdd() {
+        ListIterator<Integer> iterTest = test.listIterator();
+        ListIterator<Integer> iterList = list.listIterator();
+        
+        for (int i = 0; i < 11; ++i) {
+            iterTest.add(i);
+            
+            System.out.println(i);
+            iterList.add(i);
+            
+            if (i == 5) {
+                iterTest.previous();
+                iterTest.remove();
+                
+                iterList.previous();
+                iterList.remove();
+            }
+        }
+        
+        eq();
+        
+        System.out.println(test);
+        System.out.println(list);
     }
 
     @Test

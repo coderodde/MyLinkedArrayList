@@ -957,7 +957,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
 
         @Override
         public E next() {
-            checkCoModification();
+            checkForConcurrentModification();
             
             if (iterated == maxElements) {
                 throw new NoSuchElementException("The iterator exceeded.");
@@ -997,7 +997,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
                 throw new IllegalStateException("No current element.");
             }
             
-            checkCoModification();
+            checkForConcurrentModification();
             lastRemoved = true;
             --size;
             
@@ -1011,7 +1011,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             }
         }
      
-        private void checkCoModification() {
+        private void checkForConcurrentModification() {
             if (expectedModCount != modCount) {
                 throw new ConcurrentModificationException();
             }
@@ -1039,6 +1039,33 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         private LinkedArrayListNode<E> currentNode;
         
         /**
+         * Caches the mod count of the parent list.
+         */
+        private long expectedModCount = modCount;
+        
+        /**
+         * The local cursor of the element iterated last time.
+         */
+        private int lastLocalCursor = -1;
+        
+        /**
+         * The node of the element iterated last time.
+         */
+        private LinkedArrayListNode<E> lastNode;
+        
+        /**
+         * Indicates whether the very last operation was an addition operation
+         * {@code add(E)}.
+         */
+        private boolean lastOperationWasAdd = false;
+        
+        /**
+         * Indicates whether the very last operation was a removal operation
+         * {@code remove()}.
+         */
+        private boolean lastOperationWasRemove = false;
+        
+        /**
          * Constructs this {@code ListIterator} and sets its cursors position.
          * 
          * @param index the amount of elements from head to skip.
@@ -1064,15 +1091,23 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
 
         @Override
         public E next() {
+            checkForConcurrentModification();
+            
             if (cursor == size) {
                 throw new NoSuchElementException(
                         "The forward iteration exceeded.");
             }
         
+            lastLocalCursor = localCursor;
+            lastNode = currentNode;
+            
             if (localCursor == currentNode.size()) {
                 localCursor = 0;
                 currentNode = currentNode.next;
             }
+            
+            lastOperationWasAdd = false;
+            lastOperationWasRemove = false;
             
             ++cursor;
             return currentNode.get(localCursor++);
@@ -1085,15 +1120,23 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
 
         @Override
         public E previous() {
+            checkForConcurrentModification();
+            
             if (cursor == 0) {
                 throw new NoSuchElementException(
                         "The backward iteration exceeded.");
             }
             
+            lastLocalCursor = localCursor;
+            lastNode = currentNode;
+            
             if (localCursor == 0) {
                 currentNode = currentNode.prev;
                 localCursor = currentNode.size;
             }
+            
+            lastOperationWasAdd = false;
+            lastOperationWasRemove = false;
             
             --cursor;
             return currentNode.get(--localCursor);
@@ -1110,18 +1153,73 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         }
 
         @Override
-        public void remove() {
+        public void add(E e) {
+            lastOperationWasAdd = true;
             
+            if (localCursor == currentNode.getDegree()) {
+                LinkedArrayListNode<E> newnode = currentNode.spawn();
+                newnode.next = currentNode.next;
+                currentNode.next = newnode;
+                newnode.prev = currentNode;
+                
+                if (newnode.next == null) {
+                    tail = newnode;
+                }
+                
+                localCursor = 0;
+                currentNode = newnode;
+            }
+            
+            currentNode.insert(localCursor++, e);
+            expectedModCount = ++modCount;
+            ++cursor;
+            ++size;
         }
 
         @Override
         public void set(E e) {
-        
+            if (lastOperationWasAdd) {
+                throw new IllegalStateException(
+                        "next() or previous() was not the last operation.");
+            }
+            
+            if (lastOperationWasRemove) {
+                throw new IllegalStateException(
+                        "next() or previous() was not the last operation.");
+            }
+            
+            checkForConcurrentModification();
+            
+            lastNode.set(lastLocalCursor, e);
         }
 
         @Override
-        public void add(E e) {
+        public void remove() {
+            if (lastLocalCursor == -1) {
+                throw new IllegalStateException(
+                        "There is no current element to remove.");
+            }
+            
+            if (lastOperationWasAdd) {
+                throw new IllegalStateException(
+                        "The last operation was add().");
+            }
+            
+            if (lastOperationWasRemove) {
+                throw new IllegalStateException(
+                        "The last operation was remove(). Removing an " +
+                        "element for the second time.");
+            }
+            
+            lastNode.removeAt(lastLocalCursor);
+            --size;
+            expectedModCount = ++modCount;
+        }
         
+        private void checkForConcurrentModification() {
+            if (modCount != expectedModCount) {
+                throw new ConcurrentModificationException();
+            }
         }
     }
 }
