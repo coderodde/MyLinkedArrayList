@@ -1065,6 +1065,9 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
          */
         private boolean lastOperationWasRemove = false;
         
+        
+        private boolean lastOperationWasNext = false;
+        
         /**
          * Constructs this {@code ListIterator} and sets its cursors position.
          * 
@@ -1108,6 +1111,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             
             lastOperationWasAdd = false;
             lastOperationWasRemove = false;
+            lastOperationWasNext = true;
             
             ++cursor;
             return currentNode.get(localCursor++);
@@ -1127,9 +1131,6 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
                         "The backward iteration exceeded.");
             }
             
-            lastLocalCursor = localCursor;
-            lastNode = currentNode;
-            
             if (localCursor == 0) {
                 currentNode = currentNode.prev;
                 localCursor = currentNode.size;
@@ -1137,9 +1138,12 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             
             lastOperationWasAdd = false;
             lastOperationWasRemove = false;
+            lastOperationWasNext = false;
             
             --cursor;
-            return currentNode.get(--localCursor);
+            lastLocalCursor = --localCursor;
+            lastNode = currentNode;
+            return currentNode.get(localCursor);
         }
 
         @Override
@@ -1154,16 +1158,16 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
 
         @Override
         public void add(E e) {
-            lastOperationWasAdd = true;
-            
             if (localCursor == currentNode.getDegree()) {
                 LinkedArrayListNode<E> newnode = currentNode.spawn();
                 newnode.next = currentNode.next;
-                currentNode.next = newnode;
                 newnode.prev = currentNode;
+                currentNode.next = newnode;
                 
                 if (newnode.next == null) {
                     tail = newnode;
+                } else {
+                    newnode.next.prev = newnode;
                 }
                 
                 localCursor = 0;
@@ -1172,6 +1176,8 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             
             currentNode.insert(localCursor++, e);
             expectedModCount = ++modCount;
+            lastOperationWasAdd = true;
+            
             ++cursor;
             ++size;
         }
@@ -1212,10 +1218,24 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             }
             
             lastNode.removeAt(lastLocalCursor);
-            --size;
             expectedModCount = ++modCount;
+            lastOperationWasRemove = true;
+            
+            if (cursor > --size) {
+                cursor = size;
+            }
+            
+            if (lastOperationWasNext) {
+                --cursor;
+            }
         }
         
+        /**
+         * Checks for concurrent modification.
+         * 
+         * @throws ConcurrentModificationException if the parent list was
+         *         modified while iterating over it.
+         */
         private void checkForConcurrentModification() {
             if (modCount != expectedModCount) {
                 throw new ConcurrentModificationException();

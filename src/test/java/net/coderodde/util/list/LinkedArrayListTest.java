@@ -1028,7 +1028,7 @@ public class LinkedArrayListTest {
     
     @Test
     public void testListIterator_brute() {
-        long seed = System.currentTimeMillis();
+        long seed = 1435570923173L;//System.currentTimeMillis();
         Random random = new Random(seed);
         
         System.out.println("testListIterator_brute: seed = " + seed);
@@ -1045,33 +1045,79 @@ public class LinkedArrayListTest {
             ListIterator<Integer> listIterator = list.listIterator(startIndex);
             ListIterator<Integer> testIterator = test.listIterator(startIndex);
             
-            assertEquals(listIterator.next(), testIterator.next());
-            
             boolean lastAdd = false;
             boolean lastRemove = false;
+            boolean lastNextOrPrev = false;
             
             for (int operation = 0; operation < operationAmount; ++operation) {
-                assertEquals(listIterator.previousIndex(), 
-                             testIterator.previousIndex());
+                System.out.print("runId = " + runId + ", operation = " + operation + ": ");
                 
-                assertEquals(listIterator.nextIndex(),
-                             testIterator.nextIndex());
+                assertEquals(testIterator.previousIndex(), 
+                             listIterator.previousIndex());
                 
-                assertEquals(listIterator.hasPrevious(), 
-                             testIterator.hasPrevious());
+                assertEquals(testIterator.nextIndex(),
+                             listIterator.nextIndex());
                 
-                assertEquals(listIterator.hasNext(), testIterator.hasNext());
+                assertEquals(testIterator.hasPrevious(), 
+                             listIterator.hasPrevious());
+                
+                assertEquals(testIterator.hasNext(), listIterator.hasNext());
                 
                 float chance = random.nextFloat();
                 
                 if (chance < 0.1f) {
+                    // Try remove.
                     if (!lastRemove) {
                         lastRemove = true;
-                        listIterator.remove();
+                        lastNextOrPrev = false;
+                        
                         testIterator.remove();
+                        listIterator.remove();
+                        System.out.println("remove()");
                     }
                 } else if (chance < 0.27f) {
+                    // Try add.
+                    lastAdd = true;
+                    lastNextOrPrev = false;
                     
+                    Integer tmp = random.nextInt();
+                    listIterator.add(tmp);
+                    testIterator.add(tmp);
+                    System.out.println("add()");
+                } else if (chance < 0.35f) {
+                    // Try set.
+                    if (lastNextOrPrev) {
+                        Integer tmp = random.nextInt();
+                        listIterator.set(tmp);
+                        testIterator.set(tmp);
+                        System.out.println("set()");
+                    }
+                } else if (chance < 0.67f) {
+                    // Try next.
+                    assertEquals(testIterator.hasNext(), 
+                                 listIterator.hasNext());
+                    
+                    if (listIterator.hasNext()) {
+                        assertEquals(testIterator.next(), listIterator.next());
+                        lastNextOrPrev = true;
+                        lastRemove = false;
+                        lastAdd = false;
+                        System.out.println("next()");
+                    }
+                    
+                } else {
+                    // Try previous.
+                    assertEquals(testIterator.hasPrevious(),
+                                 listIterator.hasPrevious());
+                    
+                    if (listIterator.hasPrevious()) {
+                        assertEquals(testIterator.previous(),
+                                     listIterator.previous());
+                        lastNextOrPrev = true;
+                        lastRemove = false;
+                        lastAdd = false;
+                        System.out.println("previous()");
+                    }
                 }
                 
                 eq();
@@ -1107,6 +1153,14 @@ public class LinkedArrayListTest {
         
         assertEquals(new Integer(29), testIter.previous());
         assertEquals(new Integer(29), listIter.previous());
+        
+        assertEquals(new Integer(2), testIter.previous());
+        assertEquals(new Integer(2), listIter.previous());
+        
+        assertEquals(testIter.previousIndex(), listIter.previousIndex());
+        assertEquals(testIter.nextIndex(), listIter.nextIndex());
+        
+        eq();
     }
     
     @Test
@@ -1116,8 +1170,6 @@ public class LinkedArrayListTest {
         
         for (int i = 0; i < 11; ++i) {
             iterTest.add(i);
-            
-            System.out.println(i);
             iterList.add(i);
             
             if (i == 5) {
