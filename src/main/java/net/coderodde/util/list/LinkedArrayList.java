@@ -1065,7 +1065,6 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
          */
         private boolean lastOperationWasRemove = false;
         
-        
         private boolean lastOperationWasNext = false;
         
         /**
@@ -1223,10 +1222,14 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             
             if (cursor > --size) {
                 cursor = size;
+                System.out.println("cursor > --size");
             }
             
             if (lastOperationWasNext) {
+                // The cursor moves one position to the left if the last of 
+                // 'next()' and 'prev()' was 'next()'.
                 --cursor;
+                --localCursor;
             }
         }
         

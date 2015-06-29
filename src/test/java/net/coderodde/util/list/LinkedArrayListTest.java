@@ -1129,6 +1129,30 @@ public class LinkedArrayListTest {
     }
     
     @Test
+    public void testTinyListIterator() {
+        for (int i = 0; i < 5; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        ListIterator<Integer> listIter = list.listIterator();
+        ListIterator<Integer> testIter = test.listIterator();
+        
+        for (int i = 0; i < 3; ++i) {
+            assertEquals(testIter.next(), listIter.next());
+        }
+        
+        listIter.remove();
+        testIter.remove();
+        
+        eq();
+        
+        assertEquals(testIter.previous(), listIter.previous());
+        
+        eq();
+    }
+    
+    @Test
     public void testListIteratorValuesAfterAdd() {
         for (int i = 0; i < 5; ++i) {
             list.add(i);
