@@ -203,7 +203,7 @@ public class LinkedArrayListTest {
     
     @Test
     public void testIteratorBruteForce() {
-        final long mySeed = 1434648057381L;
+        final long mySeed = 0L;
         final long seed = mySeed != 0L ? mySeed : System.currentTimeMillis();
         System.out.println("testIteratorBruteForce: seed = " + seed);
         Random random = new Random(seed);
@@ -223,8 +223,8 @@ public class LinkedArrayListTest {
             for (int j = 0; j < size; ++j) {
                 Integer element = random.nextInt(100) - 50;
                 
-                list.add(element);
                 test.add(element);
+                list.add(element);
             }
             
             // Get the iterators.
@@ -1073,6 +1073,10 @@ public class LinkedArrayListTest {
                         
                         listIterator.remove();
                         testIterator.remove();
+                        
+                        System.out.println("DEBUG: " + listIterator.hasNext() +
+                                           testIterator.hasNext());
+                        
                         System.out.println("remove()");
                     }
                 } else if (chance < 0.27f) {

@@ -1239,14 +1239,25 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             if (lastNode.isEmpty()) {
                 System.out.println("lastNode.isEmpty() is true.");
                 unlinkNode(lastNode);
+                
+//                if (!lastOperationWasNext) {
+//                    currentNode = lastNode.prev;
+//                    localCursor = currentNode.size();
+//                } else {
+//                    currentNode = lastNode.next;
+//                    localCursor = 0;
+//                }
             }
+            
+            boolean cursorUpdated = false;
             
             if (cursor > --size) {
                 cursor = size;
+                cursorUpdated = true;
                 System.out.println("cursor > --size");
             }
             
-            if (lastOperationWasNext) {
+            if (lastOperationWasNext && !cursorUpdated) {
                 // The cursor moves one position to the left if the last of 
                 // 'next()' and 'prev()' was 'next()'.
                 --cursor;
