@@ -1067,12 +1067,12 @@ public class LinkedArrayListTest {
                 
                 if (chance < 0.1f) {
                     // Try remove.
-                    if (!lastRemove) {
+                    if (!lastRemove && !lastAdd) {
                         lastRemove = true;
                         lastNextOrPrev = false;
                         
-                        testIterator.remove();
                         listIterator.remove();
+                        testIterator.remove();
                         System.out.println("remove()");
                     }
                 } else if (chance < 0.27f) {
@@ -1118,6 +1118,11 @@ public class LinkedArrayListTest {
                         lastAdd = false;
                         System.out.println("previous()");
                     }
+                }
+                
+                if (runId == 1 && operation == 0) {
+                    System.out.println(list);
+                    System.out.println(test);
                 }
                 
                 eq();
@@ -1335,7 +1340,10 @@ public class LinkedArrayListTest {
         
         while (itTest.hasNext()) {
             assertTrue(itList.hasNext());
-            assertTrue(Objects.equals(itTest.next(), itList.next()));
+            Integer testInt = itTest.next();
+            Integer listInt = itList.next();
+            assertEquals(testInt, listInt);
+//            assertEquals(itTest.next(), itList.next());
         }
         
         assertFalse(itList.hasNext());

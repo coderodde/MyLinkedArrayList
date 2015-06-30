@@ -1100,13 +1100,23 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
                         "The forward iteration exceeded.");
             }
         
-            lastLocalCursor = localCursor;
-            lastNode = currentNode;
+//            lastLocalCursor = localCursor;
+//            lastNode = currentNode;
+//            
+//            if (localCursor == currentNode.size()) {
+//                localCursor = 0;
+//                currentNode = currentNode.next;
+//            }
             
+            //// Added
             if (localCursor == currentNode.size()) {
                 localCursor = 0;
                 currentNode = currentNode.next;
             }
+            
+            lastLocalCursor = localCursor;
+            lastNode = currentNode;
+            //// Added
             
             lastOperationWasAdd = false;
             lastOperationWasRemove = false;
@@ -1173,7 +1183,13 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
                 currentNode = newnode;
             }
             
-            currentNode.insert(localCursor++, e);
+            LinkedArrayListNode<E> newnode = 
+                    currentNode.insert(localCursor++, e);
+            
+            if (newnode != null) {
+                linkNode(currentNode, newnode);
+            }
+            
             expectedModCount = ++modCount;
             lastOperationWasAdd = true;
             
@@ -1219,6 +1235,11 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             lastNode.removeAt(lastLocalCursor);
             expectedModCount = ++modCount;
             lastOperationWasRemove = true;
+            
+            if (lastNode.isEmpty()) {
+                System.out.println("lastNode.isEmpty() is true.");
+                unlinkNode(lastNode);
+            }
             
             if (cursor > --size) {
                 cursor = size;
