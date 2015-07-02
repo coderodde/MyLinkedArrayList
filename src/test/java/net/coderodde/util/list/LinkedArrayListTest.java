@@ -1252,8 +1252,6 @@ public class LinkedArrayListTest {
         System.out.println(list);
     }
     
-    
-    
     @Test 
     public void testListIteratorAlternation() {
         list.add(10);
@@ -1277,6 +1275,45 @@ public class LinkedArrayListTest {
         assertTrue(iter.hasNext());
         assertEquals(-1, iter.previousIndex());
         assertEquals(0, iter.nextIndex());
+        
+        assertEquals(new Integer(10), iter.next());
+        assertEquals(new Integer(10), iter.previous());
+        assertEquals(new Integer(10), iter.next());
+        assertEquals(new Integer(10), iter.previous());
+    }
+    
+    @Test
+    public void testListIteratorIteration() {
+        long seed = System.currentTimeMillis();
+        System.out.println("testListIteratorIteration: seed = " + seed);
+        
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        Random random = new Random(seed);
+        int startIndex = random.nextInt(list.size() + 1); 
+        
+        ListIterator<Integer> listIter = list.listIterator(startIndex);
+        ListIterator<Integer> testIter = test.listIterator(startIndex);
+        
+        for (int ops = random.nextInt(100) + 50; ops > 0; --ops) {
+            assertEquals(listIter.hasNext(), testIter.hasNext());
+            assertEquals(listIter.hasPrevious(), testIter.hasPrevious());
+            assertEquals(listIter.previousIndex(), testIter.previousIndex());
+            assertEquals(listIter.nextIndex(), testIter.nextIndex());
+            
+            if (random.nextFloat() < 0.5) {
+                if (testIter.hasNext()) {
+                    assertEquals(testIter.next(), listIter.next());
+                }
+            } else {
+                if (testIter.hasPrevious()) {
+                    assertEquals(testIter.previous(), listIter.previous());
+                }
+            }
+        }
     }
 
 //    @Test

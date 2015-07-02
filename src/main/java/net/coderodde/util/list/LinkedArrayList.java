@@ -1330,14 +1330,13 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
                         "Backward iteration exceeded.");
             }
             
-            lastNodeIndex = --localCursor;
-            lastIteratedNode = currentNode;
-            
-            if (localCursor == -1) {
+            if (localCursor == 0) {
                 currentNode = currentNode.prev;
                 localCursor = currentNode.size;
             }
             
+            lastNodeIndex = --localCursor;
+            lastIteratedNode = currentNode;
             return currentNode.get(localCursor);
         }
 
