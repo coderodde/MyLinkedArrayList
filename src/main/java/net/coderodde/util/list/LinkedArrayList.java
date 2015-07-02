@@ -1300,6 +1300,12 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             this.expectedModCount = modCount;
             this.currentNode = head;
             
+            if (globalCursor == size) {
+                currentNode = tail;
+                localCursor = currentNode.size();
+                return;
+            }
+            
             for (int i = 0; i < globalCursor; ++i) {
                 if (++localCursor == currentNode.size()) {
                     currentNode = currentNode.next;
@@ -1320,9 +1326,6 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             if (globalCursor == size) {
                 throw new NoSuchElementException("Forward iteration exceeded.");
             }
-            
-//            lastIteratedNode = currentNode;
-//            lastNodeIndex = localCursor;
             
             if (localCursor == currentNode.size()) {
                 currentNode = currentNode.next;
@@ -1376,14 +1379,14 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
 
         @Override
         public void add(E e) {
-//            if (isEmpty()) {
-//                head.insert(0, e);
-//                globalCursor = 1;
-//                localCursor = 1;
-//                expectedModCount = ++modCount;
-//                ++size;
-//                return;
-//            }
+            if (isEmpty()) {
+                head.insert(0, e);
+                globalCursor = 1;
+                localCursor = 1;
+                expectedModCount = ++modCount;
+                ++size;
+                return;
+            }
             
             if (localCursor == currentNode.size()) {
                 if (currentNode.next == null) {
@@ -1435,7 +1438,6 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             }
             
             checkForConcurrentModification();
-            
             lastIteratedNode.removeAt(lastNodeIndex);
             
             if (lastIteratedNode.isEmpty() 
@@ -1443,19 +1445,17 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
                 // Do not remove 'lastIteratedNode' if it is the only node of
                 // this list.
                 unlinkNode(lastIteratedNode);
-                
-                if (lastIteratedNode.prev == null) {
-                    System.out.println("Hey hoe!");
-                    System.exit(0);
-                }
-                
                 currentNode = lastIteratedNode.prev;
                 localCursor = currentNode.size();
-            } 
+            }
             
             if (lastOperationWasNext) {
-                --localCursor;
                 --globalCursor;
+                
+                if (!lastIteratedNode.isEmpty()) {
+                    --localCursor;
+                    
+                }
             }
             
             expectedModCount = modCount;
