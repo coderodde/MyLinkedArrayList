@@ -1228,7 +1228,7 @@ public class LinkedArrayListTest {
         eq();
     }
     
-//    @Test
+    @Test
     public void testListIteratorAdd() {
         ListIterator<Integer> iterTest = test.listIterator();
         ListIterator<Integer> iterList = list.listIterator();
@@ -1436,6 +1436,39 @@ public class LinkedArrayListTest {
         assertEquals(new Integer(0), iter.previous());
         
         iter.previous();
+    }
+    
+    @Test
+    public void testListIteratorAdd0() {
+        for (int i = 0; i < 10; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        ListIterator<Integer> testIter = test.listIterator();
+        ListIterator<Integer> listIter = list.listIterator();
+        
+        assertEquals(testIter.next(), listIter.next());
+        assertEquals(testIter.next(), listIter.next());
+        assertEquals(testIter.previous(), listIter.previous());
+        
+        testIter.remove();
+        listIter.remove();
+        
+        testIter.add(10);
+        testIter.add(11);
+        testIter.add(12);
+        testIter.add(14);
+        
+        listIter.add(10);
+        listIter.add(11);
+        listIter.add(12);
+        listIter.add(14);
+        
+        System.out.println(test);
+        System.out.println(list);
+        
+        eq();
     }
     
     @Test

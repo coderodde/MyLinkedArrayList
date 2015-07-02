@@ -1277,7 +1277,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
          * Caches the index of element that was most recently returned by 
          * {@code next} and {@code prev}.
          */
-        private int lastNodeIndex;
+        private int lastNodeIndex = -1;
         
         /**
          * Caches whether the last operation was {@link #previous()} or 
@@ -1373,8 +1373,37 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
 
         @Override
         public void add(E e) {
-            lastOperationWasNextOrPrev = false;
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            if (isEmpty()) {
+                head.insert(0, e);
+                globalCursor = 1;
+                localCursor = 1;
+                expectedModCount = ++modCount;
+                ++size;
+                return;
+            }
+            
+            if (localCursor == currentNode.size()) {
+                if (currentNode.next == null) {
+                    LinkedArrayListNode<E> newnode = head.spawn();
+                    linkNode(currentNode, newnode);
+                }
+                
+                localCursor = 0;
+                currentNode = currentNode.next;
+            }
+            
+            // next() returns the element right after the localCursor
+            // previous() returns the element right before the localCursor
+            LinkedArrayListNode<E> newnode = currentNode.insert(localCursor, e);
+            
+            if (newnode != null) {
+                linkNode(currentNode, newnode);
+            } 
+            
+            size++;
+            localCursor++;
+            globalCursor++;
+            expectedModCount = ++modCount;
         }
 
         @Override
