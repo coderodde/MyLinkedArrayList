@@ -1315,8 +1315,130 @@ public class LinkedArrayListTest {
             }
         }
     }
+    
+    @Test(expected = IllegalStateException.class)
+    public void testListIteratorThrowsOnRemoveWithNoCursor() {
+        for (int i = 0; i < 10; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        ListIterator<Integer> iter = list.listIterator();
+        
+        iter.remove();
+    }
+    
+    @Test(expected = IllegalStateException.class)
+    public void testListIteratorThrowsOnRemovingTwice() {
+        for (int i = 0; i < 10; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        ListIterator<Integer> iter = list.listIterator();
+        
+        iter.next();
+        iter.next();
+        iter.next();
+        iter.previous();
+        
+        iter.remove();
+        iter.remove();
+    }
+    
+    @Test
+    public void testListIteratorRemove() {
+        for (int i = 0; i < 10; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        ListIterator<Integer> testIter = test.listIterator();
+        ListIterator<Integer> listIter = list.listIterator();
+        
+        for (int i = 0; i < 5; ++i) {
+            assertEquals(testIter.hasPrevious(), listIter.hasPrevious());
+            assertEquals(testIter.hasNext(), listIter.hasNext());
+            assertEquals(testIter.previousIndex(), listIter.previousIndex());
+            assertEquals(testIter.nextIndex(), listIter.nextIndex());
+            
+            assertEquals(testIter.next(), listIter.next());
+        }
+        
+        testIter.remove();
+        listIter.remove();
+        
+        eq();
+        
+        for (int i = 0; i < 2; ++i) {
+            assertEquals(testIter.hasPrevious(), listIter.hasPrevious());
+            assertEquals(testIter.hasNext(), listIter.hasNext());
+            assertEquals(testIter.previousIndex(), listIter.previousIndex());
+            assertEquals(testIter.nextIndex(), listIter.nextIndex());
+            
+            assertEquals(testIter.previous(), listIter.previous());
+        }
+        
+        testIter.remove();
+        listIter.remove();
+        
+        eq();
+        
+        assertEquals(testIter.hasPrevious(), listIter.hasPrevious());
+        assertEquals(testIter.hasNext(), listIter.hasNext());
+        assertEquals(testIter.previousIndex(), listIter.previousIndex());
+        assertEquals(testIter.nextIndex(), listIter.nextIndex());
 
-//    @Test
+        assertEquals(testIter.previous(), listIter.previous());
+        assertEquals(testIter.next(), listIter.next());
+        
+        eq();
+    }
+    
+    @Test(expected = IllegalStateException.class)
+    public void testListIteratorSetThrowsOnBegin() {
+        for (int i = 0; i < 5; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        list.listIterator().set(0);
+    }
+    
+    @Test(expected = IllegalStateException.class) 
+    public void testListIteratorThrowsOnSetAfterRemove() {
+        for (int i = 0; i < 5; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        ListIterator<Integer> iter = list.listIterator();
+        
+        iter.next();
+        iter.next();
+        
+        iter.remove();
+        iter.set(100);
+    }
+    
+    @Test(expected = NoSuchElementException.class)
+    public void testListIteratorThrowsOnExceedingElements() {
+        for (int i = 0; i < 5; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        ListIterator<Integer> iter = test.listIterator(2);
+        
+        assertTrue(iter.hasPrevious());
+        assertEquals(new Integer(1), iter.previous());
+        assertTrue(iter.hasPrevious());
+        assertEquals(new Integer(0), iter.previous());
+        
+        iter.previous();
+    }
+    
+    @Test
     public void testListIteratorSet() {
         for (int i = 0; i < 4; ++i) {
             list.add(i);
