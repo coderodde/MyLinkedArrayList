@@ -951,7 +951,11 @@ public class LinkedArrayListTest {
                                  listIterator.hasNext());
                     
                     if (listIterator.hasNext()) {
-                        assertEquals(testIterator.next(), listIterator.next());
+                        Integer testInt = testIterator.next();
+                        Integer listInt = listIterator.next();
+                        
+                        assertEquals(testInt, listInt);
+                        
                         lastNextOrPrev = true;
                         lastRemove = false;
                         lastAdd = false;
