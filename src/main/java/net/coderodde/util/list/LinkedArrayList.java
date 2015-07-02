@@ -1022,247 +1022,348 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
      * Implements the {@code #ListIterator} of this list.
      */
     private class AdvancedLinkedArrayListIterator implements ListIterator<E> {
-
-        /**
-         * Used for global navigation.
-         */
-        private int cursor;
+//
+//        /**
+//         * Used for global navigation.
+//         */
+//        private int cursor;
+//        
+//        /**
+//         * Used for local navigation within a node.
+//         */
+//        private int localCursor;
+//        
+//        /**
+//         * Caches the current node.
+//         */
+//        private LinkedArrayListNode<E> currentNode;
+//        
+//        /**
+//         * Caches the mod count of the parent list.
+//         */
+//        private long expectedModCount = modCount;
+//        
+//        /**
+//         * The local cursor of the element iterated last time.
+//         */
+//        private int lastLocalCursor = -1;
+//        
+//        /**
+//         * The node of the element iterated last time.
+//         */
+//        private LinkedArrayListNode<E> lastNode;
+//        
+//        /**
+//         * Indicates whether the very last operation was an addition operation
+//         * {@code add(E)}.
+//         */
+//        private boolean lastOperationWasAdd = false;
+//        
+//        /**
+//         * Indicates whether the very last operation was a removal operation
+//         * {@code remove()}.
+//         */
+//        private boolean lastOperationWasRemove = false;
+//        
+//        private boolean lastOperationWasNext = false;
+//        
+//        /**
+//         * Constructs this {@code ListIterator} and sets its cursors position.
+//         * 
+//         * @param index the amount of elements from head to skip.
+//         */
+//        AdvancedLinkedArrayListIterator(int index) {
+//            checkIndexForAddition(index);
+//            cursor = index;
+//            
+//            if (index == size) {
+//                localCursor = tail.size();
+//                currentNode = tail;
+//            } else {
+//                searchElement(index);
+//                currentNode = searchNode;
+//                localCursor = searchLocalIndex;
+//            }
+//        }
+//        
+//        @Override
+//        public boolean hasNext() {
+//            return cursor != size;
+//        }
+//
+//        @Override
+//        public E next() {
+//            checkForConcurrentModification();
+//            
+//            if (cursor == size) {
+//                throw new NoSuchElementException(
+//                        "The forward iteration exceeded.");
+//            }
+//        
+////            lastLocalCursor = localCursor;
+////            lastNode = currentNode;
+////            
+////            if (localCursor == currentNode.size()) {
+////                localCursor = 0;
+////                currentNode = currentNode.next;
+////            }
+//            
+//            //// Added
+//            if (localCursor == currentNode.size()) {
+//                localCursor = 0;
+//                currentNode = currentNode.next;
+//            }
+//            
+//            lastLocalCursor = localCursor;
+//            lastNode = currentNode;
+//            //// Added
+//            
+//            lastOperationWasAdd = false;
+//            lastOperationWasRemove = false;
+//            lastOperationWasNext = true;
+//            
+//            ++cursor;
+//            return currentNode.get(localCursor++);
+//        }
+//
+//        @Override
+//        public boolean hasPrevious() {
+//            return cursor != 0;
+//        }
+//
+//        @Override
+//        public E previous() {
+//            checkForConcurrentModification();
+//            
+//            if (cursor == 0) {
+//                throw new NoSuchElementException(
+//                        "The backward iteration exceeded.");
+//            }
+//            
+//            if (localCursor == 0) {
+//                currentNode = currentNode.prev;
+//                localCursor = currentNode.size;
+//            }
+//            
+//            lastOperationWasAdd = false;
+//            lastOperationWasRemove = false;
+//            lastOperationWasNext = false;
+//            
+//            --cursor;
+//            lastLocalCursor = --localCursor;
+//            lastNode = currentNode;
+//            return currentNode.get(localCursor);
+//        }
+//
+//        @Override
+//        public int nextIndex() {
+//            return cursor;
+//        }
+//
+//        @Override
+//        public int previousIndex() {
+//            return cursor - 1;
+//        }
+//
+//        @Override
+//        public void add(E e) {
+//            if (localCursor == currentNode.getDegree()) {
+//                LinkedArrayListNode<E> newnode = currentNode.spawn();
+//                newnode.next = currentNode.next;
+//                newnode.prev = currentNode;
+//                currentNode.next = newnode;
+//                
+//                if (newnode.next == null) {
+//                    tail = newnode;
+//                } else {
+//                    newnode.next.prev = newnode;
+//                }
+//                
+//                localCursor = 0;
+//                currentNode = newnode;
+//            }
+//            
+//            LinkedArrayListNode<E> newnode = 
+//                    currentNode.insert(localCursor++, e);
+//            
+//            if (newnode != null) {
+//                linkNode(currentNode, newnode);
+//            }
+//            
+//            expectedModCount = ++modCount;
+//            lastOperationWasAdd = true;
+//            
+//            ++cursor;
+//            ++size;
+//        }
+//
+//        @Override
+//        public void set(E e) {
+//            if (lastOperationWasAdd) {
+//                throw new IllegalStateException(
+//                        "next() or previous() was not the last operation.");
+//            }
+//            
+//            if (lastOperationWasRemove) {
+//                throw new IllegalStateException(
+//                        "next() or previous() was not the last operation.");
+//            }
+//            
+//            checkForConcurrentModification();
+//            
+//            lastNode.set(lastLocalCursor, e);
+//        }
+//
+//        @Override
+//        public void remove() {
+//            if (lastLocalCursor == -1) {
+//                throw new IllegalStateException(
+//                        "There is no current element to remove.");
+//            }
+//            
+//            if (lastOperationWasAdd) {
+//                throw new IllegalStateException(
+//                        "The last operation was add().");
+//            }
+//            
+//            if (lastOperationWasRemove) {
+//                throw new IllegalStateException(
+//                        "The last operation was remove(). Removing an " +
+//                        "element for the second time.");
+//            }
+//            
+//            lastOperationWasRemove = true;
+//            lastNode.removeAt(lastLocalCursor);
+//            
+//            if (lastNode.isEmpty()) {
+//                unlinkNode(lastNode);
+//                currentNode = lastNode.prev;
+//                localCursor = currentNode.size();
+//            }
+//            
+//            if (lastOperationWasNext) {
+//                --cursor;
+//                --localCursor;
+//            }
+//        }
         
         /**
-         * Used for local navigation within a node.
+         * Caches the modification count of the owner {@code LinkedArrayList}.
+         */
+        private long expectedModCount;
+        
+        /**
+         * The global cursor in the entire list.
+         */
+        private int globalCursor;
+        
+        /**
+         * The local cursor in particular node.
          */
         private int localCursor;
         
         /**
-         * Caches the current node.
+         * Caches the current node being iterated.
          */
         private LinkedArrayListNode<E> currentNode;
         
         /**
-         * Caches the mod count of the parent list.
+         * Caches the list node whose element was returned most recently by 
+         * {@code next} or {@prev}.
          */
-        private long expectedModCount = modCount;
+        private LinkedArrayListNode<E> lastIteratedNode;
         
         /**
-         * The local cursor of the element iterated last time.
+         * Caches the index of element that was most recently returned by 
+         * {@code next} and {@code prev}.
          */
-        private int lastLocalCursor = -1;
+        private int lastNodeIndex;
+
+        AdvancedLinkedArrayListIterator() {
+            this(0);
+        }
         
-        /**
-         * The node of the element iterated last time.
-         */
-        private LinkedArrayListNode<E> lastNode;
-        
-        /**
-         * Indicates whether the very last operation was an addition operation
-         * {@code add(E)}.
-         */
-        private boolean lastOperationWasAdd = false;
-        
-        /**
-         * Indicates whether the very last operation was a removal operation
-         * {@code remove()}.
-         */
-        private boolean lastOperationWasRemove = false;
-        
-        private boolean lastOperationWasNext = false;
-        
-        /**
-         * Constructs this {@code ListIterator} and sets its cursors position.
-         * 
-         * @param index the amount of elements from head to skip.
-         */
-        AdvancedLinkedArrayListIterator(int index) {
-            checkIndexForAddition(index);
-            cursor = index;
+        AdvancedLinkedArrayListIterator(int globalCursor) {
+            this.globalCursor = globalCursor;
+            this.currentNode = head;
             
-            if (index == size) {
-                localCursor = tail.size();
-                currentNode = tail;
-            } else {
-                searchElement(index);
-                currentNode = searchNode;
-                localCursor = searchLocalIndex;
+            for (int i = 0; i < globalCursor; ++i) {
+                if (++localCursor == currentNode.size()) {
+                    currentNode = currentNode.next;
+                    localCursor = 0;
+                }
             }
         }
         
         @Override
         public boolean hasNext() {
-            return cursor != size;
+            return globalCursor != size;
         }
 
         @Override
         public E next() {
-            checkForConcurrentModification();
-            
-            if (cursor == size) {
-                throw new NoSuchElementException(
-                        "The forward iteration exceeded.");
+            if (globalCursor == size) {
+                throw new NoSuchElementException("Forward iteration exceeded.");
             }
-        
-//            lastLocalCursor = localCursor;
-//            lastNode = currentNode;
-//            
-//            if (localCursor == currentNode.size()) {
-//                localCursor = 0;
-//                currentNode = currentNode.next;
-//            }
             
-            //// Added
+            lastIteratedNode = currentNode;
+            lastNodeIndex = localCursor;
+            
             if (localCursor == currentNode.size()) {
-                localCursor = 0;
                 currentNode = currentNode.next;
+                localCursor = 0;
             }
             
-            lastLocalCursor = localCursor;
-            lastNode = currentNode;
-            //// Added
-            
-            lastOperationWasAdd = false;
-            lastOperationWasRemove = false;
-            lastOperationWasNext = true;
-            
-            ++cursor;
+            ++globalCursor;
             return currentNode.get(localCursor++);
         }
 
         @Override
         public boolean hasPrevious() {
-            return cursor != 0;
+            return globalCursor != 0;
         }
 
         @Override
         public E previous() {
-            checkForConcurrentModification();
-            
-            if (cursor == 0) {
+            if (globalCursor-- == 0) {
                 throw new NoSuchElementException(
-                        "The backward iteration exceeded.");
+                        "Backward iteration exceeded.");
             }
             
-            if (localCursor == 0) {
+            lastNodeIndex = --localCursor;
+            lastIteratedNode = currentNode;
+            
+            if (localCursor == -1) {
                 currentNode = currentNode.prev;
                 localCursor = currentNode.size;
             }
             
-            lastOperationWasAdd = false;
-            lastOperationWasRemove = false;
-            lastOperationWasNext = false;
-            
-            --cursor;
-            lastLocalCursor = --localCursor;
-            lastNode = currentNode;
             return currentNode.get(localCursor);
         }
 
         @Override
         public int nextIndex() {
-            return cursor;
+            return globalCursor;
         }
 
         @Override
         public int previousIndex() {
-            return cursor - 1;
+            return globalCursor - 1;
         }
 
         @Override
         public void add(E e) {
-            if (localCursor == currentNode.getDegree()) {
-                LinkedArrayListNode<E> newnode = currentNode.spawn();
-                newnode.next = currentNode.next;
-                newnode.prev = currentNode;
-                currentNode.next = newnode;
-                
-                if (newnode.next == null) {
-                    tail = newnode;
-                } else {
-                    newnode.next.prev = newnode;
-                }
-                
-                localCursor = 0;
-                currentNode = newnode;
-            }
-            
-            LinkedArrayListNode<E> newnode = 
-                    currentNode.insert(localCursor++, e);
-            
-            if (newnode != null) {
-                linkNode(currentNode, newnode);
-            }
-            
-            expectedModCount = ++modCount;
-            lastOperationWasAdd = true;
-            
-            ++cursor;
-            ++size;
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 
         @Override
         public void set(E e) {
-            if (lastOperationWasAdd) {
-                throw new IllegalStateException(
-                        "next() or previous() was not the last operation.");
-            }
-            
-            if (lastOperationWasRemove) {
-                throw new IllegalStateException(
-                        "next() or previous() was not the last operation.");
-            }
-            
-            checkForConcurrentModification();
-            
-            lastNode.set(lastLocalCursor, e);
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 
         @Override
         public void remove() {
-            if (lastLocalCursor == -1) {
-                throw new IllegalStateException(
-                        "There is no current element to remove.");
-            }
-            
-            if (lastOperationWasAdd) {
-                throw new IllegalStateException(
-                        "The last operation was add().");
-            }
-            
-            if (lastOperationWasRemove) {
-                throw new IllegalStateException(
-                        "The last operation was remove(). Removing an " +
-                        "element for the second time.");
-            }
-            
-            lastNode.removeAt(lastLocalCursor);
-            expectedModCount = ++modCount;
-            lastOperationWasRemove = true;
-            
-            if (lastNode.isEmpty()) {
-                System.out.println("lastNode.isEmpty() is true.");
-                unlinkNode(lastNode);
-                
-//                if (!lastOperationWasNext) {
-//                    currentNode = lastNode.prev;
-//                    localCursor = currentNode.size();
-//                } else {
-//                    currentNode = lastNode.next;
-//                    localCursor = 0;
-//                }
-            }
-            
-            boolean cursorUpdated = false;
-            
-            if (cursor > --size) {
-                cursor = size;
-                cursorUpdated = true;
-                System.out.println("cursor > --size");
-            }
-            
-            if (lastOperationWasNext && !cursorUpdated) {
-                // The cursor moves one position to the left if the last of 
-                // 'next()' and 'prev()' was 'next()'.
-                --cursor;
-                --localCursor;
-            }
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
         
         /**
