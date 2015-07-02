@@ -1373,14 +1373,14 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
 
         @Override
         public void add(E e) {
-            if (isEmpty()) {
-                head.insert(0, e);
-                globalCursor = 1;
-                localCursor = 1;
-                expectedModCount = ++modCount;
-                ++size;
-                return;
-            }
+//            if (isEmpty()) {
+//                head.insert(0, e);
+//                globalCursor = 1;
+//                localCursor = 1;
+//                expectedModCount = ++modCount;
+//                ++size;
+//                return;
+//            }
             
             if (localCursor == currentNode.size()) {
                 if (currentNode.next == null) {
