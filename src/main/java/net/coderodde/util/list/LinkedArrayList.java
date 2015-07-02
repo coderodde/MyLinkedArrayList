@@ -1321,13 +1321,16 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
                 throw new NoSuchElementException("Forward iteration exceeded.");
             }
             
-            lastIteratedNode = currentNode;
-            lastNodeIndex = localCursor;
+//            lastIteratedNode = currentNode;
+//            lastNodeIndex = localCursor;
             
             if (localCursor == currentNode.size()) {
                 currentNode = currentNode.next;
                 localCursor = 0;
             }
+            
+            lastIteratedNode = currentNode;
+            lastNodeIndex = localCursor;
             
             lastOperationWasNextOrPrev = true;
             lastOperationWasNext = true;

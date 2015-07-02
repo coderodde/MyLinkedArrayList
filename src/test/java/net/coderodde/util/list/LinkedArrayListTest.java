@@ -874,9 +874,10 @@ public class LinkedArrayListTest {
         assertFalse(listIter.hasPrevious());
     }
     
-//    @Test
+    @Test
     public void testListIterator_brute() {
-        long seed = 1435570923173L;//System.currentTimeMillis();
+        long mySeed = 1435830496387L;
+        long seed = mySeed != 0L ? mySeed : System.currentTimeMillis();
         Random random = new Random(seed);
         
         System.out.println("testListIterator_brute: seed = " + seed);
@@ -983,6 +984,44 @@ public class LinkedArrayListTest {
             list.clear();
             test.clear();
         }
+    }
+    
+    @Test
+    public void testListIteratorBug1() {
+        for (int i = 0; i < 10; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        ListIterator<Integer> testIter = test.listIterator(4);
+        ListIterator<Integer> listIter = list.listIterator(4);
+        
+        for (int i = 0; i < 4; ++i) {
+            assertEquals(testIter.next(), listIter.next());
+        }
+        
+        testIter.remove();
+        listIter.remove();
+        
+        assertEquals(testIter.next(), listIter.next());
+        eq();
+        
+        for (int i = 0; i < 3; ++i) {
+            assertEquals(testIter.previous(), listIter.previous());
+            eq();
+        }
+        
+        for (int i = 0; i < 2; ++i) {
+            assertEquals(testIter.next(), listIter.next());
+            eq();
+        }
+        
+        eq();
+        
+        testIter.remove();
+        listIter.remove();
+        
+        eq();
     }
     
     @Test
