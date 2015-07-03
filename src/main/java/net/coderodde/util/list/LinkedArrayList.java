@@ -665,6 +665,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
      */
     @Override
     public List<E> subList(int fromIndex, int toIndex) {
+        
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
