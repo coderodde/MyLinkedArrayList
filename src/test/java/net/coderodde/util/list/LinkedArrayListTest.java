@@ -668,9 +668,6 @@ public class LinkedArrayListTest {
         }
         
         eq();
-        
-        System.out.println(test);
-        System.out.println(list);
     }
     
     @Test
@@ -699,9 +696,6 @@ public class LinkedArrayListTest {
         listIter.add(11);
         listIter.add(12);
         listIter.add(14);
-        
-        System.out.println(test);
-        System.out.println(list);
         
         eq();
     }
@@ -734,6 +728,44 @@ public class LinkedArrayListTest {
         assertEquals(new Integer(10), iter.previous());
         assertEquals(new Integer(10), iter.next());
         assertEquals(new Integer(10), iter.previous());
+    }
+    
+    @Test
+    public void testListIteratorFirstOperationAdd() {
+        for (int i = 0; i < 7; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        ListIterator<Integer> listIter = list.listIterator(list.size());
+        ListIterator<Integer> testIter = test.listIterator(test.size());
+        
+        for (int i = 0; i < 8; ++i) {
+            testIter.add(i + 7);
+            listIter.add(i + 7);
+            
+            assertEquals(testIter.previousIndex(), listIter.previousIndex());
+            assertEquals(testIter.nextIndex(), listIter.nextIndex());
+            assertEquals(testIter.hasPrevious(), listIter.hasPrevious());
+            assertEquals(testIter.hasNext(), listIter.hasNext());
+            
+            eq();
+        }
+        
+        listIter = list.listIterator(3);
+        testIter = test.listIterator(3);
+        
+        for (int i = 0; i < 8; ++i) {
+            testIter.add(i + 7);
+            listIter.add(i + 7);
+            
+            assertEquals(testIter.previousIndex(), listIter.previousIndex());
+            assertEquals(testIter.nextIndex(), listIter.nextIndex());
+            assertEquals(testIter.hasPrevious(), listIter.hasPrevious());
+            assertEquals(testIter.hasNext(), listIter.hasNext());
+            
+            eq();
+        }
     }
     
     @Test
@@ -876,7 +908,7 @@ public class LinkedArrayListTest {
     
     @Test
     public void testListIterator_brute() {
-        long mySeed = 1435830496387L;
+        long mySeed = 0L;
         long seed = mySeed != 0L ? mySeed : System.currentTimeMillis();
         Random random = new Random(seed);
         
@@ -899,7 +931,7 @@ public class LinkedArrayListTest {
             boolean lastNextOrPrev = false;
             
             for (int operation = 0; operation < operationAmount; ++operation) {
-                System.out.print("runId = " + runId + ", operation = " + operation + ": ");
+//                System.out.print("runId = " + runId + ", operation = " + operation + ": ");
                 
                 assertEquals(testIterator.previousIndex(), 
                              listIterator.previousIndex());
@@ -923,10 +955,10 @@ public class LinkedArrayListTest {
                         listIterator.remove();
                         testIterator.remove();
                         
-                        System.out.println("DEBUG: " + listIterator.hasNext() +
-                                           testIterator.hasNext());
-                        
-                        System.out.println("remove()");
+//                        System.out.println("DEBUG: " + listIterator.hasNext() +
+//                                           testIterator.hasNext());
+//                        
+//                        System.out.println("remove()");
                     }
                 } else if (chance < 0.27f) {
                     // Try add.
@@ -936,14 +968,14 @@ public class LinkedArrayListTest {
                     Integer tmp = random.nextInt();
                     listIterator.add(tmp);
                     testIterator.add(tmp);
-                    System.out.println("add()");
+//                    System.out.println("add()");
                 } else if (chance < 0.35f) {
                     // Try set.
                     if (lastNextOrPrev) {
                         Integer tmp = random.nextInt();
                         listIterator.set(tmp);
                         testIterator.set(tmp);
-                        System.out.println("set()");
+//                        System.out.println("set()");
                     }
                 } else if (chance < 0.67f) {
                     // Try next.
@@ -959,7 +991,7 @@ public class LinkedArrayListTest {
                         lastNextOrPrev = true;
                         lastRemove = false;
                         lastAdd = false;
-                        System.out.println("next()");
+//                        System.out.println("next()");
                     }
                     
                 } else {
@@ -975,13 +1007,8 @@ public class LinkedArrayListTest {
                         lastNextOrPrev = true;
                         lastRemove = false;
                         lastAdd = false;
-                        System.out.println("previous()");
+//                        System.out.println("previous()");
                     }
-                }
-                
-                if (runId == 1 && operation == 0) {
-                    System.out.println(list);
-                    System.out.println(test);
                 }
                 
                 eq();
@@ -1119,6 +1146,157 @@ public class LinkedArrayListTest {
         testIter.set(29);
         
         eq();
+    }
+    
+    @Test(expected = NoSuchElementException.class) 
+    public void testListIteratorThrowsOnNoPreviousElement() {
+        for (int i = 0; i < 7; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        ListIterator<Integer> listIter = list.listIterator(4);
+        ListIterator<Integer> testIter = test.listIterator(4);
+        
+        for (int i = 0; i < 4; ++i) {
+            assertEquals(testIter.hasPrevious(), listIter.hasPrevious());
+            assertEquals(testIter.hasNext(), listIter.hasNext());
+            assertEquals(testIter.previousIndex(), listIter.previousIndex());
+            assertEquals(testIter.nextIndex(), listIter.nextIndex());
+            assertEquals(testIter.previous(), listIter.previous());
+        }
+        
+        assertFalse(testIter.hasPrevious());
+        assertFalse(listIter.hasPrevious());
+        
+        listIter.previous();
+    }
+    
+    @Test(expected = NoSuchElementException.class) 
+    public void testListIteratorThrowsOnNoNextElement() {
+        for (int i = 0; i < 7; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        ListIterator<Integer> listIter = list.listIterator(4);
+        ListIterator<Integer> testIter = test.listIterator(4);
+        
+        for (int i = 0; i < 3; ++i) {
+            assertEquals(testIter.hasPrevious(), listIter.hasPrevious());
+            assertEquals(testIter.hasNext(), listIter.hasNext());
+            assertEquals(testIter.previousIndex(), listIter.previousIndex());
+            assertEquals(testIter.nextIndex(), listIter.nextIndex());
+            assertEquals(testIter.next(), listIter.next());
+        }
+        
+        assertFalse(testIter.hasNext());
+        assertFalse(listIter.hasNext());
+        
+        testIter.next();
+    }
+    
+    @Test
+    public void testListIteratorAddToEmptyList() {
+        ListIterator<Integer> listIter = list.listIterator();
+        ListIterator<Integer> testIter = test.listIterator();
+        
+        listIter.add(0);
+        testIter.add(0);
+        
+        eq();
+        
+        listIter.add(1);
+        testIter.add(1);
+        
+        eq();
+        
+        listIter.add(2);
+        testIter.add(2);
+        
+        eq();
+        
+        listIter.add(3);
+        testIter.add(3);
+        
+        eq();
+        
+        listIter.add(4);
+        testIter.add(4);
+        
+        eq();
+        
+        for (int i = 4; i >= 0; --i) {
+            assertEquals(testIter.hasPrevious(), listIter.hasPrevious());
+            assertEquals(testIter.hasNext(), listIter.hasNext());
+            assertEquals(testIter.previousIndex(), listIter.previousIndex());
+            assertEquals(testIter.nextIndex(), listIter.nextIndex());
+            
+            assertEquals(new Integer(i), testIter.previous());
+            assertEquals(new Integer(i), listIter.previous());
+        }
+        
+        assertEquals(testIter.hasPrevious(), listIter.hasPrevious());
+        assertEquals(testIter.hasNext(), listIter.hasNext());
+        assertEquals(testIter.previousIndex(), listIter.previousIndex());
+        assertEquals(testIter.nextIndex(), listIter.nextIndex());
+    }
+    
+    @Test
+    public void testListIteratorAddSemantics() {
+        for (int i = 0; i < 4; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        ListIterator<Integer> listIter = list.listIterator(2);
+        ListIterator<Integer> testIter = test.listIterator(2);
+        
+        listIter.add(10);
+        testIter.add(10);
+        
+        assertEquals(new Integer(2), listIter.next());
+        assertEquals(new Integer(2), testIter.next());
+        
+        assertEquals(new Integer(2), listIter.previous());
+        assertEquals(new Integer(2), testIter.previous());
+        
+        assertEquals(new Integer(10), listIter.previous());
+        assertEquals(new Integer(10), testIter.previous());
+        
+        assertEquals(new Integer(1), listIter.previous());
+        assertEquals(new Integer(1), testIter.previous());
+        
+        eq();
+    }
+    
+    //// YOOOOO
+    @Test
+    public void testListIteratorSetAfterAdd() {
+        ListIterator<Integer> listIter = list.listIterator();
+        ListIterator<Integer> testIter = test.listIterator();
+        
+        listIter.add(10);
+        testIter.add(10);
+        
+        boolean listThrew = false;
+        boolean testThrew = false;
+        
+        try {
+            listIter.set(11);
+        } catch (IllegalStateException ex) {
+            listThrew = true;
+        }
+        
+        try {
+            testIter.set(11);
+        } catch (IllegalStateException ex) {
+            testThrew = true;
+        }
+        
+        eq();
+        
+        assertTrue(testThrew && listThrew);
     }
     
     @Test(expected = IllegalStateException.class)
@@ -1613,6 +1791,33 @@ public class LinkedArrayListTest {
         }
         
         assertFalse(itList.hasNext());
+        
+        ListIterator<Integer> itList2 = list.listIterator();
+        ListIterator<Integer> itTest2 = test.listIterator();
+        
+        while (itTest2.hasNext()) {
+            assertTrue(itList2.hasNext());
+            Integer testInt = itTest2.next();
+            Integer listInt = itList2.next();
+            assertEquals(testInt, listInt);
+            
+            assertEquals(itTest2.previousIndex(), itList2.previousIndex());
+            assertEquals(itTest2.nextIndex(), itList2.nextIndex());
+        }
+        
+        assertFalse(itList2.hasNext());
+        
+        while (itTest2.hasPrevious()) {
+            assertTrue(itList2.hasPrevious());
+            Integer testInt = itTest2.previous();
+            Integer listInt = itList2.previous();
+            assertEquals(testInt, listInt);
+            
+            assertEquals(itTest2.previousIndex(), itList2.previousIndex());
+            assertEquals(itTest2.nextIndex(), itList2.nextIndex());
+        }
+        
+        assertFalse(itList2.hasPrevious());
 //        list.checkHealth();
     }
     
