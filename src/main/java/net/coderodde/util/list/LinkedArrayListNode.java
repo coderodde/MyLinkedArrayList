@@ -14,12 +14,12 @@ abstract class LinkedArrayListNode<E> {
     /**
      * This field holds the reference to the previous node.
      */
-    protected LinkedArrayListNode<E> prev;
+    private LinkedArrayListNode<E> prev;
     
     /**
      * This field holds the reference to the next node.
      */
-    protected LinkedArrayListNode<E> next;
+    private LinkedArrayListNode<E> next;
     
     /**
      * The actual storage array.
@@ -87,6 +87,26 @@ abstract class LinkedArrayListNode<E> {
     protected abstract int getDegree();
     
     /**
+     * Returns the reference of the next node in the chain, or {@code null} if
+     * this node is the tail node.
+     * 
+     * @return the next node.
+     */
+    protected LinkedArrayListNode<E> getNextNode() {
+        return next;
+    }
+    
+    /**
+     * Returns the reference of the previous node in the chain, or {@code null}
+     * if this node is the head node.
+     * 
+     * @return the previous node.
+     */
+    protected LinkedArrayListNode<E> getPreviousNode() {
+        return prev;
+    }
+    
+    /**
      * Inserts the {@code element} into this node before the element with index
      * {@code localIndex}. If {@code element} does not fit into this node, this
      * node is spawns a new, empty node. Then, it appends everything starting at
@@ -148,6 +168,24 @@ abstract class LinkedArrayListNode<E> {
         }
         
         size = list.size();
+    }
+    
+    /**
+     * Sets the next node.
+     * 
+     * @param node the node to set.
+     */
+    protected void setNextNode(LinkedArrayListNode<E> node) {
+        next = node;
+    }
+    
+    /**
+     * Sets the previous node.
+     * 
+     * @param node the node to set. 
+     */
+    protected void setPreviousNode(LinkedArrayListNode<E> node) {
+        prev = node;
     }
     
     /**

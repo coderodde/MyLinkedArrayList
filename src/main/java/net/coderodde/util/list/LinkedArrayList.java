@@ -121,7 +121,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
     }
     
     /**
-     * Constructs a new, empty list with default degree and input node type.
+     * Constructs a new, empty list with default degree and specified node type.
      * 
      * @param nodeType the type of internal node type.
      */
@@ -147,8 +147,8 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         if (tail.isFull()) {
             LinkedArrayListNode<E> newnode = tail.spawn();
             newnode.append(e);
-            tail.next = newnode;
-            newnode.prev = tail;
+            tail.setNextNode(newnode);
+            newnode.setPreviousNode(tail);
             tail = newnode;
         } else {
             tail.append(e);
@@ -209,8 +209,8 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             
             if (node.isFull()) {
                 LinkedArrayListNode<E> newnode = node.spawn();
-                node.next = newnode;
-                newnode.prev = node;
+                node.setNextNode(newnode);
+                newnode.setPreviousNode(node);
                 node = newnode;
             }
             
@@ -284,7 +284,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
 
         for (LinkedArrayListNode<E> node = head;
                 node != null;
-                node = node.next) {
+                node = node.getNextNode()) {
             final int nodeSize = node.size();
 
             for (int i = 0; i < nodeSize; ++i) {
@@ -297,11 +297,8 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             }
         }
 
-        if (!tmp.isEmpty()) {
-            // Add the leftovers.
-            ret.addAll(tmp);
-        }
-
+        // Add the leftovers.
+        ret.addAll(tmp);
         return ret;
     }
     
@@ -316,7 +313,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
     public boolean contains(Object o) {
         for (LinkedArrayListNode<E> node = head;
                 node != null;
-                node = node.next) {
+                node = node.getNextNode()) {
             if (node.contains(o)) {
                 return true;
             }
@@ -335,6 +332,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
      */
     @Override
     public boolean containsAll(Collection<?> c) {
+        // TODO: Optimize from O(mn) to O(n)?
         for (Object o : c) {
             if (!contains(o)) {
                 return false;
@@ -411,18 +409,21 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
     @Override
     public int hashCode() {
         int hashCode = 1;
-        for (E e : this)
-            hashCode = 31*hashCode + (e==null ? 0 : e.hashCode());
+     
+        for (E e : this) {
+            hashCode = 31 * hashCode + (e == null ? 0 : e.hashCode());
+        }
+     
         return hashCode;
     }
     
     /**
-     * Returns the least index of the element {@code o} or -1 if this list does
-     * not contain such.
+     * Returns the index of the first occurrence of {@code o}, or -1 if this
+     * list does not contain it.
      * 
      * @param  o the element whose index to look for.
-     * @return the least index of the first occurrence of element {@code o} in 
-     *         this list or -1 if this list does not contain such element.
+     * @return the index of the first occurrence of the input element, or 
+     *         {@code -1} if there is no such.
      */
     @Override
     public int indexOf(Object o) {
@@ -430,7 +431,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         
         for (LinkedArrayListNode<E> node = head; 
                 node != null; 
-                node = node.next) {
+                node = node.getNextNode()) {
             final int nodeSize = node.size();
             
             for (int i = 0; i < nodeSize; ++i, ++index) {
@@ -480,7 +481,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         
         for (LinkedArrayListNode<E> node = head;
                 node != null;
-                node = node.next) {
+                node = node.getNextNode()) {
             if (!node.isHealthy()) {
                 throw new IllegalStateException("Unhealthy node encountered.");
             }
@@ -505,12 +506,12 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
     }
 
     /**
-     * Returns the greatest index of element {@code o} or -1 if this list does 
-     * not contain {@code o}.
+     * Returns the index of the last occurrence of {@code o} in this list, or
+     * {@code -1} if this list does not contain it.
      * 
      * @param  o the element whose index to search. 
      * @return the index of the last occurrence of {@code o} in this list or
-     *         -1, if this list does not contain {@code o}.
+     *         {@code -1}, if this list does not contain {@code o}.
      */
     @Override
     public int lastIndexOf(Object o) {
@@ -518,7 +519,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         
         for (LinkedArrayListNode<E> node = tail;
                 node != null;
-                node = node.prev) {
+                node = node.getPreviousNode()) {
             final int nodeSize = node.size();
             
             for (int i = nodeSize - 1; i >= 0; --i, --index) {
@@ -589,7 +590,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
     public boolean remove(Object o) {
         for (LinkedArrayListNode<E> node = head; 
                 node != null; 
-                node = node.next) {
+                node = node.getNextNode()) {
             
             if (node.remove(o)) {
                 --size;
@@ -680,7 +681,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         
         for (LinkedArrayListNode<E> node = head; 
                 node != null; 
-                node = node.next) {
+                node = node.getNextNode()) {
             final int nodeSize = node.size();
             
             for (int i = 0; i < nodeSize; ++i, ++index) {
@@ -817,7 +818,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         
         for (LinkedArrayListNode<E> node = tail; 
                 node != null;
-                node = node.prev) {
+                node = node.getPreviousNode()) {
             for (int i = node.size() - 1; i >= 0; --i) {
                 if (set.contains(node.get(i)) == mode) {
                     modified = true;
@@ -844,12 +845,12 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
      */
     private void linkNode(LinkedArrayListNode<E> predecessor,
                           LinkedArrayListNode<E> node) {
-        node.prev = predecessor;
-        node.next = predecessor.next;
-        predecessor.next = node;
-        
-        if (node.next != null) {
-            node.next.prev = node;
+        node.setPreviousNode(predecessor);
+        node.setNextNode(predecessor.getNextNode());
+        predecessor.setNextNode(node);
+
+        if (node.getNextNode() != null) {
+            node.getNextNode().setPreviousNode(node);
         } else {
             tail = node;
         }
@@ -869,7 +870,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
 
             while (index >= node.size()) {
                 index -= node.size();
-                node = node.next;
+                node = node.getNextNode();
             }
 
             searchNode = node;
@@ -881,7 +882,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             
             while (index >= node.size()) {
                 index -= node.size();
-                node = node.prev;
+                node = node.getPreviousNode();
             }
             
             searchNode = node;
@@ -895,22 +896,26 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
      * @param node the node to unlink.
      */
     private void unlinkNode(LinkedArrayListNode<E> node) {
-        if (node.prev != null && node.next != null) {
-            node.prev.next = node.next;
-            node.next.prev = node.prev;
-        } else if (node.prev == null && node.next == null) {
-            // 'node' is the only node in this list. Do not remove.
-        } else if (node.prev == null) {
-            // 'node' is the head node and is not the only node.
-            head = node.next;
-            head.prev = null;
+        if (node.getPreviousNode() == null) {
+            if (node.getNextNode() == null) {
+                // 'node' is the only node in this list. Do not remove.
+            } else {
+                // 'node' is the head node and is not the only node.
+                head = node.getNextNode();
+                head.setPreviousNode(null);
+            }
         } else {
-            // 'node' is the tail node and is not the only node.
-            tail = node.prev;
-            tail.next = null;
+            // Here, 'node.getPreviousNode()' is not 'null'.
+            if (node.getNextNode() == null) {
+                // 'node' is the tail node and is not the only node.
+                tail = node.getPreviousNode();
+                tail.setNextNode(null);
+            } else {
+                // 'node' is neither head nor tail node.
+                node.getPreviousNode().setNextNode(node.getNextNode());
+                node.getNextNode().setPreviousNode(node.getPreviousNode());
+            }
         }
-        
-        // If no match, 'node' is the only node in this list; do not remove.
     }
     
     /**
@@ -969,7 +974,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
                 
                 if (localIndex == node.size()) {
                     localIndex = 0;
-                    node = node.next;
+                    node = node.getNextNode();
                 }
                 
                 // No need for incrementing 'localIndex'.
@@ -980,7 +985,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             
             if (++localIndex == node.size()) {
                 localIndex = 0;
-                node = node.next;
+                node = node.getNextNode();
             }
             
             return node.get(localIndex);
@@ -1004,7 +1009,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             node.removeAt(localIndex);
             
             if (node.isEmpty()) {
-                LinkedArrayListNode<E> next = node.next;
+                LinkedArrayListNode<E> next = node.getNextNode();
                 unlinkNode(node);
                 node = next;
                 localIndex = 0;
@@ -1022,230 +1027,6 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
      * Implements the {@code #ListIterator} of this list.
      */
     private class AdvancedLinkedArrayListIterator implements ListIterator<E> {
-//
-//        /**
-//         * Used for global navigation.
-//         */
-//        private int cursor;
-//        
-//        /**
-//         * Used for local navigation within a node.
-//         */
-//        private int localCursor;
-//        
-//        /**
-//         * Caches the current node.
-//         */
-//        private LinkedArrayListNode<E> currentNode;
-//        
-//        /**
-//         * Caches the mod count of the parent list.
-//         */
-//        private long expectedModCount = modCount;
-//        
-//        /**
-//         * The local cursor of the element iterated last time.
-//         */
-//        private int lastLocalCursor = -1;
-//        
-//        /**
-//         * The node of the element iterated last time.
-//         */
-//        private LinkedArrayListNode<E> lastNode;
-//        
-//        /**
-//         * Indicates whether the very last operation was an addition operation
-//         * {@code add(E)}.
-//         */
-//        private boolean lastOperationWasAdd = false;
-//        
-//        /**
-//         * Indicates whether the very last operation was a removal operation
-//         * {@code remove()}.
-//         */
-//        private boolean lastOperationWasRemove = false;
-//        
-//        private boolean lastOperationWasNext = false;
-//        
-//        /**
-//         * Constructs this {@code ListIterator} and sets its cursors position.
-//         * 
-//         * @param index the amount of elements from head to skip.
-//         */
-//        AdvancedLinkedArrayListIterator(int index) {
-//            checkIndexForAddition(index);
-//            cursor = index;
-//            
-//            if (index == size) {
-//                localCursor = tail.size();
-//                currentNode = tail;
-//            } else {
-//                searchElement(index);
-//                currentNode = searchNode;
-//                localCursor = searchLocalIndex;
-//            }
-//        }
-//        
-//        @Override
-//        public boolean hasNext() {
-//            return cursor != size;
-//        }
-//
-//        @Override
-//        public E next() {
-//            checkForConcurrentModification();
-//            
-//            if (cursor == size) {
-//                throw new NoSuchElementException(
-//                        "The forward iteration exceeded.");
-//            }
-//        
-////            lastLocalCursor = localCursor;
-////            lastNode = currentNode;
-////            
-////            if (localCursor == currentNode.size()) {
-////                localCursor = 0;
-////                currentNode = currentNode.next;
-////            }
-//            
-//            //// Added
-//            if (localCursor == currentNode.size()) {
-//                localCursor = 0;
-//                currentNode = currentNode.next;
-//            }
-//            
-//            lastLocalCursor = localCursor;
-//            lastNode = currentNode;
-//            //// Added
-//            
-//            lastOperationWasAdd = false;
-//            lastOperationWasRemove = false;
-//            lastOperationWasNext = true;
-//            
-//            ++cursor;
-//            return currentNode.get(localCursor++);
-//        }
-//
-//        @Override
-//        public boolean hasPrevious() {
-//            return cursor != 0;
-//        }
-//
-//        @Override
-//        public E previous() {
-//            checkForConcurrentModification();
-//            
-//            if (cursor == 0) {
-//                throw new NoSuchElementException(
-//                        "The backward iteration exceeded.");
-//            }
-//            
-//            if (localCursor == 0) {
-//                currentNode = currentNode.prev;
-//                localCursor = currentNode.size;
-//            }
-//            
-//            lastOperationWasAdd = false;
-//            lastOperationWasRemove = false;
-//            lastOperationWasNext = false;
-//            
-//            --cursor;
-//            lastLocalCursor = --localCursor;
-//            lastNode = currentNode;
-//            return currentNode.get(localCursor);
-//        }
-//
-//        @Override
-//        public int nextIndex() {
-//            return cursor;
-//        }
-//
-//        @Override
-//        public int previousIndex() {
-//            return cursor - 1;
-//        }
-//
-//        @Override
-//        public void add(E e) {
-//            if (localCursor == currentNode.getDegree()) {
-//                LinkedArrayListNode<E> newnode = currentNode.spawn();
-//                newnode.next = currentNode.next;
-//                newnode.prev = currentNode;
-//                currentNode.next = newnode;
-//                
-//                if (newnode.next == null) {
-//                    tail = newnode;
-//                } else {
-//                    newnode.next.prev = newnode;
-//                }
-//                
-//                localCursor = 0;
-//                currentNode = newnode;
-//            }
-//            
-//            LinkedArrayListNode<E> newnode = 
-//                    currentNode.insert(localCursor++, e);
-//            
-//            if (newnode != null) {
-//                linkNode(currentNode, newnode);
-//            }
-//            
-//            expectedModCount = ++modCount;
-//            lastOperationWasAdd = true;
-//            
-//            ++cursor;
-//            ++size;
-//        }
-//
-//        @Override
-//        public void set(E e) {
-//            if (lastOperationWasAdd) {
-//                throw new IllegalStateException(
-//                        "next() or previous() was not the last operation.");
-//            }
-//            
-//            if (lastOperationWasRemove) {
-//                throw new IllegalStateException(
-//                        "next() or previous() was not the last operation.");
-//            }
-//            
-//            checkForConcurrentModification();
-//            
-//            lastNode.set(lastLocalCursor, e);
-//        }
-//
-//        @Override
-//        public void remove() {
-//            if (lastLocalCursor == -1) {
-//                throw new IllegalStateException(
-//                        "There is no current element to remove.");
-//            }
-//            
-//            if (lastOperationWasAdd) {
-//                throw new IllegalStateException(
-//                        "The last operation was add().");
-//            }
-//            
-//            if (lastOperationWasRemove) {
-//                throw new IllegalStateException(
-//                        "The last operation was remove(). Removing an " +
-//                        "element for the second time.");
-//            }
-//            
-//            lastOperationWasRemove = true;
-//            lastNode.removeAt(lastLocalCursor);
-//            
-//            if (lastNode.isEmpty()) {
-//                unlinkNode(lastNode);
-//                currentNode = lastNode.prev;
-//                localCursor = currentNode.size();
-//            }
-//            
-//            if (lastOperationWasNext) {
-//                --cursor;
-//                --localCursor;
-//            }
-//        }
         
         /**
          * Caches the modification count of the owner {@code LinkedArrayList}.
@@ -1308,7 +1089,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             
             for (int i = 0; i < globalCursor; ++i) {
                 if (++localCursor == currentNode.size()) {
-                    currentNode = currentNode.next;
+                    currentNode = currentNode.getNextNode();
                     localCursor = 0;
                 }
             }
@@ -1328,7 +1109,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             }
             
             if (localCursor == currentNode.size()) {
-                currentNode = currentNode.next;
+                currentNode = currentNode.getNextNode();
                 localCursor = 0;
             }
             
@@ -1356,8 +1137,8 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             }
             
             if (localCursor == 0) {
-                currentNode = currentNode.prev;
-                localCursor = currentNode.size;
+                currentNode = currentNode.getPreviousNode();
+                localCursor = currentNode.size();
             }
             
             lastOperationWasNextOrPrev = true;
@@ -1390,17 +1171,15 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             }
             
             if (localCursor == currentNode.size()) {
-                if (currentNode.next == null) {
+                if (currentNode.getNextNode() == null) {
                     LinkedArrayListNode<E> newnode = head.spawn();
                     linkNode(currentNode, newnode);
                 }
                 
                 localCursor = 0;
-                currentNode = currentNode.next;
+                currentNode = currentNode.getNextNode();
             }
             
-            // next() returns the element right after the localCursor
-            // previous() returns the element right before the localCursor
             LinkedArrayListNode<E> newnode = currentNode.insert(localCursor, e);
             
             if (newnode != null) {
@@ -1446,11 +1225,11 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
                     && (head != lastIteratedNode || tail != lastIteratedNode)) {
                 unlinkNode(lastIteratedNode);  
                 
-                currentNode = lastIteratedNode.prev != null ?
-                              lastIteratedNode.prev :
-                              lastIteratedNode.next;
+                currentNode = lastIteratedNode.getPreviousNode() != null ?
+                              lastIteratedNode.getPreviousNode() : 
+                              lastIteratedNode.getNextNode();
                 
-                localCursor = lastIteratedNode.prev == null ? 
+                localCursor = lastIteratedNode.getPreviousNode() == null ? 
                               0 : 
                               currentNode.size();
             }

@@ -44,7 +44,7 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
         addAll(int localIndex, 
                Collection<? extends E> collection, 
                List<E> workList) {
-        final LinkedArrayListNode<E> nextNode = next;
+        final LinkedArrayListNode<E> nextNode = getNextNode();
         
         // Collect everything that is to be moved in this node.
         for (int i = localIndex; i < size; ++i) {
@@ -61,8 +61,10 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
         while (iterator.hasNext()) {
             if (chainTail.isFull()) {
                 LinkedArrayListNode<E> newnode = spawn();
-                newnode.prev = chainTail;
-                chainTail.next = newnode;
+                newnode.setPreviousNode(chainTail);
+//                newnode.prev = chainTail;
+//                chainTail.next = newnode;
+                chainTail.setNextNode(newnode);
                 chainTail = newnode;
             }
             
@@ -74,8 +76,10 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
         while (iterator.hasNext()) {
             if (chainTail.isFull()) {
                 LinkedArrayListNode<E> newnode = spawn();
-                newnode.prev = chainTail;
-                chainTail.next = newnode;
+                newnode.setPreviousNode(chainTail);
+                chainTail.setNextNode(newnode);
+//                newnode.prev = chainTail;
+//                chainTail.next = newnode;
                 chainTail = newnode;
             }
             
@@ -90,10 +94,12 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
             return null;
         }
         
-        chainTail.next = nextNode;
+//        chainTail.next = nextNode;
+        chainTail.setNextNode(nextNode);
         
         if (nextNode != null) {
-            nextNode.prev = chainTail;
+//            nextNode.prev = chainTail;
+            nextNode.setPreviousNode(chainTail);
             return null;
         }
         
