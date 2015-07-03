@@ -700,6 +700,208 @@ public class LinkedArrayListTest {
         eq();
     }
     
+    @Test
+    public void testListIteratorThrowsOnConcurrentModificationViaIterator() {
+        for (int i = 0; i < 5; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        ListIterator<Integer> testIter1 = test.listIterator();
+        ListIterator<Integer> testIter2 = test.listIterator();
+        
+        ListIterator<Integer> listIter1 = list.listIterator();
+        ListIterator<Integer> listIter2 = list.listIterator();
+        
+        testIter1.add(10);
+        
+        try {
+            testIter2.next();
+            fail("Should have thrown an exception.");
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        listIter1.add(10);
+        
+        try {
+            listIter2.next();
+            fail("Should have thrown an exception.");
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        testIter2 = test.listIterator(2);
+        listIter2 = list.listIterator(2);
+        
+        testIter1.add(10);
+        
+        try {
+            testIter2.previous();
+            fail("Should have thrown an exception.");
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        listIter1.add(10);
+        
+        try {
+            listIter2.previous();
+            fail("Should have thrown an exception.");
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        eq();
+    }
+    
+    @Test
+    public void testListIteratorThrowsOnConcurrentModificationViaList() {
+        for (int i = 0; i < 5; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        ListIterator<Integer> testIter = test.listIterator();
+        ListIterator<Integer> listIter = test.listIterator();
+        
+        test.remove(1);
+        
+        try {
+            testIter.next();
+            fail("Should have thrown an exception.");
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        list.remove(1);
+        
+        try {
+            listIter.next();
+            fail("Should have thrown an exception.");
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        testIter = test.listIterator(2);
+        listIter = list.listIterator(2);
+        
+        test.add(0);
+        
+        try {
+            testIter.previous();
+            fail("Should have thrown an exception.");
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        list.add(0);
+        
+        try {
+            listIter.previous();
+            fail("Should have thrown an exception.");
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        eq();
+    }
+    
+    @Test
+    public void testListIteratorSetThrowsOnConcurrencyViaList() {
+        for (int i = 0; i < 5; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        ListIterator<Integer> testIter = test.listIterator(2);
+        ListIterator<Integer> listIter = list.listIterator(2);
+        
+        testIter.next();
+        listIter.next();
+        
+        test.add(0);
+        
+        try {
+            testIter.set(10);
+            fail("Should have thrown an exception.");
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        list.add(0);
+        
+        try {
+            listIter.set(10);
+            fail("Should have thrown an exception.");
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testListIteratorSetThrowsOnConcurrencyViaListIterator() {
+        for (int i = 0; i < 5; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        ListIterator<Integer> testIter = test.listIterator(2);
+        ListIterator<Integer> listIter = list.listIterator(2);
+        
+        ListIterator<Integer> testIter2 = test.listIterator(2);
+        ListIterator<Integer> listIter2 = list.listIterator(2);
+        
+        testIter.next();
+        listIter.next();
+        
+        testIter2.add(10);
+        
+        try {
+            testIter.set(10);
+            fail("Should have thrown an exception.");
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        listIter2.add(10);
+        
+        try {
+            listIter.set(10);
+            fail("Should have thrown an exception.");
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testListIteratorAddSemantics() {
+        for (int i = 0; i < 4; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        ListIterator<Integer> listIter = list.listIterator(2);
+        ListIterator<Integer> testIter = test.listIterator(2);
+        
+        listIter.add(10);
+        testIter.add(10);
+        
+        assertEquals(new Integer(2), listIter.next());
+        assertEquals(new Integer(2), testIter.next());
+        
+        assertEquals(new Integer(2), listIter.previous());
+        assertEquals(new Integer(2), testIter.previous());
+        
+        assertEquals(new Integer(10), listIter.previous());
+        assertEquals(new Integer(10), testIter.previous());
+        
+        assertEquals(new Integer(1), listIter.previous());
+        assertEquals(new Integer(1), testIter.previous());
+        
+        eq();
+    }
+    
     @Test 
     public void testListIteratorAlternation() {
         list.add(10);
@@ -1240,34 +1442,6 @@ public class LinkedArrayListTest {
         assertEquals(testIter.hasNext(), listIter.hasNext());
         assertEquals(testIter.previousIndex(), listIter.previousIndex());
         assertEquals(testIter.nextIndex(), listIter.nextIndex());
-    }
-    
-    @Test
-    public void testListIteratorAddSemantics() {
-        for (int i = 0; i < 4; ++i) {
-            test.add(i);
-            list.add(i);
-        }
-        
-        ListIterator<Integer> listIter = list.listIterator(2);
-        ListIterator<Integer> testIter = test.listIterator(2);
-        
-        listIter.add(10);
-        testIter.add(10);
-        
-        assertEquals(new Integer(2), listIter.next());
-        assertEquals(new Integer(2), testIter.next());
-        
-        assertEquals(new Integer(2), listIter.previous());
-        assertEquals(new Integer(2), testIter.previous());
-        
-        assertEquals(new Integer(10), listIter.previous());
-        assertEquals(new Integer(10), testIter.previous());
-        
-        assertEquals(new Integer(1), listIter.previous());
-        assertEquals(new Integer(1), testIter.previous());
-        
-        eq();
     }
     
     //// YOOOOO

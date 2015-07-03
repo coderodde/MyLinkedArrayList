@@ -1380,6 +1380,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         @Override
         public void add(E e) {
             if (isEmpty()) {
+                // Special case: the list is empty.
                 head.insert(0, e);
                 globalCursor = 1;
                 localCursor = 1;
@@ -1421,6 +1422,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
                         "methods were not called at all.");
             }
             
+            checkForConcurrentModification();
             lastIteratedNode.set(lastNodeIndex, e);
         }
 
