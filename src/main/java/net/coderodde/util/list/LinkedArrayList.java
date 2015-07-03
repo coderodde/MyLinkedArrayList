@@ -1442,19 +1442,15 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
             
             if (lastIteratedNode.isEmpty() 
                     && (head != lastIteratedNode || tail != lastIteratedNode)) {
-                // Do not remove 'lastIteratedNode' if it is the only node of
-                // this list.
-                unlinkNode(lastIteratedNode);
-//                currentNode = lastIteratedNode.prev;                
+                unlinkNode(lastIteratedNode);  
+                
                 currentNode = lastIteratedNode.prev != null ?
                               lastIteratedNode.prev :
                               lastIteratedNode.next;
                 
-                if (currentNode == null) {
-                    System.out.println("BUYAKASHAAH!");
-                }
-                
-                localCursor = currentNode.size();
+                localCursor = lastIteratedNode.prev == null ? 
+                              0 : 
+                              currentNode.size();
             }
             
             if (lastOperationWasNext) {

@@ -895,7 +895,7 @@ public class LinkedArrayListTest {
             ListIterator<Integer> testIterator = test.listIterator(startIndex);
             
             boolean lastAdd = false;
-            boolean lastRemove = false;
+            boolean lastRemove = true;
             boolean lastNextOrPrev = false;
             
             for (int operation = 0; operation < operationAmount; ++operation) {
