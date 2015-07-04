@@ -281,6 +281,22 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
         elementArray[--size] = null;
     }
 
+    @Override
+    protected void removeRange(int fromIndex, int toIndex) {
+        int oldSize = size;
+        int rangeLength = toIndex - fromIndex;
+        
+        for (int i = toIndex; i < size; ++i) {
+            elementArray[i - rangeLength] = elementArray[i];
+        }
+        
+        size -= rangeLength;
+        
+        for (int i = size; i < oldSize; ++i) {
+            elementArray[i] = null;
+        }
+    }
+
     /**
      * Sets the new value for element at local index {@code index}.
      * 

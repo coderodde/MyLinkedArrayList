@@ -148,6 +148,14 @@ abstract class LinkedArrayListNode<E> {
     protected abstract void removeAt(int index);
     
     /**
+     * Removes a range from this node.
+     * 
+     * @param fromIndex the starting, inclusive index of the range to remove.
+     * @param toIndex   the ending, exclusive index of the range to remove.
+     */
+    protected abstract void removeRange(int fromIndex, int toIndex);
+    
+    /**
      * Sets the <code>index</code> element of this node to <code>element</code>.
      * 
      * @param index   the index of the target element.

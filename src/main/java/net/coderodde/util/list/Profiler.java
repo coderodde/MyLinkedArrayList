@@ -54,13 +54,17 @@ public class Profiler {
         
         Random random = new Random(seed);
         
-        profileAdd(list, random);
-        profileAddInt(list, random);
-        profileIteration(list);
-        profileRemoveInt(list, random);
+        long totalDuration = 0L;
+        
+        totalDuration += profileAdd(list, random);
+        totalDuration += profileAddInt(list, random);
+        totalDuration += profileIteration(list);
+        totalDuration += profileRemoveInt(list, random);
+        
+        System.out.println("Total duration: " + totalDuration);
     }
     
-    private static final void profileAdd(List<Integer> list, Random random) {
+    private static final long profileAdd(List<Integer> list, Random random) {
         long ta = System.currentTimeMillis();
         
         for (int i = 0; i < ADD_N; ++i) {
@@ -70,9 +74,11 @@ public class Profiler {
         long tb = System.currentTimeMillis();
         
         System.out.println("add(E) in " + (tb - ta) + " ms.");
+        
+        return tb - ta;
     }
     
-    private static final void profileAddInt(List<Integer> list, Random random) {
+    private static final long profileAddInt(List<Integer> list, Random random) {
         long ta = System.currentTimeMillis();
         
         for (int i = 0; i < ADD_INT_N; ++i) {
@@ -82,9 +88,12 @@ public class Profiler {
         long tb = System.currentTimeMillis();
         
         System.out.println("add(int, E) in " + (tb - ta) + " ms.");
+        
+        return tb - ta;
     }
     
-    private static final void profileIteration(List<Integer> list) {
+    private static final long profileIteration(List<Integer> list) {
+        long duration = 0L;
         long ta = System.currentTimeMillis();
         
         for (Integer i : list) {
@@ -94,6 +103,7 @@ public class Profiler {
         long tb = System.currentTimeMillis();
         
         System.out.println("Iterator in " + (tb - ta) + " ms.");
+        duration += tb - ta;
         
         ta = System.currentTimeMillis();
         
@@ -104,6 +114,7 @@ public class Profiler {
         }
         
         tb = System.currentTimeMillis();
+        duration += tb - ta;
         
         System.out.println("ListIterator forward in " + (tb - ta) + " ms.");
         
@@ -114,11 +125,14 @@ public class Profiler {
         }
         
         tb = System.currentTimeMillis();
+        duration += tb - ta;
         
         System.out.println("ListIterator backward in " + (tb - ta) + " ms.");
+        
+        return duration;
     }
     
-    private static final void profileRemoveInt(List<Integer> list, Random random) {
+    private static final long profileRemoveInt(List<Integer> list, Random random) {
         long ta = System.currentTimeMillis();
         
         for (int i = 0; i < REMOVE_INT_N; ++i) {
@@ -128,6 +142,8 @@ public class Profiler {
         long tb = System.currentTimeMillis();
         
         System.out.println("remove(int) in " + (tb - ta) + " ms.");
+        
+        return tb - ta;
     }
     
     private static final void title(String s) {

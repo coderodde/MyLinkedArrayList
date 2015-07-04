@@ -1875,6 +1875,145 @@ public class LinkedArrayListTest {
     }
     
     @Test
+    public void testSublistIteration() {
+        for (int i = 0; i < 10; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        List<Integer> sublist1 = test.subList(2, 8);
+        List<Integer> sublist2 = sublist1.subList(2, 6);
+        List<Integer> sublist1a = test.subList(1, 6);
+        
+        ListIterator<Integer> iter = sublist1.listIterator();
+        
+        for (int i = 2; i < 8; ++i) {
+            assertEquals(new Integer(i), iter.next());
+        }
+        
+        iter = sublist1a.listIterator();
+        
+        for (int i = 1; i < 6; ++i) {
+            assertEquals(new Integer(i), iter.next());
+        }
+        
+        iter = sublist2.listIterator();
+        
+        for (int i = 4; i < 8; ++i) {
+            assertEquals(new Integer(i), iter.next());
+        }
+    }
+    
+    @Test
+    public void testRemoveRange() {
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        test.remove(2);
+        list.removeRange(2, 3);
+        
+        eq();
+        
+        list.clear();
+        test.clear();
+        
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        list.removeRange(1, 2);
+        test.remove(1);
+        
+        eq();
+        
+        list.clear();
+        test.clear();
+        
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        list.removeRange(0, 1);
+        test.remove(0);
+        
+        eq();
+        
+        list.clear();
+        test.clear();
+        
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        list.removeRange(2, 4);
+        test.remove(3);
+        test.remove(2);
+        
+        eq();
+        
+        list.clear();
+        test.clear();
+        
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        list.removeRange(2, 5);
+        test.remove(4);
+        test.remove(3);
+        test.remove(2);
+        
+        eq();
+        
+        list.clear();
+        test.clear();
+        
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        list.removeRange(2, 7);
+        
+        for (int i = 2; i < 7; ++i) {
+            test.remove(2);
+        }
+        
+        eq();
+        
+        long seed = System.currentTimeMillis();
+        Random random = new Random(seed);
+        System.out.println("testRemoveRange: seed = " + seed);
+        
+        for (int op = 0; op < 100; ++op) {
+            for (int i = 0; i < 20; ++i) {
+                test.add(i);
+                list.add(i);
+            }
+            
+            int fromIndex = random.nextInt(list.size());
+            int toIndex = fromIndex + random.nextInt(list.size() - fromIndex);
+            
+            list.removeRange(fromIndex, toIndex);
+            
+            for (int i = toIndex - 1; i >= fromIndex; --i) {
+                test.remove(i);
+            }
+            
+            eq();
+            
+            test.clear();
+            list.clear();
+        }
+    }
+    
+    @Test
     public void testTinyListIterator() {
         for (int i = 0; i < 5; ++i) {
             list.add(i);

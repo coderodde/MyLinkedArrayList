@@ -743,6 +743,45 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
     }
     
     /**
+     * Removes this list all elements with indices between {@code fromIndex}
+     * (inclusive) and {@code toIndex} (exclusive).
+     * 
+     * @param fromIndex the starting index of the range to remove.
+     * @param toIndex   the ending index of the range to remove.
+     */
+    protected void removeRange(int fromIndex, int toIndex) {
+        int rangeLength = toIndex - fromIndex;
+        int left = rangeLength;
+        
+        searchElement(fromIndex);
+        
+        int elementsToRemove = Math.min(rangeLength, 
+                                        searchNode.size() - searchLocalIndex);
+        searchNode.removeRange(searchLocalIndex,
+                               searchLocalIndex + elementsToRemove);
+        
+        if (searchNode.isEmpty()) {
+            unlinkNode(searchNode);
+        }
+        
+        left -= elementsToRemove;
+        LinkedArrayListNode<E> currentNode = searchNode.getNextNode();
+        
+        while (left > 0) {
+            elementsToRemove = Math.min(left, currentNode.size());
+            currentNode.removeRange(0, elementsToRemove);
+            left -= elementsToRemove;
+            
+            if (currentNode.isEmpty()) {
+                unlinkNode(currentNode);
+                currentNode = currentNode.getNextNode();
+            }
+        }
+        
+        size -= rangeLength;
+    }
+    
+    /**
      * Validates the access index.
      * 
      * @param index the index to validate.

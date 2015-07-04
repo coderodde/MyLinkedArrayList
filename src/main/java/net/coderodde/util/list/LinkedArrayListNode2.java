@@ -66,6 +66,11 @@ class LinkedArrayListNode2<E> extends LinkedArrayListNode<E> {
     }
 
     @Override
+    protected void removeRange(int fromIndex, int toIndex) {
+        
+    }
+
+    @Override
     protected void set(int index, E element) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
