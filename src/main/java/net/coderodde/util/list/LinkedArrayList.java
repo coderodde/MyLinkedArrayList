@@ -320,7 +320,7 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
 
     /**
      * Returns {@code true} if this list contains <b>all</b> elements in 
-     * {@code c}. Runs in linear time.
+     * {@code c}. 
      * 
      * @param  c the collection to check for inclusion.
      * @return {@code true} if this list contains all the elements in 
@@ -328,19 +328,13 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
      */
     @Override
     public boolean containsAll(Collection<?> c) {
-        Set<?> set = new HashSet<>(c);
-        
-        for (Object element : c) {
-            if (set.contains(element)) {
-                set.remove(element);
-                
-                if (set.isEmpty()) {
-                    return true;
-                }
+        for (Object o : c) {
+            if (!contains(o)) {
+                return false;
             }
         }
         
-        return set.isEmpty();
+        return true;
     }
 
     /**
@@ -1316,7 +1310,7 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
         /**
          * The amount of elements to skip from the left of {@code parent}.
          */
-        private int offset;
+        private final int offset;
         
         /**
          * The size of this sublist.
@@ -1409,83 +1403,143 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
 
         @Override
         public boolean remove(Object o) {
+            ListIterator<E> iterator = parent.listIterator(offset);
+            
+            for (int i = 0; i < size; ++i) {
+                if (Objects.equals(iterator.next(), o)) {
+                    remove(i);
+                    return true;
+                }
+            }
+            
             return false;
         }
 
         @Override
         public boolean containsAll(Collection<?> c) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            for (Object o : c) {
+                if (!contains(o)) {
+                    return false;
+                }
+            }
+            
+            return true;
         }
 
         @Override
         public boolean addAll(Collection<? extends E> c) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            return parent.addAll(c);
         }
 
         @Override
         public boolean addAll(int index, Collection<? extends E> c) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            checkIndexForAddition(index);
+            return parent.addAll(offset + index, c);
         }
 
         @Override
         public boolean removeAll(Collection<?> c) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            boolean stateModified = false;
+            
+            for (Object o : c) {
+                if (remove((E) o)) {
+                    stateModified = true;
+                }
+            }
+            
+            return stateModified;
         }
 
         @Override
         public boolean retainAll(Collection<?> c) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            boolean stateModified = false;
+            Iterator<E> iterator = iterator();
+            
+            while (iterator.hasNext()) {
+                if (!c.contains(iterator.next())) {
+                    iterator.remove();
+                    stateModified = true;
+                }
+            }
+            
+            return stateModified;
         }
 
         @Override
         public void clear() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            ((SubList) parent).removeRange(offset, offset + size());
         }
 
         @Override
         public E get(int index) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            checkIndexForAccess(index);
+            return parent.get(index + offset);
         }
 
         @Override
         public E set(int index, E element) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            checkIndexForAccess(index);
+            return parent.set(index + offset, element);
         }
 
         @Override
         public void add(int index, E element) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            checkIndexForAddition(index);
+            parent.add(index + offset, element);
         }
 
         @Override
         public E remove(int index) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            checkIndexForAccess(index);
+            return parent.remove(index + offset);
         }
 
         @Override
         public int indexOf(Object o) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            Iterator<E> iterator = iterator();
+            int index = 0;
+            
+            while (iterator.hasNext()) {
+                if (Objects.equals(o, iterator.next())) {
+                    return index;
+                }
+                
+                ++index;
+            }
+            
+            return -1;
         }
 
         @Override
         public int lastIndexOf(Object o) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            ListIterator<E> iterator = listIterator(size());
+            int index = size() - 1;
+            
+            while (iterator.hasPrevious()) {
+                if (Objects.equals(o, iterator.previous())) {
+                    return index;
+                }
+                
+                --index;
+            }
+            
+            return -1;
         }
 
         @Override
         public ListIterator<E> listIterator() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            return listIterator(0);
         }
 
         @Override
         public ListIterator<E> listIterator(int index) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            return new AdvancedSubListIterator(
+                    parent.listIterator(offset + index), size);
         }
 
         @Override
         public List<E> subList(int fromIndex, int toIndex) {
-            
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            return new SubList(this, fromIndex, toIndex);
         }
 
         @Override
@@ -1544,14 +1598,111 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
             }
             
             private void checkForConcurrentModification() {
-                if (expectedModCount != LinkedArrayList.this.modCount) {
+                if (this.expectedModCount != LinkedArrayList.this.modCount) {
                     throw new ConcurrentModificationException();
                 }
             }
         }
         
+        private class AdvancedSubListIterator implements ListIterator<E> {
+
+            AdvancedSubListIterator(ListIterator<E> listIterator, int size) {
+                
+            }
+            
+            @Override
+            public boolean hasNext() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public E next() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public boolean hasPrevious() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public E previous() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public int nextIndex() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public int previousIndex() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public void set(E e) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public void add(E e) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+            
+        }
+        
+        /**
+         * Checks that addition index is within bounds.
+         * 
+         * @param index the index to check. 
+         * @throws IndexOutOfBounds if the index is invalid for addition.
+         */
+        private void checkIndexForAddition(int index) {
+            if (index < 0) {
+                throw new IndexOutOfBoundsException(
+                        "The addition index is negative: " + index);
+            }
+            
+            if (index > size) {
+                throw new IndexOutOfBoundsException(
+                        "The addition index is too large: " + index + ", " +
+                        "sublist size: " + size);
+            }
+        }
+        
+        /**
+         * Checks that access index is within bounds.
+         * 
+         * @param index the index to check.
+         * @throws IndexOutOfBounds if the index is invalid for access.
+         */
+        private void checkIndexForAccess(int index) {
+            if (index < 0) {
+                throw new IndexOutOfBoundsException(
+                        "The access index is negative: " + index);
+            }
+            
+            if (index >= size) {
+                throw new IndexOutOfBoundsException(
+                        "The access index is too large: " + index + ", " +
+                        "sublist size: " + size);
+            }
+        }
+        
+        /**
+         * Checks that the current modification count of this sublist equals
+         * that of the parent list.
+         */
         private void checkForConcurrentModification() {
-//            if (this.expectedModCount != )
+            if (this.expectedModCount != LinkedArrayList.this.modCount) {
+                throw new ConcurrentModificationException();
+            }
         }
         
         /**
