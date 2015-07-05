@@ -1,5 +1,6 @@
 package net.coderodde.util.list;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,7 +22,7 @@ import java.util.Set;
  * @version   1.6
  * @param <E> the actual list element type.
  */
-public class LinkedArrayList<E> implements List<E>, Cloneable {
+public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ Cloneable {
 
     /**
      * This enumeration is used for choosing the actual list node 
@@ -51,11 +52,6 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
      * This field caches the amount of elements stored in this list.
      */
     private int size;
-    
-    /**
-     * This field caches the amount of modifications made to this list.
-     */
-    private transient long modCount;
     
     /**
      * This field holds the head node of this list.
@@ -324,7 +320,7 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
 
     /**
      * Returns {@code true} if this list contains <b>all</b> elements in 
-     * {@code c}.
+     * {@code c}. Runs in linear time.
      * 
      * @param  c the collection to check for inclusion.
      * @return {@code true} if this list contains all the elements in 
@@ -332,14 +328,19 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
      */
     @Override
     public boolean containsAll(Collection<?> c) {
-        // TODO: Optimize from O(mn) to O(n)?
-        for (Object o : c) {
-            if (!contains(o)) {
-                return false;
+        Set<?> set = new HashSet<>(c);
+        
+        for (Object element : c) {
+            if (set.contains(element)) {
+                set.remove(element);
+                
+                if (set.isEmpty()) {
+                    return true;
+                }
             }
         }
         
-        return true;
+        return set.isEmpty();
     }
 
     /**
@@ -1296,6 +1297,286 @@ public class LinkedArrayList<E> implements List<E>, Cloneable {
         private void checkForConcurrentModification() {
             if (modCount != expectedModCount) {
                 throw new ConcurrentModificationException();
+            }
+        }
+    }
+    
+    /**
+     * This class implements a view over a list's range.
+     * 
+     * @param <E> the element type.
+     */
+    private class SubList<E> extends AbstractList<E> {
+
+        /**
+         * The parent list.
+         */
+        private final AbstractList<E> parent;
+        
+        /**
+         * The amount of elements to skip from the left of {@code parent}.
+         */
+        private int offset;
+        
+        /**
+         * The size of this sublist.
+         */
+        private int size;
+        
+        /**
+         * Caches the modCount of the parent list.
+         */
+        private int expectedModCount;
+        
+        SubList(AbstractList<E> parent, int fromIndex, int toIndex) {
+            sublistRangeCheck(fromIndex, toIndex, parent.size());
+            this.expectedModCount = LinkedArrayList.this.modCount;
+            this.parent = parent;
+            this.offset = fromIndex;
+            this.size = toIndex - fromIndex;
+        }
+        
+        @Override
+        public int size() {
+            return size;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return size == 0;
+        }
+
+        @Override
+        public boolean contains(Object o) {
+            ListIterator<E> iterator = parent.listIterator(offset);
+            
+            for (int i = 0; i < size; ++i) {
+                if (Objects.equals(o, iterator.next())) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        @Override
+        public Iterator<E> iterator() {
+            return new BasicSubListIterator(parent.listIterator(offset), size);
+        }
+
+        @Override
+        public Object[] toArray() {
+            Object[] ret = new Object[size()];
+            ListIterator<E> iterator = parent.listIterator(offset);
+        
+            for (int i = 0; i < size; ++i) {
+                ret[i] = iterator.next();
+            }
+            
+            return ret;
+        }
+
+        @Override
+        public <T> T[] toArray(T[] a) {
+            ListIterator<E> iterator = parent.listIterator(offset);
+            
+            if (size() <= a.length) {
+                for (int i = 0; i < size; ++i) {
+                    a[i] = (T) iterator.next();
+                }
+                
+                if (size() < a.length) {
+                    a[size()] = null;
+                }
+                
+                return a;
+            }
+            
+            T[] ret = (T[]) Arrays.copyOf(a, size(), a.getClass());
+            
+            for (int i = 0; i < size; ++i) {
+                ret[i] = (T) iterator.next();
+            }
+            
+            return ret;
+        }
+
+        @Override
+        public boolean add(E e) {
+            parent.add(offset + size, e);
+            return true;
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            return false;
+        }
+
+        @Override
+        public boolean containsAll(Collection<?> c) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public boolean addAll(Collection<? extends E> c) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public boolean addAll(int index, Collection<? extends E> c) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> c) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public boolean retainAll(Collection<?> c) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public E get(int index) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public E set(int index, E element) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void add(int index, E element) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public E remove(int index) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public int indexOf(Object o) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public int lastIndexOf(Object o) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public ListIterator<E> listIterator() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public ListIterator<E> listIterator(int index) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public List<E> subList(int fromIndex, int toIndex) {
+            
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        protected void removeRange(int fromIndex, int toIndex) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+        
+        /**
+         * This class implements an {@link java.util.Iterator} over a sublist.
+         */
+        private class BasicSubListIterator implements Iterator<E> {
+
+            /**
+             * The actual {@code ListIterator}.
+             */
+            private final ListIterator<E> listIterator;
+            
+            /**
+             * The amount of elements in the sublist.
+             */
+            private int size;
+            
+            /**
+             * The amount of elements iterated.
+             */
+            private int iterated = 0;
+            
+            /**
+             * The expected modification count. Use for <b>fail-fast</b> upon
+             * concurrent modification.
+             */
+            private int expectedModCount;
+            
+            BasicSubListIterator(ListIterator<E> listIterator, int size) {
+                this.listIterator = listIterator;
+                this.size = size;
+                this.expectedModCount = LinkedArrayList.this.modCount;
+            }
+            
+            @Override
+            public boolean hasNext() {
+                return iterated < size;
+            }
+
+            @Override
+            public E next() {
+                if (iterated++ == size) {
+                    throw new NoSuchElementException("Iterator exceeded.");
+                }
+                
+                return null;
+            }
+            
+            public void remove() {
+                
+            }
+            
+            private void checkForConcurrentModification() {
+                if (expectedModCount != LinkedArrayList.this.modCount) {
+                    throw new ConcurrentModificationException();
+                }
+            }
+        }
+        
+        private void checkForConcurrentModification() {
+//            if (this.expectedModCount != )
+        }
+        
+        /**
+         * Checks that the range indices are valid.
+         * 
+         * @param fromIndex the index of the first element within the desired
+         *                  range.
+         * @param toIndex  the index of the element one past the last element
+         *                 of the desired range.
+         * @param size    the size of the parent list.
+         */
+        private void sublistRangeCheck(int fromIndex, int toIndex, int size) {
+            if (fromIndex < 0) {
+                throw new IndexOutOfBoundsException(
+                        "fromIndex is negative: " + fromIndex);
+            }
+            
+            if (toIndex > size) {
+                throw new IndexOutOfBoundsException(
+                        "toIndex is too large: " + toIndex + ", size: " + size);
+            }
+            
+            if (toIndex < fromIndex) {
+                throw new IllegalArgumentException(
+                    "toIndex(" + toIndex + ") < fromIndex(" + fromIndex + ")");
             }
         }
     }

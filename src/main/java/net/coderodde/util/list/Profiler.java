@@ -1,6 +1,7 @@
 package net.coderodde.util.list;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,12 +22,14 @@ public class Profiler {
     private static final int ADD_N = 1000000;
     private static final int ADD_INT_N = 500;
     private static final int REMOVE_INT_N = 1000;
+    private static final int CONTAINS_ALL_N = 1000;
     
     public static void main(String[] args) {
         List<Integer> list1 = new ArrayList<>();
         List<Integer> list2 = new LinkedList<>();
         List<Integer> list3 = 
                 new LinkedArrayList<>(5, LinkedArrayList.NodeType.TRIVIAL);
+        
         long seed = System.currentTimeMillis();
         
         System.out.println("Seed: " + seed);
@@ -60,6 +63,7 @@ public class Profiler {
         totalDuration += profileAddInt(list, random);
         totalDuration += profileIteration(list);
         totalDuration += profileRemoveInt(list, random);
+        totalDuration += profileContainsAll(list, random);
         
         System.out.println("Total duration: " + totalDuration);
     }
@@ -132,7 +136,8 @@ public class Profiler {
         return duration;
     }
     
-    private static final long profileRemoveInt(List<Integer> list, Random random) {
+    private static final long profileRemoveInt(List<Integer> list, 
+                                               Random random) {
         long ta = System.currentTimeMillis();
         
         for (int i = 0; i < REMOVE_INT_N; ++i) {
@@ -142,6 +147,28 @@ public class Profiler {
         long tb = System.currentTimeMillis();
         
         System.out.println("remove(int) in " + (tb - ta) + " ms.");
+        
+        return tb - ta;
+    }
+    
+    private static final long profileContainsAll(List<Integer> list, 
+                                                 Random random) {
+        Collection<Integer> coll = new ArrayList<>();
+        
+        for (int i = 0; i < CONTAINS_ALL_N; ++i) {
+            Integer tmp = random.nextInt();
+            coll.add(tmp);
+            list.add(tmp);
+        }
+            
+        long ta = System.currentTimeMillis();
+        
+        boolean result = list.containsAll(coll);
+        
+        long tb = System.currentTimeMillis();
+        
+        System.out.println("containsAll(Collection) in " + (tb - ta) + 
+                           " ms. Result: " + result);
         
         return tb - ta;
     }
