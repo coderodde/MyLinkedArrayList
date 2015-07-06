@@ -1,6 +1,7 @@
 package net.coderodde.util.list;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
@@ -1995,6 +1996,233 @@ public class LinkedArrayListTest {
         
         eq();
         eq(list1, list2);
+    }
+    
+    @Test 
+    public void testSublistClear() {
+        for (int i = 0; i < 20; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        List<Integer> sublist1 = test.subList(4, 9);
+        List<Integer> sublist2 = list.subList(4, 9);
+        
+        sublist1.clear();
+        sublist2.clear();
+        
+        eq();
+        
+        sublist1 = test.subList(0, 4);
+        sublist2 = list.subList(0, 4);
+        
+        sublist1.clear();
+        sublist2.clear();
+        
+        eq();
+        
+        sublist1 = test.subList(3, test.size());
+        sublist2 = list.subList(3, list.size());
+        
+        sublist1.clear();
+        sublist2.clear();
+        
+        eq();
+    }
+    
+    @Test
+    public void testSublistContains() {
+        for (int i = 0; i < 20; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        List<Integer> sublist1 = test.subList(5, 10);
+        List<Integer> sublist2 = list.subList(5, 10);
+        
+        for (int i = 0; i < 5; ++i) {
+            assertFalse(sublist1.contains(i));
+            assertFalse(sublist2.contains(i));
+        }
+        
+        for (int i = 5; i < 10; ++i) {
+            assertTrue(sublist1.contains(i));
+            assertTrue(sublist2.contains(i));
+        }
+            
+        for (int i = 10; i < 20; ++i) {
+            assertFalse(sublist1.contains(i));
+            assertFalse(sublist2.contains(i));
+        }
+        
+        assertFalse(sublist1.contains(-1));
+        assertFalse(sublist2.contains(-1));
+        
+        assertFalse(sublist1.contains(20));
+        assertFalse(sublist2.contains(20));
+    }
+    
+    @Test
+    public void testSublistContainsAll() {
+        for (int i = 0; i < 20; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        List<Integer> sublist1 = test.subList(6, 12);
+        List<Integer> sublist2 = list.subList(6, 12);
+        Collection<Integer> coll = new HashSet<>();
+        
+        for (int i = 6; i < 12; ++i) {
+            coll.add(i);
+        }
+        
+        assertTrue(sublist1.containsAll(coll));
+        assertTrue(sublist2.containsAll(coll));
+        
+        coll.remove(10);
+        
+        assertTrue(sublist1.containsAll(coll));
+        assertTrue(sublist2.containsAll(coll));
+        
+        coll.add(4);
+        
+        assertTrue(test.containsAll(coll));
+        assertTrue(list.containsAll(coll));
+        
+        assertFalse(sublist1.containsAll(coll));
+        assertFalse(sublist2.containsAll(coll));
+    }
+    
+    @Test
+    public void testSublistGet() {
+        for (int i = 0; i < 20; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        List<Integer> sublist1 = test.subList(5, 12);
+        List<Integer> sublist2 = list.subList(5, 12);
+        
+        for (int i = 0; i < sublist1.size(); ++i) {
+            assertEquals(sublist1.get(i), sublist2.get(i));
+        }
+    }
+    
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void testSublistGetThrowsOnNegativeIndex() {
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+        }
+        
+        list.subList(0, 4).get(-1);
+    }
+    
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void testSublistGetThrowsOnLargeIndex() {
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+        }
+        
+        list.subList(0, 4).get(4);
+    }
+    
+    @Test
+    public  void testSublistIndexOf() {
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+        }
+        
+        List<Integer> sublist = list.subList(11, 18);
+        
+        for (int i = 11, j = 0; i < 18; ++i, ++j) {
+            assertEquals(j, sublist.indexOf(i));
+        }
+        
+        for (int i = 10; i > -5; --i) {
+            assertEquals(-1, sublist.indexOf(i));
+        }
+        
+        for (int i = 18; i < 26; ++i) {
+            assertEquals(-1, sublist.indexOf(i));
+        }
+        
+        list.clear();
+        
+        list.add(0);
+        list.add(3);
+        list.add(2);
+        list.add(3);
+        
+        assertEquals(1, list.indexOf(3));
+    }
+    
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void testSublistThrowsOnNegativeFromIndexWithEmptySublist() {
+        list.subList(-1, 0);
+    }
+    
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void testSublistThrowsOnNegativeFromIndexWithNonEmptySublist() {
+        list.add(0);
+        list.add(1);
+        
+        list.subList(-1, 0);
+    }
+    
+    @Test(expected = IndexOutOfBoundsException.class) 
+    public void testSublistThrowsOnLargeToIndexWithEmptySublist() {
+        list.subList(0, 1);
+    }
+    
+    @Test(expected = IndexOutOfBoundsException.class) 
+    public void testSublistThrowsOnLargeToIndexWithNonEmptySublist() {
+        list.add(0);
+        list.add(1);
+        
+        list.subList(0, 3);
+    }
+    
+    @Test(expected = IllegalArgumentException.class) 
+    public void testSublistThrowsOnReversedIndices() {
+        list.add(0);
+        list.add(1);
+        
+        list.subList(1, 0);
+    }
+    
+    @Test
+    public void testSublistIsEmpty() {
+        List<Integer> sublist = list.subList(0, 0);
+
+        assertTrue(sublist.isEmpty());
+        
+        sublist.addAll(Arrays.asList(0, 1, 2));
+        
+        assertFalse(sublist.isEmpty());
+        
+        sublist.remove(1);
+        
+        assertFalse(sublist.isEmpty());
+        
+        sublist.clear();
+        
+        assertTrue(sublist.isEmpty());
+    }
+    
+    @Test
+    public void testSublistLastIndexOf() {
+        list.add(0);
+        list.add(3);
+        list.add(2);
+        list.add(3);
+        
+        assertEquals(3, list.lastIndexOf(3));
+        assertEquals(0, list.lastIndexOf(0));
+        assertEquals(2, list.lastIndexOf(2));
+        
+        assertEquals(-1, list.lastIndexOf(-1));
+        assertEquals(-1, list.lastIndexOf(4));
     }
     
     @Test

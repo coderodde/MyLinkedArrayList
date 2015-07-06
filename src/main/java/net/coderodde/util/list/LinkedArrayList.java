@@ -743,6 +743,7 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
      * @param fromIndex the starting index of the range to remove.
      * @param toIndex   the ending index of the range to remove.
      */
+    @Override
     protected void removeRange(int fromIndex, int toIndex) {
         int rangeLength = toIndex - fromIndex;
         int left = rangeLength;
@@ -1357,8 +1358,14 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
 
         @Override
         public void clear() {
+            if (parent instanceof LinkedArrayList) {
+                ((LinkedArrayList<E>) parent).removeRange(offset, 
+                                                          offset + size());
+            } else {
+                ((SubList) parent).removeRange(offset, offset + size());
+            }
+                
             size = 0;
-            ((SubList) parent).removeRange(offset, offset + size());
         }
 
         @Override
@@ -1493,7 +1500,7 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
             
             return stateModified;
         }
-
+        
         @Override
         public E set(int index, E element) {
             checkIndexForAccess(index);
