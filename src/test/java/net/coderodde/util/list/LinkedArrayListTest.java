@@ -1875,6 +1875,30 @@ public class LinkedArrayListTest {
     }
     
     @Test
+    public void testSublistAdd() {
+        for (int i = 0; i < 5; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        test.subList(2, 4).add(10);
+        list.subList(2, 4).add(10);
+        
+        eq();
+        
+        test.subList(3, 6).add(11);
+        list.subList(3, 6).add(11);
+        
+        eq();
+        
+        test.clear();
+        list.clear();
+        
+        test.subList(0, 0).add(20);
+        list.subList(0, 0).add(20);
+     }
+    
+    @Test
     public void testSublistIteration() {
         for (int i = 0; i < 10; ++i) {
             test.add(i);

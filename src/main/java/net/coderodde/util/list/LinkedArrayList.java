@@ -660,8 +660,7 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
      */
     @Override
     public List<E> subList(int fromIndex, int toIndex) {
-        
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return new SubList(this, fromIndex, toIndex);
     }
 
     /**
@@ -1329,15 +1328,33 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
             this.offset = fromIndex;
             this.size = toIndex - fromIndex;
         }
-        
+
         @Override
-        public int size() {
-            return size;
+        public boolean add(E e) {
+            parent.add(offset + size, e);
+            return true;
         }
 
         @Override
-        public boolean isEmpty() {
-            return size == 0;
+        public void add(int index, E element) {
+            checkIndexForAddition(index);
+            parent.add(index + offset, element);
+        }
+
+        @Override
+        public boolean addAll(Collection<? extends E> c) {
+            return parent.addAll(c);
+        }
+
+        @Override
+        public boolean addAll(int index, Collection<? extends E> c) {
+            checkIndexForAddition(index);
+            return parent.addAll(offset + index, c);
+        }
+
+        @Override
+        public void clear() {
+            ((SubList) parent).removeRange(offset, offset + size());
         }
 
         @Override
@@ -1354,8 +1371,137 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
         }
 
         @Override
+        public boolean containsAll(Collection<?> c) {
+            for (Object o : c) {
+                if (!contains(o)) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        @Override
+        public E get(int index) {
+            checkIndexForAccess(index);
+            return parent.get(index + offset);
+        }
+
+        @Override
+        public int indexOf(Object o) {
+            Iterator<E> iterator = iterator();
+            int index = 0;
+            
+            while (iterator.hasNext()) {
+                if (Objects.equals(o, iterator.next())) {
+                    return index;
+                }
+                
+                ++index;
+            }
+            
+            return -1;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return size == 0;
+        }
+
+        @Override
         public Iterator<E> iterator() {
             return new BasicSubListIterator(parent.listIterator(offset), size);
+        }
+
+        @Override
+        public int lastIndexOf(Object o) {
+            ListIterator<E> iterator = listIterator(size());
+            int index = size() - 1;
+            
+            while (iterator.hasPrevious()) {
+                if (Objects.equals(o, iterator.previous())) {
+                    return index;
+                }
+                
+                --index;
+            }
+            
+            return -1;
+        }
+
+        @Override
+        public ListIterator<E> listIterator() {
+            return listIterator(0);
+        }
+
+        @Override
+        public ListIterator<E> listIterator(int index) {
+            return new AdvancedSubListIterator(
+                    parent.listIterator(offset + index), size);
+        }
+
+        @Override
+        public E remove(int index) {
+            checkIndexForAccess(index);
+            return parent.remove(index + offset);
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            ListIterator<E> iterator = parent.listIterator(offset);
+            
+            for (int i = 0; i < size; ++i) {
+                if (Objects.equals(iterator.next(), o)) {
+                    remove(i);
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> c) {
+            boolean stateModified = false;
+            
+            for (Object o : c) {
+                if (remove((E) o)) {
+                    stateModified = true;
+                }
+            }
+            
+            return stateModified;
+        }
+
+        @Override
+        public boolean retainAll(Collection<?> c) {
+            boolean stateModified = false;
+            Iterator<E> iterator = iterator();
+            
+            while (iterator.hasNext()) {
+                if (!c.contains(iterator.next())) {
+                    iterator.remove();
+                    stateModified = true;
+                }
+            }
+            
+            return stateModified;
+        }
+
+        @Override
+        public E set(int index, E element) {
+            checkIndexForAccess(index);
+            return parent.set(index + offset, element);
+        }
+        
+        @Override
+        public int size() {
+            return size;
+        }
+
+        @Override
+        public List<E> subList(int fromIndex, int toIndex) {
+            return new SubList(this, fromIndex, toIndex);
         }
 
         @Override
@@ -1393,153 +1539,6 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
             }
             
             return ret;
-        }
-
-        @Override
-        public boolean add(E e) {
-            parent.add(offset + size, e);
-            return true;
-        }
-
-        @Override
-        public boolean remove(Object o) {
-            ListIterator<E> iterator = parent.listIterator(offset);
-            
-            for (int i = 0; i < size; ++i) {
-                if (Objects.equals(iterator.next(), o)) {
-                    remove(i);
-                    return true;
-                }
-            }
-            
-            return false;
-        }
-
-        @Override
-        public boolean containsAll(Collection<?> c) {
-            for (Object o : c) {
-                if (!contains(o)) {
-                    return false;
-                }
-            }
-            
-            return true;
-        }
-
-        @Override
-        public boolean addAll(Collection<? extends E> c) {
-            return parent.addAll(c);
-        }
-
-        @Override
-        public boolean addAll(int index, Collection<? extends E> c) {
-            checkIndexForAddition(index);
-            return parent.addAll(offset + index, c);
-        }
-
-        @Override
-        public boolean removeAll(Collection<?> c) {
-            boolean stateModified = false;
-            
-            for (Object o : c) {
-                if (remove((E) o)) {
-                    stateModified = true;
-                }
-            }
-            
-            return stateModified;
-        }
-
-        @Override
-        public boolean retainAll(Collection<?> c) {
-            boolean stateModified = false;
-            Iterator<E> iterator = iterator();
-            
-            while (iterator.hasNext()) {
-                if (!c.contains(iterator.next())) {
-                    iterator.remove();
-                    stateModified = true;
-                }
-            }
-            
-            return stateModified;
-        }
-
-        @Override
-        public void clear() {
-            ((SubList) parent).removeRange(offset, offset + size());
-        }
-
-        @Override
-        public E get(int index) {
-            checkIndexForAccess(index);
-            return parent.get(index + offset);
-        }
-
-        @Override
-        public E set(int index, E element) {
-            checkIndexForAccess(index);
-            return parent.set(index + offset, element);
-        }
-
-        @Override
-        public void add(int index, E element) {
-            checkIndexForAddition(index);
-            parent.add(index + offset, element);
-        }
-
-        @Override
-        public E remove(int index) {
-            checkIndexForAccess(index);
-            return parent.remove(index + offset);
-        }
-
-        @Override
-        public int indexOf(Object o) {
-            Iterator<E> iterator = iterator();
-            int index = 0;
-            
-            while (iterator.hasNext()) {
-                if (Objects.equals(o, iterator.next())) {
-                    return index;
-                }
-                
-                ++index;
-            }
-            
-            return -1;
-        }
-
-        @Override
-        public int lastIndexOf(Object o) {
-            ListIterator<E> iterator = listIterator(size());
-            int index = size() - 1;
-            
-            while (iterator.hasPrevious()) {
-                if (Objects.equals(o, iterator.previous())) {
-                    return index;
-                }
-                
-                --index;
-            }
-            
-            return -1;
-        }
-
-        @Override
-        public ListIterator<E> listIterator() {
-            return listIterator(0);
-        }
-
-        @Override
-        public ListIterator<E> listIterator(int index) {
-            return new AdvancedSubListIterator(
-                    parent.listIterator(offset + index), size);
-        }
-
-        @Override
-        public List<E> subList(int fromIndex, int toIndex) {
-            return new SubList(this, fromIndex, toIndex);
         }
 
         @Override
