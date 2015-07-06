@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
@@ -1896,7 +1897,105 @@ public class LinkedArrayListTest {
         
         test.subList(0, 0).add(20);
         list.subList(0, 0).add(20);
-     }
+    }
+    
+    @Test
+    public void testSubListAddInt() {
+        for (int i = 0; i < 6; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        List<Integer> sublist1 = test.subList(1, 3);
+        List<Integer> sublist2 = list.subList(1, 3);
+        
+        sublist1.add(0, 10);
+        sublist2.add(0, 10);
+        
+        eq();
+        
+        Iterator<Integer> iter1 = sublist1.iterator();
+        Iterator<Integer> iter2 = sublist2.iterator();
+        
+        while (iter1.hasNext()) {
+            assertTrue(iter2.hasNext());
+            assertEquals(iter1.next(), iter2.next());
+        }
+        
+        assertFalse(iter2.hasNext());
+        
+        sublist1.add(1, 11);
+        sublist2.add(1, 11);
+        
+        eq();
+        
+        sublist1.add(sublist1.size(), 12);
+        sublist2.add(sublist2.size(), 12);
+        
+        eq();
+    }
+    
+    @Test
+    public void testSublistAddAll() {
+        List<Integer> sublistTest = test.subList(0, 0);
+        List<Integer> sublistList = list.subList(0, 0);
+        
+        Collection<Integer> coll = new LinkedList<>();
+        
+        coll.add(1);
+        coll.add(2);
+        coll.add(3);
+        coll.add(4);
+        
+        sublistTest.addAll(coll);
+        sublistList.addAll(coll);
+        
+        eq();
+        
+        eq(sublistList, sublistTest);
+        
+        coll.clear();
+        
+        coll.add(10);
+        coll.add(11);
+        
+        sublistTest.addAll(coll);
+        sublistList.addAll(coll);
+        
+        eq();
+        
+        eq(sublistList, sublistTest);
+    }
+    
+    @Test
+    public void testSublistAddAllInt() {
+        List<Integer> list1 = test.subList(0, 0);
+        List<Integer> list2 = list.subList(0, 0);
+        
+        Collection<Integer> coll = new HashSet<>();
+        
+        for (int i = 0; i < 4; ++i) {
+            coll.add(i);
+        }
+        
+        list1.addAll(0, coll);
+        list2.addAll(0, coll);
+        
+        eq();
+        eq(list1, list2);
+        
+        coll.clear();
+        
+        for (int i = 4; i < 9; ++i) {
+            coll.add(i);
+        }
+        
+        list1.addAll(2, coll);
+        list2.addAll(2, coll);
+        
+        eq();
+        eq(list1, list2);
+    }
     
     @Test
     public void testSublistIteration() {
@@ -2158,7 +2257,7 @@ public class LinkedArrayListTest {
 //        list.checkHealth();
     }
     
-    private void eq(LinkedArrayList<Integer> list, List<Integer> test) {
+    private void eq(List<Integer> list, List<Integer> test) {
         assertEquals(list.size(), test.size());
         
         for (int i = 0; i < test.size(); ++i) {

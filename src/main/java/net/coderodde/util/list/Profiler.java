@@ -28,7 +28,7 @@ public class Profiler {
         List<Integer> list1 = new ArrayList<>();
         List<Integer> list2 = new LinkedList<>();
         List<Integer> list3 = 
-                new LinkedArrayList<>(5, LinkedArrayList.NodeType.TRIVIAL);
+                new LinkedArrayList<>(64, LinkedArrayList.NodeType.TRIVIAL);
         
         long seed = System.currentTimeMillis();
         

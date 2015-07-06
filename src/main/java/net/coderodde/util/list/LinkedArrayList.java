@@ -1331,29 +1331,33 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
 
         @Override
         public boolean add(E e) {
-            parent.add(offset + size, e);
+            parent.add(offset + size++, e);
             return true;
         }
 
         @Override
         public void add(int index, E element) {
             checkIndexForAddition(index);
+            ++size;
             parent.add(index + offset, element);
         }
 
         @Override
         public boolean addAll(Collection<? extends E> c) {
+            size += c.size();
             return parent.addAll(c);
         }
 
         @Override
         public boolean addAll(int index, Collection<? extends E> c) {
             checkIndexForAddition(index);
+            size += c.size();
             return parent.addAll(offset + index, c);
         }
 
         @Override
         public void clear() {
+            size = 0;
             ((SubList) parent).removeRange(offset, offset + size());
         }
 
@@ -1443,6 +1447,7 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
         @Override
         public E remove(int index) {
             checkIndexForAccess(index);
+            --size;
             return parent.remove(index + offset);
         }
 
@@ -1453,6 +1458,7 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
             for (int i = 0; i < size; ++i) {
                 if (Objects.equals(iterator.next(), o)) {
                     remove(i);
+                    --size;
                     return true;
                 }
             }
@@ -1572,6 +1578,11 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
              */
             private int expectedModCount;
             
+            /**
+             * Indicates whether the last operation was {@code remove()}.
+             */
+            private boolean lastElementRemoved = false;
+            
             BasicSubListIterator(ListIterator<E> listIterator, int size) {
                 this.listIterator = listIterator;
                 this.size = size;
@@ -1589,11 +1600,25 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
                     throw new NoSuchElementException("Iterator exceeded.");
                 }
                 
-                return null;
+                lastElementRemoved = false;
+                return listIterator.next();
             }
             
             public void remove() {
+                if (lastElementRemoved) {
+                    throw new IllegalStateException(
+                            "Removing an element twice.");
+                }
                 
+                if (iterated == 0) {
+                    throw new IllegalStateException(
+                            "There is no current element.");
+                }
+                
+//                checkForConcurrentModification();
+                lastElementRemoved = true;
+                listIterator.remove();
+                --size;
             }
             
             private void checkForConcurrentModification() {
@@ -1605,38 +1630,73 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
         
         private class AdvancedSubListIterator implements ListIterator<E> {
 
+            /**
+             * The actual {@code ListIterator} over parent list.
+             */
+            private final ListIterator<E> listIterator;
+            
+            /**
+             * The size of this {@code SubList}.
+             */
+            private int size;
+            
+            /**
+             * The cursor within this sublist.
+             */
+            private int cursor;
+            
+            /**
+             * Constructs a new list iterator over a sublist.
+             * 
+             * @param listIterator the actual list iterator over the parent 
+             *                     list's range.
+             * @param size        the length of the range. 
+             */
             AdvancedSubListIterator(ListIterator<E> listIterator, int size) {
-                
+                this.listIterator = listIterator;
+                this.size = size;
             }
             
             @Override
             public boolean hasNext() {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                return cursor != size;
             }
 
             @Override
             public E next() {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                if (!hasNext()) {
+                    throw new NoSuchElementException(
+                        "There is no next element in this list iterator.");
+                }
+                
+                ++cursor;
+                return listIterator.next();
             }
 
             @Override
             public boolean hasPrevious() {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                return cursor != 0;
             }
 
             @Override
             public E previous() {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                if (!hasPrevious()) {
+                    throw new NoSuchElementException(
+                        "There is no previous element in this list iterator.");
+                }
+                
+                --cursor;
+                return listIterator.previous();
             }
 
             @Override
             public int nextIndex() {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                return cursor;
             }
 
             @Override
             public int previousIndex() {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                return cursor - 1;
             }
 
             @Override
