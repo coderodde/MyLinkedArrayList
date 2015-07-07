@@ -28,7 +28,8 @@ public class Profiler {
         List<Integer> list1 = new ArrayList<>();
         List<Integer> list2 = new LinkedList<>();
         List<Integer> list3 = 
-                new LinkedArrayList<>(64, LinkedArrayList.NodeType.TRIVIAL);
+                new LinkedArrayList<>(128, LinkedArrayList.NodeType.TRIVIAL);
+        List<Integer> list4 = new EnemyTreeList<>();
         
         long seed = System.currentTimeMillis();
         
@@ -37,12 +38,14 @@ public class Profiler {
         profile(list1, seed);
         profile(list2, seed);
         profile(list3, seed);
+        profile(list4, seed);
         
         title("End of profiling");
         
         System.out.println("Lists have same content: " + equals(list1,
                                                                 list2,
-                                                                list3));
+                                                                list3,
+                                                                list4));
     }
     
     private static void profile(List<Integer> list, long seed) {
