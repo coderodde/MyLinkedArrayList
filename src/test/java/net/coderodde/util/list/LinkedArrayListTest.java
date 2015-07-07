@@ -2028,6 +2028,24 @@ public class LinkedArrayListTest {
         sublist2.clear();
         
         eq();
+        
+        test.clear();
+        list.clear();
+        
+        for (int i = 0; i < 30; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        sublist1 = test.subList(5, 25).subList(5, 15);
+        sublist2 = list.subList(5, 25).subList(5, 15);
+        
+        eq(sublist1, sublist2);
+        
+        sublist1.clear();
+        sublist2.clear();
+        
+        eq();
     }
     
     @Test
@@ -2253,6 +2271,208 @@ public class LinkedArrayListTest {
         for (int i = 4; i < 8; ++i) {
             assertEquals(new Integer(i), iter.next());
         }
+    }
+    
+    @Test
+    public void testSublistRemoveAll() {
+        for (int i = 0; i < 26; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        Collection<Integer> coll = new LinkedList<>();
+        
+        for (int i = -10; i < 30; i += 2) {
+            coll.add(i);
+        }
+        
+        List<Integer> sublist1 = list.subList(4, 16);
+        List<Integer> sublist2 = test.subList(4, 16);
+        
+        assertTrue(sublist1.removeAll(coll));
+        assertTrue(sublist2.removeAll(coll));
+        
+        eq(sublist1, sublist2);
+        
+        eq();
+        
+        coll.clear();
+        
+        assertFalse(sublist1.removeAll(coll));
+        assertFalse(sublist2.removeAll(coll));
+        
+        eq(sublist1, sublist2);
+        
+        eq();
+        
+        for (int i = 30; i < 40; ++i) {
+            coll.add(i);
+        }
+        
+        assertFalse(sublist1.removeAll(coll));
+        assertFalse(sublist2.removeAll(coll));
+        
+        eq(sublist1, sublist2);
+        eq();
+    }
+    
+    @Test
+    public void testSublistRemoveInt() {
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        List<Integer> sublist1 = list.subList(2, 5);
+        List<Integer> sublist2 = test.subList(2, 5);
+        
+        assertEquals(new Integer(3), sublist1.remove(1));
+        assertEquals(new Integer(3), sublist2.remove(1));
+        
+        eq(sublist1, sublist2);
+        
+        assertEquals(new Integer(4), sublist1.remove(1));
+        assertEquals(new Integer(4), sublist2.remove(1));
+        
+        eq(sublist1, sublist2);
+    }
+    
+    @Test
+    public void testSublistRemoveObject() {
+        for (int i = 0; i < 20; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        List<Integer> sublist1 = list.subList(3, 9);
+        List<Integer> sublist2 = test.subList(3, 9);
+            
+        assertTrue(sublist1.remove(new Integer(4)));
+        assertTrue(sublist2.remove(new Integer(4)));
+            
+        assertTrue(sublist1.remove(new Integer(6)));
+        assertTrue(sublist2.remove(new Integer(6)));
+            
+        assertFalse(sublist1.remove(new Integer(9)));
+        assertFalse(sublist2.remove(new Integer(9)));
+        
+        eq(sublist1, sublist2);
+        
+        eq();
+    }
+    
+    @Test
+    public void testSublistRetainAll() {
+        for (int i = 0; i < 26; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        List<Integer> sublist1 = list.subList(5, 17);
+        List<Integer> sublist2 = test.subList(5, 17);
+        
+        Collection<Integer> coll = new HashSet<>();
+        
+        for (int i = -10; i < 30; i += 2) {
+            coll.add(i);
+        }
+        
+        assertTrue(sublist1.retainAll(coll));
+        assertTrue(sublist2.retainAll(coll));
+        
+        eq(sublist1, sublist2);
+        eq();
+    }
+    
+    @Test
+    public void testSublistBasicIterator() {
+        for (int i = 0; i < 26; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        Iterator<Integer> sublist1 = list.subList(10, 20).iterator();
+        Iterator<Integer> sublist2 = test.subList(10, 20).iterator();
+        
+        for (int i = 0; i < 5; ++i) {
+            assertTrue(sublist1.hasNext());
+            assertTrue(sublist2.hasNext());
+            
+            Integer num = i + 10;
+            
+            assertEquals(num, sublist1.next());
+            assertEquals(num, sublist2.next());
+        }
+        
+        sublist1.remove();
+        sublist2.remove();
+        
+        eq();
+        eq(list, test);
+        
+        for (int i = 0; i < 5; ++i) {
+            assertTrue(sublist2.hasNext());
+            assertTrue(sublist1.hasNext());
+            
+            Integer num = i + 15;
+            
+            assertEquals(num, sublist1.next());
+            assertEquals(num, sublist2.next());
+        }
+        
+        eq();
+        eq(list, test);
+        
+        sublist1.remove();
+        sublist2.remove();
+        
+        eq();
+        eq(list, test);
+    }
+    
+    
+    
+    @Test
+    public void testSublistBasicIteratorShit() {
+        for (int i = 0; i < 26; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        Iterator<Integer> listIter = list.iterator();
+        Iterator<Integer> testIter = test.iterator();
+        
+        for (int i = 0; i < 5; ++i) {
+            assertTrue(listIter.hasNext());
+            assertTrue(testIter.hasNext());
+            
+            Integer num = i;
+            
+            assertEquals(num, listIter.next());
+            assertEquals(num, testIter.next());
+        }
+        
+        listIter.remove();
+        testIter.remove();
+        
+        eq();
+        
+        for (int i = 0; i < 5; ++i) {
+            assertTrue(listIter.hasNext());
+            assertTrue(testIter.hasNext());
+            
+            Integer num = i + 5;
+            
+            assertEquals(num, listIter.next());
+            assertEquals(num, testIter.next());
+        }
+        
+        eq();
+        
+        listIter.remove();
+        testIter.remove();
+        
+        eq();
     }
     
     @Test

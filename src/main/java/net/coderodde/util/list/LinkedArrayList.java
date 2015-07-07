@@ -1,6 +1,5 @@
 package net.coderodde.util.list;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,7 +21,7 @@ import java.util.Set;
  * @version   1.6
  * @param <E> the actual list element type.
  */
-public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ Cloneable {
+public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
 
     /**
      * This enumeration is used for choosing the actual list node 
@@ -78,6 +77,11 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
      * index.
      */
     private transient List<E> workList;
+    
+    /**
+     * The modification counter.
+     */
+    private int modCount;
     
     /**
      * Constructs a new, empty list with given degree and node type.
@@ -659,7 +663,7 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
      * @return a view over this list.
      */
     @Override
-    public List<E> subList(int fromIndex, int toIndex) {
+    public SubList<E> subList(int fromIndex, int toIndex) {
         return new SubList(this, fromIndex, toIndex);
     }
 
@@ -743,8 +747,7 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
      * @param fromIndex the starting index of the range to remove.
      * @param toIndex   the ending index of the range to remove.
      */
-    @Override
-    protected void removeRange(int fromIndex, int toIndex) {
+    public void removeRange(int fromIndex, int toIndex) {
         int rangeLength = toIndex - fromIndex;
         int left = rangeLength;
         
@@ -1300,12 +1303,12 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
      * 
      * @param <E> the element type.
      */
-    private class SubList<E> extends AbstractList<E> {
+    class SubList<E> implements ExtendedList<E> {
 
         /**
          * The parent list.
          */
-        private final AbstractList<E> parent;
+        private final ExtendedList<E> parent;
         
         /**
          * The amount of elements to skip from the left of {@code parent}.
@@ -1318,11 +1321,11 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
         private int size;
         
         /**
-         * Caches the modCount of the parent list.
+         * Caches the modification count of the parent list.
          */
         private int expectedModCount;
         
-        SubList(AbstractList<E> parent, int fromIndex, int toIndex) {
+        SubList(ExtendedList<E> parent, int fromIndex, int toIndex) {
             sublistRangeCheck(fromIndex, toIndex, parent.size());
             this.expectedModCount = LinkedArrayList.this.modCount;
             this.parent = parent;
@@ -1358,13 +1361,7 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
 
         @Override
         public void clear() {
-            if (parent instanceof LinkedArrayList) {
-                ((LinkedArrayList<E>) parent).removeRange(offset, 
-                                                          offset + size());
-            } else {
-                ((SubList) parent).removeRange(offset, offset + size());
-            }
-                
+            parent.removeRange(offset, offset + size());
             size = 0;
         }
 
@@ -1464,7 +1461,7 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
             
             for (int i = 0; i < size; ++i) {
                 if (Objects.equals(iterator.next(), o)) {
-                    remove(i);
+                    parent.remove(i + offset);
                     --size;
                     return true;
                 }
@@ -1489,11 +1486,12 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
         @Override
         public boolean retainAll(Collection<?> c) {
             boolean stateModified = false;
-            Iterator<E> iterator = iterator();
+            Iterator<E> iterator = this.iterator();
             
             while (iterator.hasNext()) {
                 if (!c.contains(iterator.next())) {
                     iterator.remove();
+                    --size;
                     stateModified = true;
                 }
             }
@@ -1513,7 +1511,7 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
         }
 
         @Override
-        public List<E> subList(int fromIndex, int toIndex) {
+        public ExtendedList<E> subList(int fromIndex, int toIndex) {
             return new SubList(this, fromIndex, toIndex);
         }
 
@@ -1555,9 +1553,9 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
         }
 
         @Override
-        protected void removeRange(int fromIndex, int toIndex) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
+        public void removeRange(int fromIndex, int toIndex) {
+            parent.removeRange(fromIndex + offset, toIndex + offset);
+        }   
         
         /**
          * This class implements an {@link java.util.Iterator} over a sublist.
@@ -1611,6 +1609,7 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
                 return listIterator.next();
             }
             
+            @Override
             public void remove() {
                 if (lastElementRemoved) {
                     throw new IllegalStateException(
@@ -1653,6 +1652,16 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
             private int cursor;
             
             /**
+             * Indicates whether the last operation was {@link remove}.
+             */
+            private boolean lastOperationWasRemove;
+            
+            /**
+             * Indicates whether the last operation was {@link next}.
+             */
+            private boolean lastOperationWasNext;
+            
+            /**
              * Constructs a new list iterator over a sublist.
              * 
              * @param listIterator the actual list iterator over the parent 
@@ -1671,6 +1680,8 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
 
             @Override
             public E next() {
+                checkForConcurrentModification();
+                
                 if (!hasNext()) {
                     throw new NoSuchElementException(
                         "There is no next element in this list iterator.");
@@ -1707,20 +1718,30 @@ public class LinkedArrayList<E> extends AbstractList<E> implements /*List<E>,*/ 
             }
 
             @Override
-            public void remove() {
+            public void add(E e) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+
+            @Override
+            public void remove() {
+                if (lastOperationWasRemove) {
+                    throw new NoSuchElementException(
+                            "There is no current element to remove.");
+                }
+                
+                lastOperationWasRemove = true;
+                --size;
+                listIterator.remove();
             }
 
             @Override
             public void set(E e) {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
-
-            @Override
-            public void add(E e) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
             
+            private void checkForConcurrentModification() {
+                
+            }
         }
         
         /**
