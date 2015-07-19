@@ -1570,7 +1570,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
             /**
              * The amount of elements in the sublist.
              */
-            private int size;
+            private final int size;
             
             /**
              * The amount of elements iterated.
@@ -1624,7 +1624,6 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
 //                checkForConcurrentModification();
                 lastElementRemoved = true;
                 listIterator.remove();
-                --size;
             }
             
             private void checkForConcurrentModification() {
