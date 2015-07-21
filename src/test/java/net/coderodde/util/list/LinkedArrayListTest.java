@@ -2113,6 +2113,36 @@ public class LinkedArrayListTest {
     }
     
     @Test
+    public void testSublistEquals() {
+        for (int i = 0; i < 20; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        List<Integer> sublist1 = test.subList(5, 11);
+        List<Integer> sublist2 = list.subList(5, 11);
+        
+        assertTrue(sublist1.equals(sublist2));
+        assertTrue(sublist2.equals(sublist1));
+        assertTrue(sublist1.equals(sublist1));
+        assertTrue(sublist2.equals(sublist2));
+        
+        sublist2.set(3, 1001);
+        
+        assertFalse(sublist1.equals(sublist2));
+        assertFalse(sublist2.equals(sublist1));
+        assertTrue(sublist1.equals(sublist1));
+        assertTrue(sublist2.equals(sublist2));
+        
+        sublist2.remove(3);
+        
+        assertFalse(sublist1.equals(sublist2));
+        assertFalse(sublist2.equals(sublist1));
+        assertTrue(sublist1.equals(sublist1));
+        assertTrue(sublist2.equals(sublist2));
+    }
+    
+    @Test
     public void testSublistGet() {
         for (int i = 0; i < 20; ++i) {
             test.add(i);
@@ -2382,6 +2412,68 @@ public class LinkedArrayListTest {
         
         eq(sublist1, sublist2);
         eq();
+    }
+    
+    @Test(expected = NoSuchElementException.class)
+    public void testSublistListIteratorThrowsOnNoNextElement() {
+        title("testSublistListIteratorThrowsOnNoNextElement");
+        
+        for (int i = 0; i < 33; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        ListIterator<Integer> iterator1 = test.subList(10, 15).listIterator();
+        ListIterator<Integer> iterator2 = list.subList(10, 15).listIterator();
+        
+        for (int i = 0; i < 5; ++i) {
+            assertEquals(iterator1.next(), iterator2.next());
+        }
+        
+        assertFalse(iterator1.hasNext());
+        assertFalse(iterator2.hasNext());
+        
+        try {
+            iterator1.next();
+            fail("Failed.");
+        } catch (NoSuchElementException ex) {
+            System.out.println("-- ArrayList threw as expected.");
+        }
+        
+        iterator2.next();
+    }
+    
+    @Test(expected = NoSuchElementException.class)
+    public void testSublistListItertorThrowsOnNoPreviousElement() {
+        title("testSublistListIteratorThrowsOnNoPreviousElement");
+        
+        for (int i = 0; i < 33; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        ListIterator<Integer> iterator1 = test.subList(10, 15).listIterator();
+        ListIterator<Integer> iterator2 = list.subList(10, 15).listIterator();
+        
+        for (int i = 0; i < 2; ++i) {
+            assertEquals(iterator1.next(), iterator2.next());
+        }
+        
+        for (int i = 0; i < 2; ++i) {
+            assertEquals(iterator1.previous(), iterator2.previous());
+        }
+        
+        assertFalse(iterator1.hasPrevious());
+        assertFalse(iterator2.hasPrevious());
+        
+        try {
+            iterator1.previous();
+            fail("Failed.");
+        } catch (NoSuchElementException ex) {
+            System.out.println("-- ArrayList threw as expected.");
+        }
+        
+        iterator2.previous();
     }
     
     @Test
@@ -2741,5 +2833,24 @@ public class LinkedArrayListTest {
             assertEquals(itTest2.nextIndex(), itList2.nextIndex());
         }
 //        test.checkHealth();
+    }
+    
+    private static void title(String s) {
+        StringBuilder sb = new StringBuilder(80);
+        int textAreaLength = s.length() + 2;
+        int leftBarLength = (80 - textAreaLength) / 2;
+        int rightBarLength = 80 - textAreaLength - leftBarLength;
+        
+        for (int i = 0; i < leftBarLength; ++i) {
+            sb.append("*");
+        }
+        
+        sb.append(" ").append(s).append(" ");
+        
+        for (int i = 0; i < rightBarLength; ++i) {
+            sb.append("*");
+        }
+        
+        System.out.println(sb.toString());
     }
 }

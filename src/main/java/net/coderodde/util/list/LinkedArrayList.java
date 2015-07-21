@@ -1341,7 +1341,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
 
         @Override
         public void add(int index, E element) {
-            checkIndexForAddition(index);
+            checkInsertionIndex(index);
             ++size;
             parent.add(index + offset, element);
         }
@@ -1354,7 +1354,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
 
         @Override
         public boolean addAll(int index, Collection<? extends E> c) {
-            checkIndexForAddition(index);
+            checkInsertionIndex(index);
             size += c.size();
             return parent.addAll(offset + index, c);
         }
@@ -1388,10 +1388,35 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
             
             return true;
         }
+        
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof List)) {
+                return false;
+            }
+            
+            if (this == o) {
+                return true;
+            }
+            
+            List<E> list = (List<E>) o;
+            
+            if (size() != list.size()) {
+                return false;
+            }
+            
+            for (int i = 0; i < size(); ++i) {
+                if (!get(i).equals(list.get(i))) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
 
         @Override
         public E get(int index) {
-            checkIndexForAccess(index);
+            checkAccessIndex(index);
             return parent.get(index + offset);
         }
 
@@ -1450,7 +1475,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
 
         @Override
         public E remove(int index) {
-            checkIndexForAccess(index);
+            checkAccessIndex(index);
             --size;
             return parent.remove(index + offset);
         }
@@ -1501,7 +1526,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
         
         @Override
         public E set(int index, E element) {
-            checkIndexForAccess(index);
+            checkAccessIndex(index);
             return parent.set(index + offset, element);
         }
         
@@ -1660,6 +1685,8 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
              */
             private boolean lastOperationWasNext;
             
+            private int expectedModCount;
+            
             /**
              * Constructs a new list iterator over a sublist.
              * 
@@ -1670,6 +1697,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
             AdvancedSubListIterator(ListIterator<E> listIterator, int size) {
                 this.listIterator = listIterator;
                 this.size = size;
+                this.expectedModCount = LinkedArrayList.this.modCount;
             }
             
             @Override
@@ -1697,6 +1725,8 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
 
             @Override
             public E previous() {
+                checkForConcurrentModification();
+                
                 if (!hasPrevious()) {
                     throw new NoSuchElementException(
                         "There is no previous element in this list iterator.");
@@ -1718,7 +1748,8 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
 
             @Override
             public void add(E e) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                expectedModCount = LinkedArrayList.this.modCount;
+                listIterator.add(e);
             }
 
             @Override
@@ -1731,15 +1762,19 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
                 lastOperationWasRemove = true;
                 --size;
                 listIterator.remove();
+                expectedModCount = LinkedArrayList.this.modCount;
             }
 
             @Override
             public void set(E e) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                listIterator.set(e);
+                expectedModCount = LinkedArrayList.this.modCount;
             }
             
             private void checkForConcurrentModification() {
-                
+                if (expectedModCount != LinkedArrayList.this.modCount) {
+                    throw new ConcurrentModificationException();
+                }
             }
         }
         
@@ -1749,15 +1784,15 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
          * @param index the index to check. 
          * @throws IndexOutOfBounds if the index is invalid for addition.
          */
-        private void checkIndexForAddition(int index) {
+        private void checkInsertionIndex(int index) {
             if (index < 0) {
                 throw new IndexOutOfBoundsException(
-                        "The addition index is negative: " + index);
+                        "The insertion index is negative: " + index);
             }
             
             if (index > size) {
                 throw new IndexOutOfBoundsException(
-                        "The addition index is too large: " + index + ", " +
+                        "The insertion index is too large: " + index + ", " +
                         "sublist size: " + size);
             }
         }
@@ -1768,7 +1803,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
          * @param index the index to check.
          * @throws IndexOutOfBounds if the index is invalid for access.
          */
-        private void checkIndexForAccess(int index) {
+        private void checkAccessIndex(int index) {
             if (index < 0) {
                 throw new IndexOutOfBoundsException(
                         "The access index is negative: " + index);
