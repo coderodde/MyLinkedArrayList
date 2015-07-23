@@ -1364,7 +1364,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
             parent.removeRange(offset, offset + size());
             size = 0;
         }
-
+        
         @Override
         public boolean contains(Object o) {
             ListIterator<E> iterator = parent.listIterator(offset);
@@ -1755,7 +1755,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
             @Override
             public void remove() {
                 if (lastOperationWasRemove) {
-                    throw new NoSuchElementException(
+                    throw new IllegalStateException(
                             "There is no current element to remove.");
                 }
                 

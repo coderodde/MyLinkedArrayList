@@ -2414,6 +2414,45 @@ public class LinkedArrayListTest {
         eq();
     }
     
+    @Test
+    public void testSublistSet() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        list.subList(4, 6).set(1, 111);
+        test.subList(4, 6).set(1, 111);
+        
+        eq();
+    }
+    
+    @Test
+    public void testSublistSize() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        assertEquals(4, test.subList(4, 8).size());
+        assertEquals(4, list.subList(4, 8).size());
+        
+        assertEquals(0, test.subList(10, 10).size());
+        assertEquals(0, list.subList(10, 10).size());
+        
+        assertEquals(0, test.subList(0, 0).size());
+        assertEquals(0, list.subList(0, 0).size());
+        
+        assertEquals(1, test.subList(9, 10).size());
+        assertEquals(1, list.subList(9, 10).size());
+        
+        assertEquals(1, test.subList(0, 1).size());
+        assertEquals(1, list.subList(0, 1).size());
+        
+        assertEquals(3, test.subList(2, 5).size());
+        assertEquals(3, list.subList(2, 5).size());
+    }
+    
     @Test(expected = NoSuchElementException.class)
     public void testSublistListIteratorThrowsOnNoNextElement() {
         title("testSublistListIteratorThrowsOnNoNextElement");
@@ -2474,6 +2513,65 @@ public class LinkedArrayListTest {
         }
         
         iterator2.previous();
+    }
+    
+    @Test
+    public void testSublistListIteratorThrowsOnDoubleRemove() {
+        title("testSublistListIteratorThrowsOnDoubleRemove");
+        
+        for (int i = 0; i < 33; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        ListIterator<Integer> iterator1 = test.subList(5, 14).listIterator(2);
+        ListIterator<Integer> iterator2 = list.subList(5, 14).listIterator(2);
+        
+        assertTrue(iterator1.hasNext());
+        assertEquals(new Integer(7), iterator1.next());
+        assertEquals(new Integer(7), iterator2.next());
+        
+        iterator2.remove();
+        iterator1.remove();
+        
+        try {
+            iterator2.remove();
+            fail("List iterator of sublist should have threw.");
+        } catch (IllegalStateException ex) {
+            
+        }
+        
+        try {
+            iterator1.remove();
+            fail("ArrayList iterator of sublist should have threw.");
+        } catch (IllegalStateException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testSublistListIteratorThrowsOnInitialRemove() {
+        for (int i = 0; i < 5; ++i) {
+            test.add(i);
+            list.add(i);
+        }
+        
+        ListIterator<Integer> iterator1 = test.subList(1, 4).listIterator(1);
+        ListIterator<Integer> iterator2 = list.subList(1, 4).listIterator(1);
+        
+        try {
+            iterator1.remove();
+            fail();
+        } catch (IllegalStateException ex) {
+            
+        }
+        
+        try {
+            iterator2.remove();
+            fail();
+        } catch (IllegalStateException ex) {
+            
+        }
     }
     
     @Test
@@ -2674,6 +2772,76 @@ public class LinkedArrayListTest {
             test.clear();
             list.clear();
         }
+    }
+    
+    @Test
+    public void testSublistToArray() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        assertTrue(Arrays.equals(test.subList(3, 8).toArray(), 
+                                 list.subList(3, 8).toArray()));
+        
+        assertTrue(Arrays.equals(test.subList(3, 3).toArray(), 
+                                 list.subList(3, 3).toArray()));
+    }
+    
+    @Test
+    public void testSublistToArrayGeneric() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        Integer[] array1 = new Integer[5];
+        Integer[] array2 = new Integer[5];
+        
+        Integer[] ret1;
+        Integer[] ret2;
+        
+        ret1 = list.subList(2, 8).toArray(array1);
+        ret2 = test.subList(2, 8).toArray(array2);
+        
+        assertFalse(ret1 == array1);
+        assertEquals(6, ret1.length);
+        
+        assertFalse(ret2 == array2);
+        assertEquals(6, ret2.length);
+        
+        assertTrue(Arrays.equals(ret1, ret2));
+        
+        array1 = new Integer[6];
+        array2 = new Integer[6];
+        
+        ret1 = list.subList(2, 8).toArray(array1);
+        ret2 = test.subList(2, 8).toArray(array2);
+        
+        assertTrue(ret1 == array1);
+        assertEquals(6, ret1.length);
+        
+        assertTrue(ret2 == array2);
+        assertEquals(6, ret2.length);
+        
+        assertTrue(Arrays.equals(ret1, ret2));
+        
+        array1 = new Integer[10];
+        array2 = new Integer[10];
+        
+        ret1 = list.subList(2, 8).toArray(array1);
+        ret2 = test.subList(2, 8).toArray(array2);
+        
+        assertTrue(ret1 == array1);
+        assertEquals(10, ret1.length);
+        
+        assertTrue(ret2 == array2);
+        assertEquals(10, ret2.length);
+        
+        assertTrue(Arrays.equals(ret1, ret2));
+        
+        assertTrue(ret1[6] == null);
+        assertTrue(ret2[6] == null);
     }
     
     @Test
