@@ -2979,6 +2979,322 @@ public class LinkedArrayListTest {
     }
     
     @Test
+    public void testSublistDetectsConcurrencyInAddAllInt() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        Collection<Integer> coll = new HashSet<>();
+        
+        for (int i = 0; i < 4; ++i) {
+            coll.add(i + 10);
+        }
+        
+        List<Integer> sublist1 = list.subList(2, 5);
+        List<Integer> sublist2 = test.subList(2, 5);
+        
+        list.remove(3);
+        test.remove(3);
+        
+        try {
+            sublist1.addAll(1, coll);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist2.addAll(1, coll);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist1.addAll(-1, coll);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+        
+        try {
+            sublist2.addAll(-1, coll);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+        
+        try {
+            sublist1.addAll(4, coll);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+        
+        try {
+            sublist2.addAll(4, coll);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testSublistDetectsConcurrencyInClear() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        List<Integer> sublist1 = list.subList(2, 7);
+        List<Integer> sublist2 = test.subList(2, 7);
+        
+        list.remove(3);
+        test.remove(3);
+        
+        try {
+            sublist1.clear();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist2.clear();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testSublistDetectsConcurrencyInContains() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        List<Integer> sublist1 = list.subList(2, 7);
+        List<Integer> sublist2 = test.subList(2, 7);
+        
+        list.remove(3);
+        test.remove(3);
+        
+        try {
+            sublist1.contains(new Integer(3));
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist2.contains(new Integer(3));
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testSublistDetectsConcurrencyInContainsAll() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        List<Integer> sublist1 = list.subList(2, 7);
+        List<Integer> sublist2 = test.subList(2, 7);
+        
+        list.remove(3);
+        test.remove(3);
+        
+        Collection<Integer> coll = new HashSet<>();
+        // If 'coll' is empty, no exceptions should be thrown
+        // and return value must be 'true'.
+        assertTrue(sublist1.containsAll(coll));
+        assertTrue(sublist2.containsAll(coll));
+        
+        coll.add(9);
+        coll.add(6);
+        
+        try {
+            sublist1.containsAll(coll);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist2.containsAll(coll);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testSublistDetectsConcurrencyInEquals() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        List<Integer> sublist1 = list.subList(0, 10);
+        List<Integer> sublist2 = test.subList(0, 10);
+        
+        list.add(4, 100);
+        test.add(4, 100);
+        
+        try {
+            sublist1.equals(sublist2);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist2.equals(sublist1);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testSublistDetectsConcurrencyInGet() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        List<Integer> sublist1 = list.subList(0, 10);
+        List<Integer> sublist2 = test.subList(0, 10);
+        
+        list.add(4, 100);
+        test.add(4, 100);
+        
+        try {
+            sublist1.get(4);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist2.get(4);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist1.get(-1);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+        
+        try {
+            sublist2.get(-1);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+        
+        try {
+            sublist1.get(10);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+        
+        try {
+            sublist2.get(10);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+        
+        sublist1 = list.subList(4, 4);
+        sublist2 = test.subList(4, 4);
+        
+        try {
+            sublist1.get(0);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+        
+        try {
+            sublist2.get(0);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testSublistDetectsConcurrencyInIndexOf() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        List<Integer> sublist1 = list.subList(0, 10);
+        List<Integer> sublist2 = test.subList(0, 10);
+        
+        list.add(4, 100);
+        test.add(4, 100);
+        
+        Integer num = Integer.valueOf(6);
+        
+        try {
+            sublist1.indexOf(num);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist2.indexOf(num);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testSublistDetectsConcurrencyInIsEmpty() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        List<Integer> sublist1 = list.subList(0, 10);
+        List<Integer> sublist2 = test.subList(0, 10);
+        
+        list.add(4, 100);
+        test.add(4, 100);
+        
+        Integer num = Integer.valueOf(6);
+        
+        try {
+            sublist1.isEmpty();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist2.isEmpty();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+    }
+    
+    @Test
     public void testSublistBasicIterator() {
         for (int i = 0; i < 26; ++i) {
             list.add(i);

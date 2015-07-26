@@ -1352,8 +1352,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
 
         @Override
         public boolean addAll(Collection<? extends E> c) {
-            size += c.size();
-            return parent.addAll(c);
+            return addAll(size, c);
         }
 
         @Override
@@ -1374,12 +1373,14 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
 
         @Override
         public void clear() {
+            checkForConcurrentModification();
             parent.removeRange(offset, offset + size());
             size = 0;
         }
         
         @Override
         public boolean contains(Object o) {
+            checkForConcurrentModification();
             ListIterator<E> iterator = parent.listIterator(offset);
             
             for (int i = 0; i < size; ++i) {
@@ -1393,6 +1394,12 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
 
         @Override
         public boolean containsAll(Collection<?> c) {
+            if (c.isEmpty()) {
+                return true;
+            }
+            
+            checkForConcurrentModification();
+            
             for (Object o : c) {
                 if (!contains(o)) {
                     return false;
@@ -1426,15 +1433,17 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
             
             return true;
         }
-
+        
         @Override
         public E get(int index) {
             checkAccessIndex(index);
+            checkForConcurrentModification();
             return parent.get(index + offset);
         }
 
         @Override
         public int indexOf(Object o) {
+            checkForConcurrentModification();
             Iterator<E> iterator = iterator();
             int index = 0;
             
@@ -1451,6 +1460,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
 
         @Override
         public boolean isEmpty() {
+            checkForConcurrentModification();
             return size == 0;
         }
 
@@ -1490,8 +1500,11 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
         @Override
         public E remove(int index) {
             checkAccessIndex(index);
-            --size;
-            return parent.remove(index + offset);
+            checkForConcurrentModification();
+            E ret = parent.remove(index + offset);
+            this.expectedModCount = LinkedArrayList.this.modCount;
+            this.size--;
+            return ret;
         }
 
         @Override
@@ -1502,6 +1515,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
                 if (Objects.equals(iterator.next(), o)) {
                     parent.remove(i + offset);
                     --size;
+                    this.expectedModCount = LinkedArrayList.this.modCount;
                     return true;
                 }
             }
@@ -1519,6 +1533,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
                 }
             }
             
+            this.expectedModCount = LinkedArrayList.this.modCount;
             return stateModified;
         }
 
