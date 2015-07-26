@@ -1335,15 +1335,19 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
 
         @Override
         public boolean add(E e) {
+            checkForConcurrentModification();
             parent.add(offset + size++, e);
+            this.expectedModCount = LinkedArrayList.this.modCount;
             return true;
         }
 
         @Override
         public void add(int index, E element) {
             checkInsertionIndex(index);
-            ++size;
+            checkForConcurrentModification();
             parent.add(index + offset, element);
+            this.expectedModCount = LinkedArrayList.this.modCount;
+            ++size;
         }
 
         @Override
@@ -1355,8 +1359,17 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
         @Override
         public boolean addAll(int index, Collection<? extends E> c) {
             checkInsertionIndex(index);
+            int collSize = c.size();
+            
+            if (collSize == 0) {
+                return false;
+            }
+            
+            checkForConcurrentModification();
+            parent.addAll(offset + index, c);
+            this.expectedModCount = LinkedArrayList.this.modCount;
             size += c.size();
-            return parent.addAll(offset + index, c);
+            return true;
         }
 
         @Override
@@ -1469,8 +1482,9 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
 
         @Override
         public ListIterator<E> listIterator(int index) {
+            cursorIndexCheck(index);
             return new AdvancedSubListIterator(
-                    parent.listIterator(offset + index), size);
+                    parent.listIterator(offset + index), size, index);
         }
 
         @Override
@@ -1527,6 +1541,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
         @Override
         public E set(int index, E element) {
             checkAccessIndex(index);
+            checkForConcurrentModification();
             return parent.set(index + offset, element);
         }
         
@@ -1581,6 +1596,19 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
         public void removeRange(int fromIndex, int toIndex) {
             parent.removeRange(fromIndex + offset, toIndex + offset);
         }   
+        
+        private void cursorIndexCheck(int index) {
+            if (index < 0) {
+                throw new IndexOutOfBoundsException(
+                        "The cursor index is negative: " + index);
+            }
+            
+            if (index > this.size) {
+                throw new IndexOutOfBoundsException(
+                        "The cursor index is too large: " + index +
+                        ", sub list size: " + this.size);
+            }
+        }
         
         /**
          * This class implements an {@link java.util.Iterator} over a sublist.
@@ -1694,9 +1722,12 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
              *                     list's range.
              * @param size        the length of the range. 
              */
-            AdvancedSubListIterator(ListIterator<E> listIterator, int size) {
+            AdvancedSubListIterator(ListIterator<E> listIterator, 
+                                    int size, 
+                                    int skip) {
                 this.listIterator = listIterator;
                 this.size = size;
+                this.cursor = skip;
                 this.expectedModCount = LinkedArrayList.this.modCount;
             }
             

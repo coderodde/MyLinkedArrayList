@@ -2135,9 +2135,21 @@ public class LinkedArrayListTest {
         assertTrue(sublist2.equals(sublist2));
         
         sublist2.remove(3);
-        
+
         assertFalse(sublist1.equals(sublist2));
         assertFalse(sublist2.equals(sublist1));
+//        try {
+//            fail();
+//        } catch (ConcurrentModificationException ex) {
+//            
+//        }
+//        
+//        try {
+//            fail();
+//        } catch (ConcurrentModificationException ex) {
+//            
+//        }
+        
         assertTrue(sublist1.equals(sublist1));
         assertTrue(sublist2.equals(sublist2));
     }
@@ -2570,6 +2582,398 @@ public class LinkedArrayListTest {
             iterator2.remove();
             fail();
         } catch (IllegalStateException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testSublistListIteratorThrowsOnNegativeInitialCursor() {
+        for (int i = 0; i < 15; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        ListIterator<Integer> iter1;
+                
+        try {
+            iter1 = test.subList(2, 12).listIterator(-1);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+        
+        ListIterator<Integer> iter2;
+        
+        try {
+            iter2 = list.subList(2, 12).listIterator(-1);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testSublistListIteratorThrowsOnLargeInitialCursor() {
+        for (int i = 0; i < 15; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        ListIterator<Integer> iter1;
+                
+        try {
+            iter1 = test.subList(2, 12).listIterator(11);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+        
+        ListIterator<Integer> iter2;
+        
+        try {
+            iter2 = list.subList(2, 12).listIterator(11);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testSublistListIteratorNext() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        ListIterator<Integer> iterator1 = list.subList(2, 8).listIterator(2);
+        ListIterator<Integer> iterator2 = test.subList(2, 8).listIterator(2);
+        
+        int i = 0;
+        
+        while (iterator2.hasNext()) {
+            System.out.println(++i);
+            assertEquals(iterator2.next(), iterator1.next());
+        }
+        
+        assertFalse(iterator1.hasNext());
+        
+        list.add(100);
+        test.add(100);
+        
+        try {
+            iterator1.next();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            iterator2.next();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        iterator1 = list.subList(2, 8).listIterator(6);
+        iterator2 = test.subList(2, 8).listIterator(6);
+        
+        try {
+            iterator1.next();
+            fail();
+        } catch (NoSuchElementException ex) {
+            
+        }
+        
+        try {
+            iterator2.next();
+            fail();
+        } catch (NoSuchElementException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testSublistListIteratorPrevious() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        ListIterator<Integer> iterator1 = list.subList(2, 8).listIterator(2);
+        ListIterator<Integer> iterator2 = test.subList(2, 8).listIterator(2);
+        
+        for (int i = 0; i < 2; ++i) {
+            assertTrue(iterator1.hasPrevious());
+            assertTrue(iterator2.hasPrevious());
+            
+            assertEquals(iterator1.previous(), iterator2.previous());
+        }
+        
+        assertFalse(iterator1.hasPrevious());
+        assertFalse(iterator2.hasPrevious());
+        
+        try {
+            iterator2.previous();
+            fail();
+        } catch (NoSuchElementException ex) {
+            
+        }
+        
+        try {
+            iterator1.previous();
+            fail();
+        } catch (NoSuchElementException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testSublistListIteratorSet() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        ListIterator<Integer> iter1 = list.subList(1, 5).listIterator(1);
+        ListIterator<Integer> iter2 = test.subList(1, 5).listIterator(1);
+        
+        iter1.next();
+        iter2.next();
+        
+        iter1.set(1000);
+        iter2.set(1000);
+        
+        eq();
+        
+        iter1.set(1010);
+        iter2.set(1010);
+        
+        eq();
+    }
+    
+    @Test
+    public void testSublistListIteratorAdd() {
+        for (int i = 0; i < 17; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        ListIterator<Integer> iter1 = list.subList(0, 4).listIterator();
+        ListIterator<Integer> iter2 = test.subList(0, 4).listIterator();
+        
+        iter1.next();
+        iter2.next();
+        
+        for (int i = 0; i < 3; ++i) {
+            iter1.add(i + 100);
+            iter2.add(i + 100);
+        }
+        
+        eq();
+    }
+    
+    @Test
+    public void testSublistListIteratorThrowsOnSetAfterNoNextPrevious() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        ListIterator<Integer> iter1 = list.subList(3, 7).listIterator(2);
+        ListIterator<Integer> iter2 = test.subList(3, 7).listIterator(2);
+        
+        try {
+            iter1.set(1000);
+            fail();
+        } catch (IllegalStateException ex) {
+            
+        }
+        
+        try {
+            iter2.set(1000);
+            fail();
+        } catch (IllegalStateException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testSublistListIteratorRemoveAfterAddThrows() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        ListIterator<Integer> iter1 = list.subList(2, 10).listIterator(3);
+        ListIterator<Integer> iter2 = test.subList(2, 10).listIterator(3);
+        
+        assertEquals(iter1.next(), iter2.next());
+        
+        iter1.remove();
+        iter2.remove();
+        
+        iter1.add(101);
+        iter2.add(101);
+        
+        try {
+            iter1.remove();
+            fail();
+        } catch (IllegalStateException ex) {
+            
+        }
+        
+        try {
+            iter2.remove();
+            fail();
+        } catch (IllegalStateException ex) {
+            
+        }
+        
+        eq();
+    }
+    
+    @Test
+    public void testSublistDetectsConcurrencyInSet() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        List<Integer> sublist1 = list.subList(3, 8);
+        List<Integer> sublist2 = test.subList(3, 8);
+        
+        list.remove(3);
+        test.remove(3);
+        
+        try {
+            sublist1.set(1, 100);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist2.set(1, 100);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testSublistDetectsConcurrencyInAdd() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        List<Integer> sublist1 = list.subList(3, 7);
+        List<Integer> sublist2 = test.subList(3, 7);
+        
+        list.add(10);
+        test.add(10);
+        
+        try {
+            sublist1.add(100);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist2.add(100);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testSublistDetectsConcurrencyInAddInt() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        List<Integer> sublist1 = list.subList(3, 7);
+        List<Integer> sublist2 = test.subList(3, 7);
+        
+        list.add(1, 10);
+        test.add(1, 10);
+        
+        try {
+            sublist1.add(2, 100);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist2.add(2, 100);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist1.add(-1, 200);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+        
+        try {
+            sublist2.add(-1, 200);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+        
+        try {
+            sublist1.add(5, 200);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+        
+        try {
+            sublist2.add(5, 200);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testSublistDetectsConcurrencyInAddAll() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        Collection<Integer> coll = new HashSet<>();
+        
+        for (int i = 0; i < 4; ++i) {
+            coll.add(i + 10);
+        }
+        
+        List<Integer> sublist1 = list.subList(2, 5);
+        List<Integer> sublist2 = test.subList(2, 5);
+        
+        list.remove(3);
+        test.remove(3);
+        
+        try {
+            sublist1.addAll(coll);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist2.addAll(coll);
+            fail();
+        } catch (ConcurrentModificationException ex) {
             
         }
     }
