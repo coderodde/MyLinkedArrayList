@@ -3657,6 +3657,82 @@ public class LinkedArrayListTest {
     }
     
     @Test
+    public void testSublistDetectsConcurrencyInSublist() {
+        for (int i = 0; i < 11; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        List<Integer> sublist1 = list.subList(1, 10);
+        List<Integer> sublist2 = test.subList(1, 10);
+        
+        list.add(101);
+        test.add(101);
+        
+        sublist1 = sublist1.subList(2, 6);
+        sublist2 = sublist2.subList(2, 6);
+        
+        try {
+            sublist1.add(123);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist2.add(123);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist1.subList(-1, 2);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+        
+        try {
+            sublist2.subList(-1, 2);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+        
+        sublist1.subList(1, 4);
+        sublist2.subList(1, 4);
+        
+        try {
+            sublist2.subList(1, 5);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+        
+        try {
+            sublist1.subList(1, 5);
+            fail();
+        } catch (IndexOutOfBoundsException ex) {
+            
+        }
+        
+        try {
+            sublist1.subList(3, 2);
+            fail();
+        } catch (IllegalArgumentException ex) {
+            
+        }
+        
+        try {
+            sublist2.subList(3, 2);
+            fail();
+        } catch (IllegalArgumentException ex) {
+            
+        }
+    }
+    
+    @Test
     public void testSublistBasicIterator() {
         for (int i = 0; i < 26; ++i) {
             list.add(i);

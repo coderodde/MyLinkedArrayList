@@ -20,4 +20,11 @@ public interface ExtendedList<E> extends List<E> {
      * @param toIndex   the ending (exclusive) index.
      */
     public void removeRange(int fromIndex, int toIndex);
+    
+    /**
+     * Returns the modification count of this list.
+     * 
+     * @return the modification count.
+     */
+    public int getModificationCount();
 }

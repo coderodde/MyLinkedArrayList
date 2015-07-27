@@ -400,6 +400,14 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
     }
     
     /**
+     * {@inheritDoc }
+     */
+    @Override
+    public int getModificationCount() {
+        return modCount;
+    }
+    
+    /**
      * Returns the hash code of this list. This routine was copied from 
      * {@link java.util.ArrayList#hashCode()} for compatibility.
      * 
@@ -664,7 +672,33 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
      */
     @Override
     public SubList<E> subList(int fromIndex, int toIndex) {
+        sublistRangeCheck(fromIndex, toIndex, size);
         return new SubList(this, fromIndex, toIndex);
+    }
+    
+    /**
+     * Checks the validity of a sublist indices.
+     * 
+     * @param fromIndex the starting (inclusive) index of the sublist range.
+     * @param toIndex   the ending (exclusive) index of the sublist range.
+     * @param size      the size of the parent list.
+     */
+    private void sublistRangeCheck(int fromIndex, int toIndex, int size) {
+        if (fromIndex < 0) {
+            throw new IndexOutOfBoundsException(
+                    "The 'fromIndex' is negative: " + fromIndex);
+        }
+        
+        if (toIndex > size) {
+            throw new IndexOutOfBoundsException(
+                    "The 'toIndex' is too large: " + toIndex + ", " +
+                    " parent list size: " + size);
+        }
+         
+        if (fromIndex > toIndex) {
+            throw new IllegalArgumentException(
+                    "fromIndex(" + fromIndex + ") > toIndex(" + toIndex + ")");
+        }
     }
 
     /**
@@ -1326,8 +1360,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
         private int expectedModCount;
         
         SubList(ExtendedList<E> parent, int fromIndex, int toIndex) {
-            sublistRangeCheck(fromIndex, toIndex, parent.size());
-            this.expectedModCount = LinkedArrayList.this.modCount;
+            this.expectedModCount = parent.getModificationCount();
             this.parent = parent;
             this.offset = fromIndex;
             this.size = toIndex - fromIndex;
@@ -1439,6 +1472,11 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
             checkAccessIndex(index);
             checkForConcurrentModification();
             return parent.get(index + offset);
+        }
+        
+        @Override
+        public int getModificationCount() {
+            return expectedModCount;
         }
 
         @Override
@@ -1574,6 +1612,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
 
         @Override
         public ExtendedList<E> subList(int fromIndex, int toIndex) {
+            sublistRangeCheck(fromIndex, toIndex, size);
             return new SubList(this, fromIndex, toIndex);
         }
 
@@ -1631,7 +1670,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
                         ", sub list size: " + this.size);
             }
         }
-        
+
         /**
          * This class implements an {@link java.util.Iterator} over a sublist.
          */
