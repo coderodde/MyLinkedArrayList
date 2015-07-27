@@ -1466,11 +1466,13 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
 
         @Override
         public Iterator<E> iterator() {
+            checkForConcurrentModification();
             return new BasicSubListIterator(parent.listIterator(offset), size);
         }
 
         @Override
         public int lastIndexOf(Object o) {
+            checkForConcurrentModification();
             ListIterator<E> iterator = listIterator(size());
             int index = size() - 1;
             
@@ -1492,6 +1494,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
 
         @Override
         public ListIterator<E> listIterator(int index) {
+            checkForConcurrentModification();
             cursorIndexCheck(index);
             return new AdvancedSubListIterator(
                     parent.listIterator(offset + index), size, index);
@@ -1509,6 +1512,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
 
         @Override
         public boolean remove(Object o) {
+            checkForConcurrentModification();
             ListIterator<E> iterator = parent.listIterator(offset);
             
             for (int i = 0; i < size; ++i) {
@@ -1525,6 +1529,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
 
         @Override
         public boolean removeAll(Collection<?> c) {
+            checkForConcurrentModification();
             boolean stateModified = false;
             
             for (Object o : c) {
@@ -1539,6 +1544,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
 
         @Override
         public boolean retainAll(Collection<?> c) {
+            checkForConcurrentModification();
             boolean stateModified = false;
             Iterator<E> iterator = this.iterator();
             
@@ -1562,6 +1568,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
         
         @Override
         public int size() {
+            checkForConcurrentModification();
             return size;
         }
 
