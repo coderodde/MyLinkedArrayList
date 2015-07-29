@@ -66,7 +66,7 @@ class LinkedArrayListNode2<E> extends LinkedArrayListNode<E> {
     }
 
     @Override
-    protected void removeAt(int index) {
+    protected E removeAt(int index) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

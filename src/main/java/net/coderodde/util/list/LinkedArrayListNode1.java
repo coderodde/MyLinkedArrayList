@@ -268,12 +268,14 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
      * @param index 
      */
     @Override
-    protected void removeAt(int index) {
+    protected E removeAt(int index) {
+        E ret = (E) elementArray[index];
         for (int i = index + 1; i < size(); ++i) {
             elementArray[i - 1] = elementArray[i];
         }
         
         elementArray[--size] = null;
+        return ret;
     }
 
     @Override

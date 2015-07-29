@@ -3749,7 +3749,7 @@ public class LinkedArrayListTest {
             sublist1.toArray();
             fail();
         } catch (ConcurrentModificationException ex) {
-            System.out.println("yeah");
+            
         }
         
         try {

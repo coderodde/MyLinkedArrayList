@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -21,7 +22,8 @@ import java.util.Set;
  * @version   1.6
  * @param <E> the actual list element type.
  */
-public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
+public class LinkedArrayList<E> 
+implements ExtendedList<E>, Cloneable, Deque<E> {
 
     /**
      * This enumeration is used for choosing the actual list node 
@@ -81,7 +83,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
     /**
      * The modification counter.
      */
-    private int modCount;
+    private transient int modCount;
     
     /**
      * Constructs a new, empty list with given degree and node type.
@@ -258,6 +260,34 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
         workList.clear();
         return true;
     }
+    
+    @Override
+    public void addFirst(E e) {
+        if (head.isFull()) {
+            LinkedArrayListNode<E> newnode = head.spawn();
+            newnode.setNextNode(head);
+            head.setPreviousNode(newnode);
+            head = newnode;
+        }
+        
+        head.insert(0, e);
+        ++size;
+        ++modCount;
+    }
+
+    @Override
+    public void addLast(E e) {
+        if (tail.isFull()) {
+            LinkedArrayListNode<E> newnode = head.spawn();
+            newnode.setPreviousNode(tail);
+            tail.setNextNode(newnode);
+            tail = newnode;
+        }
+        
+        tail.append(e);
+        ++size;
+        ++modCount;
+    }
 
     /**
      * Makes this list empty dropping all the elements.
@@ -341,6 +371,21 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
         return true;
     }
 
+    @Override
+    public Iterator<E> descendingIterator() {
+        return null;
+    }
+    
+    @Override
+    public E element() {
+        if (size == 0) {
+            throw new NoSuchElementException(
+            "Reading from empty LinkedArrayList.");
+        }
+        
+        return head.get(0);
+    }
+    
     /**
      * Returns {@code true} if {@code o} is a {@link java.util.List}, it has the
      * same size as this list, and its element sequence is equal to the element
@@ -397,6 +442,26 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
      */
     public int getDegree() {
         return head.getDegree();
+    }
+    
+    @Override
+    public E getFirst() {
+        if (size == 0) {
+            throw new NoSuchElementException(
+                    "Reading from empty LinkedArrayList.");
+        }
+        
+        return head.get(0);
+    }
+
+    @Override
+    public E getLast() {
+        if (size == 0) {
+            throw new NoSuchElementException(
+                    "Reading from empty LinkedArrayList.");
+        }
+        
+        return tail.get(tail.size() - 1);
     }
     
     /**
@@ -563,6 +628,177 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
         return new AdvancedLinkedArrayListIterator(index);
     }
 
+    @Override
+    public boolean offer(E e) {
+        if (tail.isFull()) {
+            LinkedArrayListNode<E> newnode = head.spawn();
+            tail.setNextNode(newnode);
+            newnode.setPreviousNode(tail);
+            tail = newnode;
+        }
+        
+        tail.append(e);
+        ++size;
+        ++modCount;
+        return true;
+    }
+    
+    @Override
+    public boolean offerFirst(E e) {
+        if (head.isFull()) {
+            LinkedArrayListNode<E> newnode = head.spawn();
+            newnode.setNextNode(head);
+            head.setPreviousNode(newnode);
+            head = newnode;
+        }
+        
+        head.insert(0, e);
+        ++size;
+        ++modCount;
+        return true;
+    }
+
+    @Override
+    public boolean offerLast(E e) {
+        if (tail.isFull()) {
+            LinkedArrayListNode<E> newnode = head.spawn();
+            newnode.setPreviousNode(tail);
+            tail.setNextNode(newnode);
+            tail = newnode;
+        }
+        
+        tail.append(e);
+        ++size;
+        ++modCount;
+        return true;
+    }
+    
+    @Override
+    public E peek() {
+        if (size == 0) {
+            return null;
+        }
+        
+        return head.get(0);
+    }
+    
+    @Override
+    public E peekFirst() {
+        if (size == 0) {
+            return null;
+        }
+        
+        return head.get(0);
+    }
+
+    @Override
+    public E peekLast() {
+        if (size == 0) {
+            return null;
+        }
+        
+        return tail.get(tail.size() - 1);
+    }
+
+    @Override
+    public E poll() {
+        if (size == 0) {
+            return null;
+        }
+        
+        E ret = head.removeAt(0);
+        
+        if (head.isEmpty()) {
+            unlinkNode(head);
+        }
+        
+        --size;
+        ++modCount;
+        return ret;
+    }
+
+    @Override
+    public E pollFirst() {
+        if (size == 0) {
+            return null;
+        }
+        
+        E ret = head.removeAt(0);
+        
+        if (head.isEmpty()) {
+            unlinkNode(head);
+        }
+        
+        --size;
+        ++modCount;
+        return ret;
+    }
+
+    @Override
+    public E pollLast() {
+        if (size == 0) {
+            return null;
+        }
+        
+        E ret = tail.removeAt(tail.size() - 1);
+        
+        if (tail.isEmpty()) {
+            unlinkNode(tail);
+        }
+        
+        --size;
+        ++modCount;
+        return ret;
+    }
+
+    @Override
+    public E pop() {
+        if (size == 0) {
+            throw new NoSuchElementException(
+                    "Popping from an empty LinkedArrayList.");
+        }
+        
+        E ret = head.removeAt(0);
+        
+        if (head.isEmpty()) {
+            unlinkNode(head);
+        }
+        
+        --size;
+        ++modCount;
+        return ret;
+    }
+
+    @Override
+    public void push(E e) {
+        if (head.isFull()) {
+            LinkedArrayListNode<E> newnode = head.spawn();
+            newnode.setNextNode(head);
+            head.setPreviousNode(newnode);
+            head = newnode;
+        }
+        
+        head.insert(0, e);
+        ++size;
+        ++modCount;
+    }
+
+    @Override
+    public E remove() {
+        if (size == 0) {
+            throw new NoSuchElementException(
+                    "Removing from an empty LinkedArrayList.");
+        }
+        
+        E ret = head.removeAt(0);
+        
+        if (head.isEmpty()) {
+            unlinkNode(head);
+        }
+        
+        return ret;
+    }
+    
     /**
      * Removes the element at index {@code index} and returns it.
      * 
@@ -623,6 +859,26 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
     @Override
     public boolean removeAll(Collection<?> c) {
         return bulkContainOperation(c, true);
+    }
+    
+    @Override
+    public E removeFirst() {
+        return null;
+    }
+    
+    @Override
+    public boolean removeFirstOccurrence(Object o) {
+        return false;
+    }
+
+    @Override
+    public E removeLast() {
+        return null;
+    }
+
+    @Override
+    public boolean removeLastOccurrence(Object o) {
+        return false;
     }
 
     /**
