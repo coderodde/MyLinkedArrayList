@@ -62,8 +62,6 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
             if (chainTail.isFull()) {
                 LinkedArrayListNode<E> newnode = spawn();
                 newnode.setPreviousNode(chainTail);
-//                newnode.prev = chainTail;
-//                chainTail.next = newnode;
                 chainTail.setNextNode(newnode);
                 chainTail = newnode;
             }
@@ -78,8 +76,6 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
                 LinkedArrayListNode<E> newnode = spawn();
                 newnode.setPreviousNode(chainTail);
                 chainTail.setNextNode(newnode);
-//                newnode.prev = chainTail;
-//                chainTail.next = newnode;
                 chainTail = newnode;
             }
             
@@ -94,11 +90,9 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
             return null;
         }
         
-//        chainTail.next = nextNode;
         chainTail.setNextNode(nextNode);
         
         if (nextNode != null) {
-//            nextNode.prev = chainTail;
             nextNode.setPreviousNode(chainTail);
             return null;
         }
@@ -231,6 +225,7 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
      * 
      * @return {@code true} if this head node obeys the head node invariant.
      */
+    @Override
     protected boolean isHealthyHead() {
         final int degree = getDegree();
         

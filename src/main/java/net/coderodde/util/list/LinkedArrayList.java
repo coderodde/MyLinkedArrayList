@@ -476,7 +476,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
     public void checkHealth() {
         if (head == tail) {
             // Only one node in this list. It is allowed to be empty.
-            if (!head.isHealthy()) {
+            if (!head.isHealthyHead()) {
                 throw new IllegalStateException(
                         "The only node in this list is unhealthy.");
             }

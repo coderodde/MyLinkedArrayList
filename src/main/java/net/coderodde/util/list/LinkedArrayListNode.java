@@ -131,6 +131,15 @@ abstract class LinkedArrayListNode<E> {
     protected abstract boolean isHealthy();
     
     /**
+     * Assumes, that this node is the only node in the list. Checks that all 
+     * unused array components are set to {@code null}. Allows this node to be
+     * empty.
+     * 
+     * @return {@code true} if this node is healthy.
+     */
+    protected abstract boolean isHealthyHead();
+    
+    /**
      * Attempts to remove <code>o</code> from this node. If this node contains
      * <code>o</code>, it removes it and returns <code>true</code>. Otherwise,
      * this node is not modified and <code>false</code> is returned.

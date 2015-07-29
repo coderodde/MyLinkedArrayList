@@ -4191,7 +4191,7 @@ public class LinkedArrayListTest {
         }
         
         assertFalse(itList2.hasPrevious());
-//        list.checkHealth();
+        list.checkHealth();
     }
     
     private void eq(List<Integer> list, List<Integer> test) {
