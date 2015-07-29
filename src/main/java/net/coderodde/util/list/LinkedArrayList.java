@@ -290,6 +290,46 @@ implements ExtendedList<E>, Cloneable, Deque<E> {
     }
 
     /**
+     * Checks that this list maintains the invariants of 
+     * {@code LinkedArrayList}. The first invariant is that there is no empty 
+     * nodes in the chain of nodes of this list. The second invariant is that
+     * there is no node that wastes space, or namely, every node has values
+     * {@code null} at every storage array component that does not logically 
+     * hold a value. The third invariant is that the sums of node sizes equals 
+     * the value of {@code size} field of this list.
+     * 
+     * @throws IllegalStateException if this list is not healthy.
+     */
+    public void checkHealth() {
+        if (head == tail) {
+            // Only one node in this list. It is allowed to be empty.
+            if (!head.isHealthyHead()) {
+                throw new IllegalStateException(
+                        "The only node in this list is unhealthy.");
+            }
+            
+            return;
+        }
+        
+        int s = 0;
+        
+        for (LinkedArrayListNode<E> node = head;
+                node != null;
+                node = node.getNextNode()) {
+            if (!node.isHealthy()) {
+                throw new IllegalStateException("Unhealthy node encountered.");
+            }
+            
+            s += node.size();
+        }
+        
+        if (size != s) {
+            throw new IllegalStateException("Wrong accumulated size: " + 
+                    s + "; list reports containing " + size + " elements.");
+        }
+    }
+    
+    /**
      * Makes this list empty dropping all the elements.
      */
     @Override
@@ -527,46 +567,6 @@ implements ExtendedList<E>, Cloneable, Deque<E> {
         return size() == 0;
     }
     
-    /**
-     * Checks that this list maintains the invariants of 
-     * {@code LinkedArrayList}. The first invariant is that there is no empty 
-     * nodes in the chain of nodes of this list. The second invariant is that
-     * there is no node that wastes space, or namely, every node has values
-     * {@code null} at every storage array component that does not logically 
-     * hold a value. The third invariant is that the sums of node sizes equals 
-     * the value of {@code size} field of this list.
-     * 
-     * @throws IllegalStateException if this list is not healthy.
-     */
-    public void checkHealth() {
-        if (head == tail) {
-            // Only one node in this list. It is allowed to be empty.
-            if (!head.isHealthyHead()) {
-                throw new IllegalStateException(
-                        "The only node in this list is unhealthy.");
-            }
-            
-            return;
-        }
-        
-        int s = 0;
-        
-        for (LinkedArrayListNode<E> node = head;
-                node != null;
-                node = node.getNextNode()) {
-            if (!node.isHealthy()) {
-                throw new IllegalStateException("Unhealthy node encountered.");
-            }
-            
-            s += node.size();
-        }
-        
-        if (size != s) {
-            throw new IllegalStateException("Wrong accumulated size: " + 
-                    s + "; list reports containing " + size + " elements.");
-        }
-    }
-
     /**
      * Returns an {@code java.util.Iterator} over this list.
      * 
@@ -863,21 +863,82 @@ implements ExtendedList<E>, Cloneable, Deque<E> {
     
     @Override
     public E removeFirst() {
-        return null;
+        if (size == 0) {
+            throw new NoSuchElementException();
+        }
+        
+        E ret = head.removeAt(0);
+        
+        if (head.isEmpty()) {
+            unlinkNode(head);
+        }
+        
+        --size;
+        ++modCount;
+        return ret;
     }
     
     @Override
     public boolean removeFirstOccurrence(Object o) {
+        for (LinkedArrayListNode<E> node = head; 
+                node != null; 
+                node = node.getNextNode()) {
+            for (int i = 0; i < node.size(); ++i) {
+                E current = node.get(i);
+                
+                if (Objects.equals(current, o)) {
+                    node.removeAt(i);
+                    
+                    if (node.isEmpty()) {
+                        unlinkNode(node);
+                    }
+                    
+                    --size;
+                    ++modCount;
+                    return true;
+                }
+            }
+        }
+        
         return false;
     }
 
     @Override
     public E removeLast() {
-        return null;
+        if (size == 0) {
+            throw new NoSuchElementException();
+        }
+        
+        E ret = tail.removeAt(tail.size() - 1);
+        
+        if (tail.isEmpty()) {
+            unlinkNode(tail);
+        }
+        
+        --size;
+        ++modCount;
+        return ret;
     }
 
     @Override
     public boolean removeLastOccurrence(Object o) {
+        for (LinkedArrayListNode<E> node = tail; 
+                node != null;
+                node = node.getPreviousNode()) {
+            for (int i = node.size() - 1; i >= 0; --i) {
+                if (Objects.equals(node.get(i), o)) {
+                    node.removeAt(i);
+                    
+                    if (node.isEmpty()) {
+                        unlinkNode(node);
+                    }
+                    
+                    --size;
+                    ++modCount;
+                    return true;
+                }
+            }
+        }
         return false;
     }
 

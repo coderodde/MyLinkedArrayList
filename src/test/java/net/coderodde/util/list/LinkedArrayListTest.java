@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -320,7 +321,292 @@ public class LinkedArrayListTest {
         assertTrue(list.containsAll(col));
         assertTrue(test.containsAll(col));
     }
+    
+    @Test
+    public void testDequeAddFirst() {
+        List<Integer> deque = new LinkedList<>();
+        Deque<Integer> d = (Deque<Integer>) deque;
+        
+        for (int i = 0; i < 10; ++i) {
+            deque.add(i);
+            list.add(i);
+        }
+        
+        for (int i = 0; i < 7; ++i) {
+            eq(deque, list);
+            d.addFirst(i + 123);
+            list.addFirst(i + 123);
+        }
+        
+        eq(deque, list);
+    }
+    
+    @Test
+    public void testDequeAddLast() {
+        List<Integer> deque = new LinkedList<>();
+        Deque<Integer> d = (Deque<Integer>) deque;
+        
+        for (int i = 0; i < 10; ++i) {
+            deque.add(i);
+            list.add(i);
+        }
+        
+        for (int i = 0; i < 7; ++i) {
+            eq(deque, list);
+            d.addLast(i + 123);
+            list.addLast(i + 123);
+        }
+        
+        eq(deque, list);
+    }
 
+    @Test
+    public void testDequeDescendingIterator() {
+        fail();
+    }
+    
+    @Test
+    public void testDequeElement() {
+        List<Integer> deque = new LinkedList<>();
+        Deque<Integer> d = (Deque<Integer>) deque;
+        
+        for (int i = 0; i < 10; ++i) {
+            deque.add(i);
+            list.add(i);
+        }
+        
+        eq(deque, list);
+        
+        assertEquals(d.element(), list.element());
+        
+        d.clear();
+        list.clear();
+        
+        try {
+            d.element();
+            fail();
+        } catch (NoSuchElementException ex) {
+            
+        }
+        
+        try {
+            list.element();
+            fail();
+        } catch (NoSuchElementException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testDequeGetFirst() {
+        List<Integer> deque = new LinkedList<>();
+        Deque<Integer> d = (Deque<Integer>) deque;
+        
+        for (int i = 0; i < 10; ++i) {
+            deque.add(i);
+            list.add(i);
+        }
+        
+        eq(deque, list);
+        
+        assertEquals(d.getFirst(), list.getFirst());
+        
+        d.addFirst(1111);
+        list.addFirst(1111);
+        
+        assertEquals(d.getFirst(), list.getFirst());
+        
+        d.clear();
+        list.clear();
+        
+        try {
+            d.getFirst();
+            fail();
+        } catch (NoSuchElementException ex) {
+            
+        }
+        
+        try {
+            list.getFirst();
+            fail();
+        } catch (NoSuchElementException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testDequeGetLast() {
+        List<Integer> deque = new LinkedList<>();
+        Deque<Integer> d = (Deque<Integer>) deque;
+        
+        for (int i = 0; i < 10; ++i) {
+            deque.add(i);
+            list.add(i);
+        }
+        
+        eq(deque, list);
+        
+        assertEquals(d.getLast(), list.getLast());
+        
+        d.addLast(1111);
+        list.addLast(1111);
+        
+        assertEquals(d.getLast(), list.getLast());
+        
+        d.clear();
+        list.clear();
+        
+        try {
+            d.getLast();
+            fail();
+        } catch (NoSuchElementException ex) {
+            
+        }
+        
+        try {
+            list.getLast();
+            fail();
+        } catch (NoSuchElementException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testDequeOffer() {
+        List<Integer> deque = new LinkedList<>();
+        Deque<Integer> d = (Deque<Integer>) deque;
+        
+        for (int i = 0; i < 10; ++i) {
+            d.offer(i);
+            list.offer(i);
+        }
+        
+        eq(deque, list);
+        
+        assertTrue(d.offer(12321));
+        assertTrue(list.offer(12321));
+        
+        eq(deque, list);
+        
+        assertEquals(d.getLast(), list.getLast());
+    }
+    
+    @Test
+    public void testDequeOfferFirst() {
+        List<Integer> deque = new LinkedList<>();
+        Deque<Integer> d = (Deque<Integer>) deque;
+        
+        for (int i = 0; i < 10; ++i) {
+            d.offerFirst(i);
+            list.offerFirst(i);
+        }
+        
+        eq(deque, list);
+        
+        assertTrue(d.offerFirst(12321));
+        assertTrue(list.offerFirst(12321));
+        
+        eq(deque, list);
+        
+        assertEquals(d.getFirst(), list.getFirst());
+    }
+    
+    @Test
+    public void testDequeOfferLast() {
+        List<Integer> deque = new LinkedList<>();
+        Deque<Integer> d = (Deque<Integer>) deque;
+        
+        for (int i = 0; i < 10; ++i) {
+            d.offerLast(i);
+            list.offerLast(i);
+        }
+        
+        eq(deque, list);
+        
+        assertTrue(d.offerLast(12321));
+        assertTrue(list.offerLast(12321));
+        
+        eq(deque, list);
+        
+        assertEquals(d.getLast(), list.getLast());
+    }
+    
+    @Test
+    public void testPeek() {
+        List<Integer> deque = new LinkedList<>();
+        Deque<Integer> d = (Deque<Integer>) deque;
+        
+        assertNull(d.peek());
+        assertNull(list.peek());
+        
+        assertNull(d.peekFirst());
+        assertNull(list.peekFirst());
+        
+        assertNull(d.peekLast());
+        assertNull(list.peekLast());
+        
+        list.offer(1);
+        d.offer(1);
+        
+        assertEquals(d.peek(), list.peek());
+        assertEquals(d.peekFirst(), list.peekFirst());
+        assertEquals(d.peekLast(), list.peekLast());
+        assertEquals(d.peekFirst(), list.peekLast());
+        
+        list.offer(4);
+        d.offer(4);
+        
+        assertEquals(d.peek(), list.peek());
+        assertEquals(d.peekFirst(), list.peekFirst());
+        assertEquals(d.peekLast(), list.peekLast());
+        assertFalse(d.peekFirst().equals(d.peekLast()));
+        assertFalse(list.peekFirst().equals(list.peekLast()));
+    }
+    
+    @Test
+    public void testDequePoll() {
+        List<Integer> deque = new LinkedList<>();
+        Deque<Integer> d = (Deque<Integer>) deque;
+        
+        assertNull(list.poll());
+        assertNull(d.poll());
+        
+        for (int i = 0; i < 10; ++i) {
+            d.offerLast(i);
+            list.offerLast(i);
+        }
+        
+        assertEquals(d.poll(), list.poll());
+        
+        d.addFirst(123);
+        list.addFirst(123);
+        
+        assertEquals(d.poll(), list.poll());
+        
+        eq(deque, list);
+        
+        d.addFirst(124);
+        list.addFirst(124);
+        
+        eq(deque, list);
+        
+        assertEquals(d.poll(), list.poll());
+       
+        eq(deque, list);
+        
+        d.addFirst(125);
+        list.addFirst(125);
+        d.addFirst(126);
+        list.addFirst(126);
+        
+        eq(deque, list);
+        
+        assertEquals(d.poll(), list.poll());
+        assertEquals(d.poll(), list.poll());
+        
+        eq(deque, list);
+    }
+    
     @Test
     public void testEquals() {
         assertTrue(test.equals(list));
