@@ -3733,6 +3733,64 @@ public class LinkedArrayListTest {
     }
     
     @Test
+    public void testSublistDetectsConcurrencyInToArray() {
+        for (int i = 0; i < 11; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        List<Integer> sublist1 = list.subList(1, 10);
+        List<Integer> sublist2 = test.subList(1, 10);
+        
+        list.add(101);
+        test.add(101);
+        
+        try {
+            sublist1.toArray();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            System.out.println("yeah");
+        }
+        
+        try {
+            sublist2.toArray();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testSublistDetectsConcurrencyInToArrayT() {
+        for (int i = 0; i < 11; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        List<Integer> sublist1 = list.subList(1, 10);
+        List<Integer> sublist2 = test.subList(1, 10);
+        
+        list.add(101);
+        test.add(101);
+        
+        Integer[] array = new Integer[2];
+        
+        try {
+            sublist1.toArray(array);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist2.toArray(array);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+    }
+    
+    @Test
     public void testSublistBasicIterator() {
         for (int i = 0; i < 26; ++i) {
             list.add(i);
@@ -3777,8 +3835,6 @@ public class LinkedArrayListTest {
         eq();
         eq(list, test);
     }
-    
-    
     
     @Test
     public void testSublistBasicIteratorShit() {
@@ -4071,6 +4127,21 @@ public class LinkedArrayListTest {
         }
         
         assertNull(largeArray[list.size()]);
+    }
+    
+    @Test
+    public void testToString() {
+        for (int i = 0; i < 5; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        assertEquals(test.toString(), list.toString());
+        
+        list.clear();
+        test.clear();
+        
+        assertEquals(test.toString(), list.toString());
     }
     
     private void eq() {

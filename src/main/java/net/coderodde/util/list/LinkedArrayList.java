@@ -1618,6 +1618,7 @@ public class LinkedArrayList<E> implements ExtendedList<E>, Cloneable {
 
         @Override
         public Object[] toArray() {
+            // parent.listIterator checks for concurrent modification.
             Object[] ret = new Object[size()];
             ListIterator<E> iterator = parent.listIterator(offset);
         
