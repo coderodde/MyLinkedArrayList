@@ -12,6 +12,7 @@ import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * This class implements a list data structure consisting of a list of arrays. 
@@ -411,9 +412,12 @@ implements ExtendedList<E>, Cloneable, Deque<E> {
         return true;
     }
 
+    /**
+     * {@inheritDoc }
+     */
     @Override
     public Iterator<E> descendingIterator() {
-        return null;
+        return new DescendingIterator(listIterator(size()));
     }
     
     @Override
@@ -796,6 +800,8 @@ implements ExtendedList<E>, Cloneable, Deque<E> {
             unlinkNode(head);
         }
         
+        ++modCount;
+        --size;
         return ret;
     }
     
@@ -1408,6 +1414,43 @@ implements ExtendedList<E>, Cloneable, Deque<E> {
         private void checkForConcurrentModification() {
             if (expectedModCount != modCount) {
                 throw new ConcurrentModificationException();
+            }
+        }
+    }
+    
+    /**
+     * This class simply wraps an actual list iterator providing the 
+     * descending iteration.
+     * 
+     * @param <E> the list element type.
+     */
+    private class DescendingIterator<E> implements Iterator<E> {
+
+        private final ListIterator<E> iterator;
+        
+        DescendingIterator(ListIterator<E> iterator) {
+            this.iterator = iterator;
+        }
+        
+        @Override
+        public boolean hasNext() {
+            return iterator.hasPrevious();
+        }
+
+        @Override
+        public E next() {
+            return iterator.previous();
+        }
+        
+        @Override
+        public void remove() {
+            iterator.remove();
+        }
+        
+        @Override
+        public void forEachRemaining(Consumer<? super E> consumer) {
+            while (iterator.hasPrevious()) {
+                consumer.accept(iterator.previous());
             }
         }
     }
