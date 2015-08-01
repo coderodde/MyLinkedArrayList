@@ -417,6 +417,8 @@ public class LinkedArrayListTest {
         iter1.remove();
         iter2.remove();
         
+        System.out.println(d);
+        
         eq(deque, list);
         
         while (iter1.hasNext()) {
@@ -426,6 +428,30 @@ public class LinkedArrayListTest {
         assertFalse(iter2.hasNext());
         
         eq(deque, list);
+        
+        iter1 = d.descendingIterator();
+        iter2 = list.descendingIterator();
+        
+        class TempConsumer implements Consumer<Integer> {
+
+            private int index;
+            private final Integer[] array;
+            
+            TempConsumer() {
+                array = new Integer[]{
+                    4, 3, 1, 0, 4, 3, 2, 1, 0, 
+                };
+            }
+            
+            @Override
+            public void accept(Integer t) {
+                assertEquals(t, array[index++]);
+            }
+            
+        }
+        
+        iter1.forEachRemaining(new TempConsumer());
+        iter2.forEachRemaining(new TempConsumer());
     }
     
     @Test
@@ -988,11 +1014,9 @@ public class LinkedArrayListTest {
             public void accept(Object t) {
                 Integer i = (Integer) t;
                 
-                if (i != num) {
+                if (i != num++) {
                     throw new IllegalStateException();
                 }
-                
-                ++num;
             }
         };
         
@@ -3516,7 +3540,6 @@ public class LinkedArrayListTest {
         }
         
         // Check that overlapping sublists throw as expected.
-        
         sublist1 = list.subList(1, 4);
         List<Integer> sublist1b = list.subList(3, 7);
         

@@ -2,6 +2,7 @@ package net.coderodde.util.list;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,6 +22,7 @@ public class Profiler {
     
     private static final int ADD_N = 1000000;
     private static final int ADD_INT_N = 500;
+    private static final int DEQUE_N = 2000;
     private static final int REMOVE_INT_N = 1000;
     private static final int CONTAINS_ALL_N = 1000;
     
@@ -67,6 +69,10 @@ public class Profiler {
         totalDuration += profileIteration(list);
         totalDuration += profileRemoveInt(list, random);
         totalDuration += profileContainsAll(list, random);
+        totalDuration += profileAddFirst(list, random);
+        totalDuration += profileRemoveFirst(list, random);
+        totalDuration += profileAddLast(list, random);
+        totalDuration += profileRemoveLast(list, random);
         
         System.out.println("Total duration: " + totalDuration);
     }
@@ -82,6 +88,126 @@ public class Profiler {
         
         System.out.println("add(E) in " + (tb - ta) + " ms.");
         
+        return tb - ta;
+    }
+    
+    private static final long profileAddFirst(List<Integer> list,
+                                              Random random) {
+        if (list instanceof Deque) {
+            Deque<Integer> d = (Deque<Integer>) list;
+            long ta = System.currentTimeMillis();
+
+            for (int i = 0; i < DEQUE_N; ++i) {
+                d.addFirst(random.nextInt(list.size() + 1));
+            }
+
+            long tb = System.currentTimeMillis();
+
+            System.out.println("addFirst(E) in " + (tb - ta) + " ms.");
+
+            return tb - ta;
+        }
+        
+        long ta = System.currentTimeMillis();
+
+        for (int i = 0; i < DEQUE_N; ++i) {
+            list.add(0, random.nextInt(list.size() + 1));
+        }
+
+        long tb = System.currentTimeMillis();
+
+        System.out.println("addFirst(E) in " + (tb - ta) + " ms.");
+
+        return tb - ta;
+    }
+    
+    private static final long profileRemoveFirst(List<Integer> list,
+                                              Random random) {
+        if (list instanceof Deque) {
+            Deque<Integer> d = (Deque<Integer>) list;
+            long ta = System.currentTimeMillis();
+
+            for (int i = 0; i < DEQUE_N; ++i) {
+                d.removeFirst();
+            }
+
+            long tb = System.currentTimeMillis();
+
+            System.out.println("removeFirst() in " + (tb - ta) + " ms.");
+
+            return tb - ta;
+        }
+        
+        long ta = System.currentTimeMillis();
+
+        for (int i = 0; i < DEQUE_N; ++i) {
+            list.remove(0);
+        }
+
+        long tb = System.currentTimeMillis();
+
+        System.out.println("removeFirst() in " + (tb - ta) + " ms.");
+
+        return tb - ta;
+    }
+    
+    private static final long profileAddLast(List<Integer> list,
+                                              Random random) {
+        if (list instanceof Deque) {
+            Deque<Integer> d = (Deque<Integer>) list;
+            long ta = System.currentTimeMillis();
+
+            for (int i = 0; i < DEQUE_N; ++i) {
+                d.addLast(random.nextInt(list.size() + 1));
+            }
+
+            long tb = System.currentTimeMillis();
+
+            System.out.println("addLast(E) in " + (tb - ta) + " ms.");
+
+            return tb - ta;
+        }
+        
+        long ta = System.currentTimeMillis();
+
+        for (int i = 0; i < DEQUE_N; ++i) {
+            list.add(i);
+        }
+
+        long tb = System.currentTimeMillis();
+
+        System.out.println("addLast(E) in " + (tb - ta) + " ms.");
+
+        return tb - ta;
+    }
+    
+    private static final long profileRemoveLast(List<Integer> list,
+                                              Random random) {
+        if (list instanceof Deque) {
+            Deque<Integer> d = (Deque<Integer>) list;
+            long ta = System.currentTimeMillis();
+
+            for (int i = 0; i < DEQUE_N; ++i) {
+                d.removeLast();
+            }
+
+            long tb = System.currentTimeMillis();
+
+            System.out.println("removeLast() in " + (tb - ta) + " ms.");
+
+            return tb - ta;
+        }
+        
+        long ta = System.currentTimeMillis();
+
+        for (int i = 0; i < DEQUE_N; ++i) {
+            list.remove(list.size() - 1);
+        }
+
+        long tb = System.currentTimeMillis();
+
+        System.out.println("removeLast() in " + (tb - ta) + " ms.");
+
         return tb - ta;
     }
     

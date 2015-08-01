@@ -10,7 +10,7 @@ import java.util.List;
  * @version 1.6
  * @param <E> the actual element type.
  */
-public interface ExtendedList<E> extends List<E> {
+interface ExtendedList<E> extends List<E> {
     
     /**
      * Removes the elements with indices {@code fromIndex, fromIndex + 1, ...,
