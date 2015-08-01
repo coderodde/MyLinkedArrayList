@@ -3516,6 +3516,7 @@ public class LinkedArrayListTest {
         }
         
         // Check that overlapping sublists throw as expected.
+        
         sublist1 = list.subList(1, 4);
         List<Integer> sublist1b = list.subList(3, 7);
         
