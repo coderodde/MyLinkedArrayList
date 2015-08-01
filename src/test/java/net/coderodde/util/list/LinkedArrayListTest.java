@@ -13,6 +13,7 @@ import java.util.ListIterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Random;
+import java.util.function.Consumer;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -973,6 +974,48 @@ public class LinkedArrayListTest {
         assertTrue(test.equals(list));
     }
 
+    @Test
+    public void testForEach() {
+        for (int i = 0; i < 10; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        Consumer<Integer> consumer = new Consumer() {
+            private int num = 0;
+            
+            @Override
+            public void accept(Object t) {
+                Integer i = (Integer) t;
+                
+                if (i != num) {
+                    throw new IllegalStateException();
+                }
+                
+                ++num;
+            }
+        };
+        
+        list.forEach(consumer);
+        
+        consumer = new Consumer() {
+            private int num = 0;
+            
+            @Override
+            public void accept(Object t) {
+                Integer i = (Integer) t;
+                
+                if (i != num) {
+                    throw new IllegalStateException();
+                }
+                
+                ++num;
+            }
+        };
+        
+        test.forEach(consumer);
+    }
+    
     @Test
     public void testGet() {
         Integer[] data = new Integer[20];
@@ -3063,6 +3106,438 @@ public class LinkedArrayListTest {
         test.subList(4, 6).set(1, 111);
         
         eq();
+    }
+    
+    @Test
+    public void testSublistThrowsOnParallelSublist() {
+        for (int i = 0; i < 15; ++i) {
+            list.add(i);
+            test.add(i);
+        }
+        
+        List<Integer> sublist1 = list.subList(2, 13)
+                                     .subList(0, 9)
+                                     .subList(2, 9);
+        
+        List<Integer> sublist2 = test.subList(2, 13)
+                                     .subList(0, 9)
+                                     .subList(2, 9);
+        
+        List<Integer> sublist11 = sublist1.subList(2, 5);
+        List<Integer> sublist22 = sublist2.subList(2, 5);
+        
+        sublist1.add(123);
+        sublist2.add(123);
+        
+        eq();
+        
+        try {
+            sublist11.add(142);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.add(142);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist11.add(1, 123);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.add(1, 123);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        Collection<Integer> coll = new HashSet<>();
+        
+        assertFalse(sublist11.addAll(coll));
+        assertFalse(sublist22.addAll(coll));
+        
+        coll.add(298);
+        
+        try {
+            sublist11.addAll(coll);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.addAll(coll);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist11.addAll(1, coll);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.addAll(1, coll);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist11.clear();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.clear();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist11.contains(null);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.contains(null);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        coll.clear();
+        
+        assertTrue(sublist11.containsAll(coll));
+        assertTrue(sublist22.containsAll(coll));
+        
+        coll.add(345);
+        
+        try {
+            sublist11.containsAll(coll);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.containsAll(coll);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist11.forEach((i) -> {});
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.forEach((i) -> {});
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist11.get(1);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.get(1);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist11.indexOf(Integer.valueOf(3));
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.indexOf(Integer.valueOf(3));
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist11.isEmpty();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.isEmpty();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist11.iterator();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.iterator();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist11.lastIndexOf(null);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.lastIndexOf(null);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist11.listIterator();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.listIterator();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist11.listIterator(2);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.listIterator(2);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist11.remove(Integer.valueOf(5));
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.remove(Integer.valueOf(5));
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist11.remove(1);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.remove(1);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        coll.clear();
+        
+        try {
+            sublist11.removeAll(coll);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.removeAll(coll);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        coll.add(321);
+        
+        try {
+            sublist11.removeAll(coll);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.removeAll(coll);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist11.retainAll(coll);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.retainAll(coll);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        coll.clear();
+        
+        try {
+            sublist11.retainAll(coll);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.retainAll(coll);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist11.set(2, 12321);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.set(2, 12321);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist11.size();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist22.size();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist11.subList(0, 1);
+        } catch (ConcurrentModificationException ex) {
+            // subList should not throw
+            fail();
+        }
+        
+        try {
+            sublist22.subList(0, 1);
+        } catch (ConcurrentModificationException ex) {
+            // subList should not throw
+            fail();
+        }
+        
+        try {
+            sublist11.toArray();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+        
+        }
+        
+        try {
+            sublist22.toArray();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+        
+        }
+        
+        try {
+            sublist11.toArray(new Integer[3]);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+        
+        }
+        
+        try {
+            sublist22.toArray(new Integer[3]);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+        
+        }
+        
+        // Check that overlapping sublists throw as expected.
+        sublist1 = list.subList(1, 4);
+        List<Integer> sublist1b = list.subList(3, 7);
+        
+        sublist2 = test.subList(1, 4);
+        List<Integer> sublist2b = test.subList(3, 7);
+        
+        sublist1.add(2, 222);
+        sublist2.add(2, 222);
+        
+        try {
+            sublist1b.set(1, 12321);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            sublist2b.set(1, 12321);
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
     }
     
     @Test
