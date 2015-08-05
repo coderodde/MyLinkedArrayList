@@ -21,7 +21,8 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
      * @param degree the degree of the new node.
      */
     LinkedArrayListNode1(int degree) {
-        super(degree);
+        degree = Math.max(degree, LinkedArrayList.MINIMUM_DEGREE);
+        this.elementArray = new Object[degree];
     }
     
     /**
@@ -168,7 +169,60 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
      */
     @Override
     protected LinkedArrayListNode<E> insert(int localIndex, E element) {
-        if (!isFull()) {
+        if (isFull()) {
+            LinkedArrayListNode<E> newnode = spawn();
+            int max = elementArray.length - elementArray.length >> 1;
+            
+            if (localIndex < elementArray.length >> 1) {
+                for (int i = elementArray.length >> 1, j = 0; 
+                        i < max;
+                        ++i, ++j) {
+                    newnode.elementArray[j] = elementArray[i];
+                }
+                    
+                newnode.size = max;
+                this.size -= max;
+                this.size++;
+                
+                for (int i = size - 1; i > localIndex; --i) {
+                    elementArray[i] = elementArray[i - 1];
+                }
+                
+                elementArray[localIndex] = element;
+            } else {
+                this.size -= max;
+                newnode.size = max + 1;
+                
+                int upperBound = localIndex - elementArray.length >> 1;
+                int j = elementArray.length >> 1;
+                
+                for (int i = 0; 
+                        i < upperBound; 
+                        ++i, ++j) {
+                    newnode.elementArray[i] = this.elementArray[j];
+                    this.elementArray[j] = null;
+                }
+                
+                newnode.elementArray[upperBound] = element;
+                
+                for (int i = upperBound + 1; i < max; ++i, ++j) {
+                    newnode.elementArray[i] = this.elementArray[j];
+                    this.elementArray[j] = null;
+                }
+            }
+            
+            return newnode;
+//            LinkedArrayListNode<E> newnode = spawn();
+//            
+//            for (int i = localIndex; i < size; ++i) {
+//                newnode.append((E) elementArray[i]);
+//                elementArray[i] = null;
+//            }
+//            
+//            elementArray[localIndex] = element;
+//            size = localIndex + 1;
+//            return newnode;
+        } else {
             for (int i = size; i > localIndex; --i) {
                 elementArray[i] = elementArray[i - 1];
             }
@@ -176,17 +230,6 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
             elementArray[localIndex] = element;
             ++size;
             return null;
-        } else {
-            LinkedArrayListNode<E> newnode = spawn();
-            
-            for (int i = localIndex; i < size; ++i) {
-                newnode.append((E) elementArray[i]);
-                elementArray[i] = null;
-            }
-            
-            elementArray[localIndex] = element;
-            size = localIndex + 1;
-            return newnode;
         }
     }
     

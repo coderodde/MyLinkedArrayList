@@ -24,7 +24,7 @@ abstract class LinkedArrayListNode<E> {
     /**
      * The actual storage array.
      */
-    protected final Object[] elementArray;
+    protected Object[] elementArray;
     
     /**
      * This field caches the size of this node. The size of the node is the
@@ -32,14 +32,14 @@ abstract class LinkedArrayListNode<E> {
      */
     protected int size;
     
-    /**
-     * Constructs a node with the specified degree.
-     * 
-     * @param degree the degree of this node.
-     */
-    LinkedArrayListNode(int degree) {
-        this.elementArray = new Object[degree];
-    }
+//    /**
+//     * Constructs a node with the specified degree.
+//     * 
+//     * @param degree the degree of this node.
+//     */
+//    LinkedArrayListNode(int degree) {
+//        this.elementArray = new Object[degree];
+//    }
     
     /**
      * Inserts the elements in <code>collection</code> starting from this node

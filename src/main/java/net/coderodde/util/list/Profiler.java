@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Random;
+import java.util.stream.StreamSupport;
 
 /**
  * This class demonstrates performance of {@link java.util.ArrayList},
@@ -73,6 +74,8 @@ public class Profiler {
         totalDuration += profileRemoveFirst(list, random);
         totalDuration += profileAddLast(list, random);
         totalDuration += profileRemoveLast(list, random);
+        totalDuration += profileSequentialStream(list);
+        totalDuration += profileParallelStream(list);
         
         System.out.println("Total duration: " + totalDuration);
     }
@@ -208,6 +211,26 @@ public class Profiler {
 
         System.out.println("removeLast() in " + (tb - ta) + " ms.");
 
+        return tb - ta;
+    }
+    
+    private static final long profileSequentialStream(List<Integer> list) {
+        long ta = System.currentTimeMillis();
+        StreamSupport.stream(list.spliterator(), false).reduce((a, b) -> a);
+        long tb = System.currentTimeMillis();
+        
+        System.out.println("Sequential stream in " + (tb - ta) + " ms.");
+        
+        return tb - ta;
+    }
+    
+    private static final long profileParallelStream(List<Integer> list) {
+        long ta = System.currentTimeMillis();
+        StreamSupport.stream(list.spliterator(), true).reduce((a, b) -> b);
+        long tb = System.currentTimeMillis();
+        
+        System.out.println("Parallel stream in " + (tb - ta) + " ms.");
+        
         return tb - ta;
     }
     

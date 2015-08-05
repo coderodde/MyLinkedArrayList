@@ -38,12 +38,12 @@ implements ExtendedList<E>, Cloneable, Deque<E> {
     /**
      * The minimum degree of any {@code LinkedArrayList}.
      */
-    private static final int MINIMUM_DEGREE = 2;
+    static final int MINIMUM_DEGREE = 2;
     
     /**
      * The default degree.
      */
-    private static final int DEFAULT_DEGREE = 16;
+    static final int DEFAULT_DEGREE = 16;
     
     /**
      * The node type of this list.
@@ -129,7 +129,7 @@ implements ExtendedList<E>, Cloneable, Deque<E> {
      * @param nodeType the type of internal node type.
      */
     public LinkedArrayList(NodeType nodeType) {
-        this(DEFAULT_DEGREE);
+        this(DEFAULT_DEGREE, nodeType);
     }
     
     /**
@@ -514,6 +514,10 @@ implements ExtendedList<E>, Cloneable, Deque<E> {
     @Override
     public int getModificationCount() {
         return modCount;
+    }
+    
+    public NodeType getNodeType() {
+        return nodeType;
     }
     
     /**
