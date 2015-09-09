@@ -169,46 +169,52 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
      */
     @Override
     protected LinkedArrayListNode<E> insert(int localIndex, E element) {
+//        if (localIndex == elementArray.length) {
+//            LinkedArrayListNode<E> newnode = spawn();
+//            newnode.elementArray[0] = element;
+//            newnode.size = 1;
+//            return newnode;
+//        }
+        
         if (isFull()) {
             LinkedArrayListNode<E> newnode = spawn();
-            int max = elementArray.length - elementArray.length >> 1;
+            int leftNodeSize = elementArray.length >> 1;
             
-            if (localIndex < elementArray.length >> 1) {
-                for (int i = elementArray.length >> 1, j = 0; 
-                        i < max;
-                        ++i, ++j) {
-                    newnode.elementArray[j] = elementArray[i];
+            if (localIndex < leftNodeSize) {
+                for (int i = leftNodeSize; i < elementArray.length; ++i) {
+                    newnode.elementArray[i - leftNodeSize] = 
+                            elementArray[i];
+                    elementArray[i] = null;
                 }
-                    
-                newnode.size = max;
-                this.size -= max;
-                this.size++;
                 
-                for (int i = size - 1; i > localIndex; --i) {
-                    elementArray[i] = elementArray[i - 1];
+                newnode.size = elementArray.length - leftNodeSize;
+                this.size -= newnode.size;
+                
+                // Now shift the right portion of this node one positiion to the
+                // left.
+                for (int i = size - 1; i >= localIndex; --i) {
+                    elementArray[i + 1] = elementArray[i];
                 }
                 
                 elementArray[localIndex] = element;
+                this.size++;
             } else {
-                this.size -= max;
-                newnode.size = max + 1;
+                for (int i = leftNodeSize, j = 0; i < localIndex; ++i, ++j) {
+                    newnode.elementArray[j] = elementArray[i];
+                    elementArray[i] = null;
+                }
                 
-                int upperBound = localIndex - elementArray.length >> 1;
-                int j = elementArray.length >> 1;
+                newnode.elementArray[localIndex - leftNodeSize] = element;
                 
-                for (int i = 0; 
-                        i < upperBound; 
+                for (int i = localIndex, j = localIndex - leftNodeSize + 1; 
+                        i < elementArray.length; 
                         ++i, ++j) {
-                    newnode.elementArray[i] = this.elementArray[j];
-                    this.elementArray[j] = null;
+                    newnode.elementArray[j] = elementArray[i];
+                    elementArray[i] = null;
                 }
                 
-                newnode.elementArray[upperBound] = element;
-                
-                for (int i = upperBound + 1; i < max; ++i, ++j) {
-                    newnode.elementArray[i] = this.elementArray[j];
-                    this.elementArray[j] = null;
-                }
+                newnode.size = elementArray.length - leftNodeSize + 1;
+                this.size = leftNodeSize;
             }
             
             return newnode;
@@ -347,16 +353,6 @@ class LinkedArrayListNode1<E> extends LinkedArrayListNode<E> {
     @Override
     protected void set(int index, E element) {
         elementArray[index] = element;
-    }
-
-    /**
-     * Shifts all the elements in this node to the left such, that the head
-     * element is at index 0, the second at index 1, and so on.
-     */
-    @Override
-    protected void shiftToBegining() {
-        // This node type already aligns all the elements to the beginning of
-        // the storage array.
     }
     
     /**

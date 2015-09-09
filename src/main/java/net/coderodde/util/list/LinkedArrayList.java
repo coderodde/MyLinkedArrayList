@@ -1606,26 +1606,34 @@ implements ExtendedList<E>, Cloneable, Deque<E> {
                 return;
             }
             
-            if (localCursor == currentNode.size()) {
-                if (currentNode.getNextNode() == null) {
-                    LinkedArrayListNode<E> newnode = head.spawn();
-                    linkNode(currentNode, newnode);
-                }
-                
-                localCursor = 0;
-                currentNode = currentNode.getNextNode();
-            }
-            
             LinkedArrayListNode<E> newnode = currentNode.insert(localCursor, e);
             
             if (newnode != null) {
                 linkNode(currentNode, newnode);
-            } 
-            
-            size++;
-            localCursor++;
-            globalCursor++;
-            expectedModCount = ++modCount;
+                
+            } else {
+                
+            }
+//            if (localCursor == currentNode.size()) {
+//                if (currentNode.getNextNode() == null) {
+//                    LinkedArrayListNode<E> newnode = head.spawn();
+//                    linkNode(currentNode, newnode);
+//                }
+//                
+//                localCursor = 0;
+//                currentNode = currentNode.getNextNode();
+//            }
+//            
+//            LinkedArrayListNode<E> newnode = currentNode.insert(localCursor, e);
+//            
+//            if (newnode != null) {
+//                linkNode(currentNode, newnode);
+//            }
+//            
+//            size++;
+//            localCursor++;
+//            globalCursor++;
+//            expectedModCount = ++modCount;
         }
 
         @Override

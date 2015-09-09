@@ -206,12 +206,6 @@ abstract class LinkedArrayListNode<E> {
     }
     
     /**
-     * Shifts all the bunch of elements in this node to the beginning of this
-     * node.
-     */
-    protected abstract void shiftToBegining();
-    
-    /**
      * Constructs a new node with the same implementation.
      * 
      * @return a new node with the same implementation as the object of the 
